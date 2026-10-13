@@ -144,11 +144,27 @@ struct WebView: Representable {
         updatePlaybackCompatibility(in: uiView)
     }
 #elseif os(macOS)
-    func makeNSView(context: Context) -> WKWebView {
-        return makeWebView(context: context)
+    func makeNSView(context: Context) -> NSView {
+        let container = NSView()
+        let webView = makeWebView(context: context)
+
+        webView.removeFromSuperview()
+        webView.translatesAutoresizingMaskIntoConstraints = true
+        webView.frame = container.bounds
+        webView.autoresizingMask = [.width, .height]
+
+        container.addSubview(webView)
+
+        return container
     }
-    func updateNSView(_ nsView: WKWebView, context: Context) {
-        updatePlaybackCompatibility(in: nsView)
+    func updateNSView(_ nsView: NSView, context: Context) {
+        guard let webView = nsView.subviews
+            .compactMap({ $0 as? WKWebView })
+            .first else {
+            return
+        }
+
+        updatePlaybackCompatibility(in: webView)
     }
 #endif
 
@@ -537,8 +553,17 @@ extension WebView.Coordinator {
 // MARK: - Dismantle
 extension WebView {
 #if os(macOS)
-    static func dismantleNSView(_ nsView: WKWebView, coordinator: WebView.Coordinator) {
-        Self.dismantleView(nsView, coordinator: coordinator)
+    static func dismantleNSView(
+        _ nsView: NSView,
+        coordinator: WebView.Coordinator
+    ) {
+        guard let webView = nsView.subviews
+            .compactMap({ $0 as? WKWebView })
+            .first else {
+            return
+        }
+
+        Self.dismantleView(webView, coordinator: coordinator)
     }
 #elseif os(iOS)
     static func dismantleUIView(_ uiView: WKWebView, coordinator: WebView.Coordinator) {
