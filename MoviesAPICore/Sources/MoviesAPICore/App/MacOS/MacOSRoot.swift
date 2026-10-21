@@ -12,6 +12,7 @@ struct MacOSRoot: View {
 
     @Bindable var windowContainer: WindowCoordinatorContainer
     @State private var tmdbManager: TMDBManager?
+    @State private var aniListManager = AniListManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
 
@@ -21,6 +22,7 @@ struct MacOSRoot: View {
     @State private var showError: Bool = false
 
     @State private var path = NavigationPath()
+    @State private var enableAnimeSearch: Bool = false
 
     var body: some View {
         ZStack {
@@ -64,8 +66,11 @@ struct MacOSRoot: View {
                             case .searchResults:
                                 ScrollView {
                                     SearchResultsView(
-                                        searchResults: tmdbManager.searchResults
+                                        enableAnimeSearch: $enableAnimeSearch,
+                                        searchResults: tmdbManager.searchResults,
+                                        animeSearchResults: aniListManager.searchResults
                                     )
+                                    .padding(.top, 50)
                                 }
                             }
                         }
