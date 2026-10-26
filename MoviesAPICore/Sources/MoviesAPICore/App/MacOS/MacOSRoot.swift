@@ -77,6 +77,12 @@ struct MacOSRoot: View {
                 }
             } else {
                 ProgressView()
+                    .alert(isPresented: $showError) {
+                        Alert(
+                            title: Text("Error"),
+                            message: Text("\(error, default: "Unknown Error")")
+                        )
+                    }
                     .task {
                         do {
                             let manager = try TMDBManager()
