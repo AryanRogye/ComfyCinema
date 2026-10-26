@@ -32,6 +32,9 @@
 			exceptions = (
 				9B6EBDB83058ADF10058478C /* Exceptions for "MoviesAPIClient" folder in "MoviesAPIClient" target */,
 			);
+			explicitFolders = (
+				Resources/uBOLite,
+			);
 			path = MoviesAPIClient;
 			sourceTree = "<group>";
 		};

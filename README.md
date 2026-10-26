@@ -78,6 +78,13 @@ TMDB_API_READ_ACCESS_TOKEN=your_token
 
 `MoviesShared/local.properties` is ignored by Git. The Android build also accepts the token from a Gradle property or the `TMDB_API_READ_ACCESS_TOKEN` environment variable.
 
+## Build iOS or macOS
+
+```shell
+./install-ubol.sh
+./MoviesAPICore/update-shared-logic.sh
+```
+
 ## Build the Fire TV app
 
 From `MoviesShared`:
