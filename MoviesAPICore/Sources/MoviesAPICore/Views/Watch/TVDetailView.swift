@@ -772,7 +772,6 @@ private struct EpisodesView: View {
     #if os(iOS)
     let columns = [
         GridItem(.flexible()),
-        GridItem(.flexible()),
     ]
     #elseif os(macOS)
     let columns = [
@@ -791,7 +790,13 @@ private struct EpisodesView: View {
 
                     Text("EP\(episode.episodeNumber): \(episode.name)")
                         .minimumScaleFactor(0.5)
+#if os(iOS)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+#else
                         .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+#endif
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(
                             isSelected ? .primary : .secondary
