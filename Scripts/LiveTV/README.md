@@ -29,7 +29,12 @@ without executing page scripts or opening a browser. It writes
     {
       "name": "Basic Cable",
       "channels": [
-        { "name": "Animal Planet", "id": 304, "isAdult": false }
+        {
+          "name": "Animal Planet",
+          "id": 304,
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/250px-2018_Animal_Planet_logo.svg.png",
+          "isAdult": false
+        }
       ]
     }
   ]
@@ -40,3 +45,6 @@ Sections are sorted alphabetically, and channels are sorted by ID. A channel
 with multiple categories appears in each matching section. Channels without a
 category go in `Uncategorized`. Consumers of the previous flat array must now
 read each section's `channels` array.
+
+`logo` contains the remote image URL, or an empty string when no logo is
+available. Images are not downloaded.

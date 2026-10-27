@@ -31,6 +31,8 @@ class ChannelCatalogParser(HTMLParser):
             channels[channel_id] = {
                 "name": name,
                 "id": channel_id,
+                # Keep the image link only; no image files are downloaded.
+                "logo": entry["logo"][1],
                 "isAdult": "adult" in categories or "18+" in name,
             }
             # Put each channel in its categories, just like the site's tabs.

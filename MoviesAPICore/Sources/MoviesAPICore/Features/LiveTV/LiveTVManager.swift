@@ -32,6 +32,7 @@ struct LiveTVSection: Codable, Identifiable, Hashable {
 struct LiveTVChannel: Codable, Identifiable, Hashable {
     let name: String
     let id: Int
+    let logo: String
     let isAdult: Bool
 }
 
@@ -86,6 +87,10 @@ final class LiveTVManager {
             LiveTVContainer.self,
             from: data
         )
-        self.sectionInternal = container.LiveTV
+        let sections = container.LiveTV
+
+        self.sectionInternal =
+        sections.filter { $0.name != "Adult" } +
+        sections.filter { $0.name == "Adult" }
     }
 }

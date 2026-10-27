@@ -68,11 +68,29 @@ private struct LiveTVSectionView: View {
             LazyVGrid(columns: columns) {
                 ForEach(section.channels, id: \.id) { channel in
                     VStack {
-                        /// add logo here later
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(.secondary.opacity(0.2))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 100)
+                        // Load the logo link, keeping the full logo visible.
+                        AsyncImage(url: channel.logo.isEmpty ? nil : URL(string: channel.logo)) { phase in
+                            ZStack {
+                                Rectangle()
+                                    .fill(.quaternary)
+
+                                if let image = phase.image {
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(8)
+                                } else if phase.error != nil || channel.logo.isEmpty || URL(string: channel.logo) == nil {
+                                    Image(systemName: "photo")
+                                        .font(.title2)
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 100)
+                        .clipShape(.rect(cornerRadius: 12))
                         Text(channel.name)
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(.primary)
