@@ -56,7 +56,9 @@ struct PasswordView: View {
             onPasswordValid()
             return
         } else {
+            SettingLogs.shared.add(password)
             passwordsDoNotMatch = true
+            enteredPassword.removeAll(keepingCapacity: true)
         }
     }
 

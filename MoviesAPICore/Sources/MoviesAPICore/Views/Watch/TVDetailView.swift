@@ -707,51 +707,53 @@ private struct SeasonsView: View {
                         let seasonNumber = Int(season.seasonNumber)
                         let isSelected = selectedSeasonNumber == seasonNumber
 
-                        Text("Season \(season.seasonNumber)")
-                            .minimumScaleFactor(0.5)
-                            .lineLimit(1)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(
-                                isSelected ? .primary : .secondary
-                            )
-                            .frame(maxWidth: .infinity)
-                            .padding(8)
-                            .background {
-                                if isSelected {
-                                    Capsule()
-                                        .fill(.yellow.opacity(0.16))
-                                        .background {
-                                            Capsule()
-                                                .stroke(
-                                                    .yellow.opacity(0.6),
-                                                    style: .init(lineWidth: 1)
-                                                )
-                                        }
-                                        .shadow(
-                                            color: .yellow,
-                                            radius: 8
-                                        )
-                                        .matchedGeometryEffect(
-                                            id: "ACTIVE_SEASON_PILL",
-                                            in: nm
-                                        )
-                                } else {
-                                    Capsule()
-                                        .fill(.white.opacity(0.06))
-                                }
-                            }
-                            .onTapGesture {
-                                guard !isLoadingSeason else { return }
+                        Button {
+                            guard !isLoadingSeason else { return }
 
-                                withAnimation(
-                                    .spring(
-                                        response: 0.3,
-                                        dampingFraction: 0.7
-                                    )
-                                ) {
-                                    selectedSeasonNumber = seasonNumber
-                                }
+                            withAnimation(
+                                .spring(
+                                    response: 0.3,
+                                    dampingFraction: 0.7
+                                )
+                            ) {
+                                selectedSeasonNumber = seasonNumber
                             }
+                        } label: {
+                            Text("Season \(season.seasonNumber)")
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(
+                                    isSelected ? .primary : .secondary
+                                )
+                                .frame(maxWidth: .infinity)
+                                .padding(8)
+                                .background {
+                                    if isSelected {
+                                        Capsule()
+                                            .fill(.yellow.opacity(0.16))
+                                            .background {
+                                                Capsule()
+                                                    .stroke(
+                                                        .yellow.opacity(0.6),
+                                                        style: .init(lineWidth: 1)
+                                                    )
+                                            }
+                                            .shadow(
+                                                color: .yellow,
+                                                radius: 8
+                                            )
+                                            .matchedGeometryEffect(
+                                                id: "ACTIVE_SEASON_PILL",
+                                                in: nm
+                                            )
+                                    } else {
+                                        Capsule()
+                                            .fill(.white.opacity(0.06))
+                                    }
+                                }
+                        }
+                        .buttonStyle(TVDetailButtonStyle())
                     }
                 }
             }
@@ -782,61 +784,75 @@ private struct EpisodesView: View {
     ]
     #endif
 
+    @State private var hoveringEpisode: KTEpisode?
+
     var body: some View {
         if let seasonInfo {
             LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(seasonInfo.episodes, id: \.id) { episode in
                     let isSelected = selectedEpisode == episode
 
-                    Text("EP\(episode.episodeNumber): \(episode.name)")
-                        .minimumScaleFactor(0.5)
+                    Button {
+                        withAnimation(
+                            .spring(
+                                response: 0.3,
+                                dampingFraction: 0.7
+                            )
+                        ) {
+                            selectedEpisode = episode
+                        }
+                    } label: {
+                        let isHovering = hoveringEpisode == episode
+                        Text("EP\(episode.episodeNumber): \(episode.name)")
+                            .minimumScaleFactor(0.5)
 #if os(iOS)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.85)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.85)
 #else
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
 #endif
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(
-                            isSelected ? .primary : .secondary
-                        )
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(8)
-                        .background {
-                            if isSelected {
-                                Capsule()
-                                    .fill(.yellow.opacity(0.16))
-                                    .background {
-                                        Capsule()
-                                            .stroke(
-                                                .yellow.opacity(0.6),
-                                                style: .init(lineWidth: 1)
-                                            )
-                                    }
-                                    .shadow(
-                                        color: .yellow,
-                                        radius: 8
-                                    )
-                                    .matchedGeometryEffect(
-                                        id: "ACTIVE_EPISODE_PILL",
-                                        in: nm
-                                    )
-                            } else {
-                                Capsule()
-                                    .fill(.white.opacity(0.06))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(
+                                isSelected || isHovering ? .primary : .secondary
+                            )
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(8)
+                            .background {
+                                if isSelected {
+                                    Capsule()
+                                        .fill(.yellow.opacity(0.16))
+                                        .background {
+                                            Capsule()
+                                                .stroke(
+                                                    .yellow.opacity(0.6),
+                                                    style: .init(lineWidth: 1)
+                                                )
+                                        }
+                                        .shadow(
+                                            color: .yellow,
+                                            radius: 8
+                                        )
+                                        .matchedGeometryEffect(
+                                            id: "ACTIVE_EPISODE_PILL",
+                                            in: nm
+                                        )
+                                } else {
+                                    Capsule()
+                                        .fill(
+                                            .white.opacity(isHovering ? 0.12 : 0.06)
+                                        )
+                                }
                             }
-                        }
-                        .onTapGesture {
-                            withAnimation(
-                                .spring(
-                                    response: 0.3,
-                                    dampingFraction: 0.7
-                                )
-                            ) {
-                                selectedEpisode = episode
+                            .onHover { hovering in
+                                if hovering {
+                                    hoveringEpisode = episode
+                                } else {
+                                    hoveringEpisode = nil
+                                }
                             }
-                        }
+                    }
+                    .buttonStyle(TVDetailButtonStyle())
                 }
             }
             .padding(.horizontal)
@@ -904,7 +920,8 @@ private struct MoreInfoButton: View {
             Text(selected.rawValue)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
-                .frame(width: 100, height: 30)
+                .frame(height: 30)
+                .padding(.horizontal)
                 .background {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(
@@ -1114,6 +1131,14 @@ private struct MoreLikeThis: View {
                 .font(.title3)
                 .foregroundStyle(.secondary)
             }
+    }
+}
+
+private struct TVDetailButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.easeInOut(duration: 0.18), value: configuration.isPressed)
     }
 }
 
