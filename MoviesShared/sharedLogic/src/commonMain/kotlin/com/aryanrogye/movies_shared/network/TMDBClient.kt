@@ -28,6 +28,7 @@ interface TMDBClientProviding {
     suspend fun search(query: String, token: String, includeAdult: Boolean): KTSearchResponse
     suspend fun infoOnTV(id: Int, token: String): KTTVShow
     suspend fun seasonInfo(id: Int, seasonNumber: Int, token: String): KTSeasonInfo
+    suspend fun recommendationsForMovie(id: Int, token: String, page: Int): KTMovieListResponse
     suspend fun recommendationsForTV(id: Int, token: String, page: Int): KTTVListResponse
 }
 
@@ -116,6 +117,18 @@ class TMDBClient: TMDBClientProviding {
     override suspend fun infoOnTV(id: Int, token: String): KTTVShow {
         val response = client.get("https://api.themoviedb.org/3/tv/$id") {
             parameter("language", "en-US")
+
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+
+        return response.body()
+    }
+
+    override suspend fun recommendationsForMovie(id: Int, token: String, page: Int): KTMovieListResponse {
+        val response = client.get("https://api.themoviedb.org/3/movie/$id/recommendations") {
+            parameter("language", "en-US")
+            parameter("page", page)
 
             header("accept", "application/json")
             header("Authorization", "Bearer $token")

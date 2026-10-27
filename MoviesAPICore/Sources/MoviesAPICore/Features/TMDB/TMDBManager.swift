@@ -161,6 +161,10 @@ public final class TMDBManager {
         return try await tmdbClient.infoOnTV(id: Int32(id), token: token)
     }
 
+    public func recommendationsForMovie(for id: Int32, page: Int32 = 1) async throws -> KTMovieListResponse {
+        return try await tmdbClient.recommendationsForMovie(id: id, token: token, page: page)
+    }
+
     public func recommendationsForTV(for id: Int32) async throws -> KTTVListResponse {
         return try await tmdbClient.recommendationsForTV(id: id, token: token, page: 1)
     }

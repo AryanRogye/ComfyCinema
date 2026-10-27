@@ -44,6 +44,10 @@ public struct MovieDetailView: View {
 
     @State var webviewModel: EmbeddedMovieViewModel = .init()
 
+#if os(macOS)
+    @State private var window: NSWindow?
+#endif
+
     private var titleLineLimit: Int {
         if let title = result.title {
             title.count <= 25 ? 1 : 2
@@ -103,56 +107,72 @@ public struct MovieDetailView: View {
                     )
 #endif
             } else {
-                Color.black
-                    .ignoresSafeArea()
-                    .overlay {
-                        MovieImageBackground(imagePath: result.posterPath)
-                            .ignoresSafeArea()
-                    }
-                    .overlay(alignment: .bottomLeading) {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(result.title ?? "")
-                                .font(.system(.largeTitle, design: .serif))
-                                .fontWeight(.semibold)
-                                .lineLimit(titleLineLimit)
-                                .minimumScaleFactor(0.8)
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.white, .white.opacity(0.7)],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .shadow(color: .black.opacity(0.6), radius: 4, x: 0, y: 2)
+                GeometryReader { geometry in
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            Color.black
+                                .ignoresSafeArea()
+                                .overlay {
+                                    MovieImageBackground(imagePath: result.posterPath)
+                                        .ignoresSafeArea()
+                                }
+                                .overlay(alignment: .bottomLeading) {
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        Text(result.title ?? "")
+                                            .font(.system(.largeTitle, design: .serif))
+                                            .fontWeight(.semibold)
+                                            .lineLimit(titleLineLimit)
+                                            .minimumScaleFactor(0.8)
+                                            .foregroundStyle(
+                                                LinearGradient(
+                                                    colors: [.white, .white.opacity(0.7)],
+                                                    startPoint: .top,
+                                                    endPoint: .bottom
+                                                )
+                                            )
+                                            .shadow(color: .black.opacity(0.6), radius: 4, x: 0, y: 2)
 
 
-                            ExpandableText(
-                                text: result.overview ?? "",
-                                tintColor: .yellow,
-                                font: overviewFont,
-                                background: .black,
-                                foregroundStyle: .white.opacity(0.65)
-                            )
-                            .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
+                                        ExpandableText(
+                                            text: result.overview ?? "",
+                                            tintColor: .yellow,
+                                            font: overviewFont,
+                                            background: .black,
+                                            foregroundStyle: .white.opacity(0.65)
+                                        )
+                                        .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
 
-                            Button {
-                                loadMovie()
-                            } label: {
-                                Label("Play Movie", systemImage: "play.fill")
-                                    .font(.body)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(.white)
-                                    .padding(.vertical, 10)
-                                    .padding(.horizontal, 20)
-                                    .glassEffect(.clear.tint(.yellow.opacity(0.1).mix(with: .black, by: 0.8)), in: .capsule)
-                            }
-                            .buttonStyle(.plain)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        Button {
+                                            loadMovie()
+                                        } label: {
+                                            Label("Play Movie", systemImage: "play.fill")
+                                                .font(.body)
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(.white)
+                                                .padding(.vertical, 10)
+                                                .padding(.horizontal, 20)
+                                                .glassEffect(.clear.tint(.yellow.opacity(0.1).mix(with: .black, by: 0.8)), in: .capsule)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
+                                    .padding()
+                                }
+                                .frame(height: geometry.size.height)
+
+
+                            MoreInfo(result: result)
+                                .padding(.top, 32)
                         }
-                        .padding()
                     }
+                }
             }
         }
+#if os(macOS)
+        .resizeWindow(width: 850, height: 860) { window in
+            self.window = window
+        }
+#endif
         .navigationBarBackButtonHidden()
         .navigationTitle(result.name ?? result.title ?? "")
         .frame(maxWidth: .infinity)
@@ -172,7 +192,18 @@ public struct MovieDetailView: View {
                     if playbackSession.isPlaying(result) {
                         playbackSession.stop()
                     }
-                    dismiss()
+
+                    if let movieUrl {
+                        self.movieUrl = nil
+#if os(macOS)
+                        if let window {
+                            let frame = window.frame
+                            window.setFrame(NSRect(x: frame.minX, y: frame.maxY - 860, width: 850, height: 860), display: true)
+                        }
+#endif
+                    } else {
+                        dismiss()
+                    }
                 } label: {
                     Image(systemName: "chevron.backward")
                 }
@@ -357,6 +388,212 @@ private struct MovieImageBackground: View {
                 .clipped()
             }
         }
+    }
+}
+
+private struct MoreInfo: View {
+
+    let result: KTSearchResult
+    @State private var selected: SelectedOption = .moreLikeThis
+
+    enum SelectedOption: String {
+        case moreLikeThis = "More Like This"
+    }
+
+    var body: some View {
+        VStack {
+            HStack {
+                MoreInfoButton(
+                    selected: .moreLikeThis,
+                    isSelected: selected == .moreLikeThis
+                ) {
+                    self.selected = .moreLikeThis
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.white.opacity(0.06))
+            }
+
+            switch selected {
+            case .moreLikeThis:
+                MoreLikeThis(result: result)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+private struct MoreInfoButton: View {
+
+    let selected: MoreInfo.SelectedOption
+    let isSelected: Bool
+    let onSelect: () -> Void
+
+    var body: some View {
+        Button(action: {
+            onSelect()
+        }) {
+            Text(selected.rawValue)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .frame(height: 30)
+                .padding(.horizontal)
+                .background {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(
+                            isSelected
+                            ? .yellow.opacity(0.16)
+                            : .white.opacity(0.06)
+                        )
+                        .background {
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(
+                                    isSelected
+                                    ? .yellow.opacity(0.6)
+                                    : .white.opacity(0.06),
+                                    style: .init(lineWidth: 1)
+                                )
+                        }
+                        .shadow(
+                            color: isSelected
+                            ? .yellow
+                            : .white,
+                            radius: 8
+                        )
+                }
+        }
+        .buttonStyle(.plain)
+
+    }
+}
+
+private struct MoreLikeThis: View {
+
+    @Environment(TMDBManager.self) var tmdbManager
+    @Environment(PlaybackSession.self) var playbackSession
+    let result: KTSearchResult
+
+    @State private var error: String?
+    @State private var showError: Bool = false
+
+    @State private var response: KTMovieListResponse?
+
+    @State private var showDetail: Bool = false
+    @State private var selectedResult: KTSearchResult?
+
+    @State private var isResolving: Bool = false
+    @State private var resolveTask: Task<Void, Never>?
+
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack {
+                if let response {
+                    ForEach(response.results, id: \.self) { result in
+                        VStack {
+                            artwork(result: result)
+                            Text(result.title)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(height: 36, alignment: .top)
+                        }
+                        .frame(width: 120)
+                        .onTapGesture {
+                            playbackSession.stop()
+                            resolve(result)
+                        }
+                    }
+                } else {
+                    ProgressView()
+                }
+            }
+        }
+        .alert(isPresented: $showError) {
+            Alert(
+                title: Text("Error"),
+                message: Text("\(error, default: "Unknown Error")")
+            )
+        }
+        .task {
+            do {
+                response = try await tmdbManager.recommendationsForMovie(for: result.id)
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
+            }
+        }
+        .navigationDestination(isPresented: $showDetail) {
+            if let selectedResult {
+                WatchDetailView(result: selectedResult)
+            }
+        }
+    }
+
+    func resolve(_ result: KTMovieListResult) {
+        if isResolving { return }
+        resolveTask = Task {
+
+            isResolving = true
+            defer {
+                isResolving = false
+            }
+
+            do {
+                try await tmdbManager.search(result.title)
+                if !tmdbManager.searchResults.isEmpty {
+                    if let result = tmdbManager.searchResults.first(where: { $0.id == result.id }) {
+                        self.selectedResult = result
+                        self.showDetail = true
+                    }
+                    /// Clear once we finish
+                    tmdbManager.clearSearchResults()
+                }
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func artwork(result: KTMovieListResult) -> some View {
+        if let posterPath = result.posterPath,
+           let url = URL(
+            string: "https://image.tmdb.org/t/p/w500\(posterPath)"
+           ) {
+            AsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+            } placeholder: {
+                ProgressView()
+            }
+            .frame(width: 120, height: 180)
+            .clipped()
+            .clipShape(.rect(cornerRadius: 12))
+        } else {
+            posterPlaceholder(for: result.mediaType)
+        }
+    }
+
+    private func posterPlaceholder(for mediaType: KTMediaType) -> some View {
+        Rectangle()
+            .fill(.quaternary)
+            .overlay {
+                Image(
+                    systemName: mediaType == .movie
+                    ? "film"
+                    : "play.rectangle"
+                )
+                .font(.title3)
+                .foregroundStyle(.secondary)
+            }
     }
 }
 
