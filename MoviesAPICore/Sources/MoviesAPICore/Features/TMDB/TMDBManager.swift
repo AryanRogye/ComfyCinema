@@ -161,6 +161,10 @@ public final class TMDBManager {
         return try await tmdbClient.infoOnTV(id: Int32(id), token: token)
     }
 
+    public func recommendationsForTV(for id: Int32) async throws -> KTTVListResponse {
+        return try await tmdbClient.recommendationsForTV(id: id, token: token, page: 1)
+    }
+
     /// Function to search for tv,movie,person
     public func search(_ text: String) async throws {
         let results = try await tmdbClient.search(query: text, token: token, includeAdult: includeAdult)

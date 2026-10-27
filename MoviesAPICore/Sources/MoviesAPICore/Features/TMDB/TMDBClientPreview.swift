@@ -10,6 +10,11 @@ import SharedLogic
 
 public final class TMDBClientPreview: TMDBClientProviding {
 
+    public func recommendationsForTV(id: Int32, token: String, page: Int32) async throws -> KTTVListResponse {
+        await tvResponse(page: page)
+    }
+
+
     public init() {}
 
     public func infoOnTV(id: Int32, token: String) async throws -> KTTVShow {

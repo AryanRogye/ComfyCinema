@@ -160,8 +160,11 @@ public struct TVDetailView: View {
                         selectedEpisode: $selectedEpisode
                     )
 
-                    MoreInfo(selectedEpisode: selectedEpisode)
-                        .padding(.bottom, 24)
+                    MoreInfo(
+                        selectedEpisode: selectedEpisode,
+                        result: result
+                    )
+                    .padding(.bottom, 24)
                 }
             }
         }
@@ -839,34 +842,44 @@ private struct EpisodesView: View {
 private struct MoreInfo: View {
 
     let selectedEpisode: KTEpisode?
+    let result: KTSearchResult
     @State private var selected: SelectedOption = .castAndCrew
 
     enum SelectedOption: String {
         case castAndCrew = "Cast & Crew"
+        case moreLikeThis = "More Like This"
     }
 
     var body: some View {
         VStack {
-            HStack {
-                if selectedEpisode != nil {
+            if selectedEpisode != nil {
+                HStack {
                     MoreInfoButton(
                         selected: .castAndCrew,
                         isSelected: selected == .castAndCrew
                     ) {
                         self.selected = .castAndCrew
                     }
+                    MoreInfoButton(
+                        selected: .moreLikeThis,
+                        isSelected: selected == .moreLikeThis
+                    ) {
+                        self.selected = .moreLikeThis
+                    }
                 }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(8)
-            .background {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.white.opacity(0.06))
-            }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(8)
+                .background {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(.white.opacity(0.06))
+                }
 
-            switch selected {
-            case .castAndCrew:
-                CastAndCrew(selectedEpisode: selectedEpisode)
+                switch selected {
+                case .castAndCrew:
+                    CastAndCrew(selectedEpisode: selectedEpisode)
+                case .moreLikeThis:
+                    MoreLikeThis(result: result)
+                }
             }
         }
         .padding(.horizontal)
@@ -921,52 +934,181 @@ private struct CastAndCrew: View {
     let selectedEpisode: KTEpisode?
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            if let selectedEpisode {
+        if let selectedEpisode {
+            ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack {
                     ForEach(selectedEpisode.guestStars, id: \.self) { star in
                         VStack {
-                            if let path = star.profilePath,
-                               let url = URL(string: "https://image.tmdb.org/t/p/w185\(path)") {
-                                AsyncImage(url: url) { image in
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                } placeholder: {
-                                    ProgressView()
+                            ZStack {
+                                if let path = star.profilePath,
+                                   let url = URL(string: "https://image.tmdb.org/t/p/w185\(path)") {
+                                    AsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                    } placeholder: {
+                                        ProgressView()
+                                    }
+                                } else {
+                                    Rectangle()
+                                        .fill(.gray.opacity(0.15))
+                                        .overlay {
+                                            Image(systemName: "person.fill")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .foregroundStyle(.secondary)
+                                                .padding(30)
+                                        }
                                 }
-                                .frame(maxWidth: .infinity)
-                                .aspectRatio(2.0 / 3.0, contentMode: .fit)
-                                .clipped()
-                                .clipShape(.rect(cornerRadius: 12))
-                            } else {
-                                Image(systemName: "person.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .foregroundStyle(.secondary)
-                                    .padding(30)
-                                    .frame(maxWidth: .infinity)
-                                    .aspectRatio(2.0 / 3.0, contentMode: .fit)
-                                    .background(.gray.opacity(0.15))
-                                    .clipShape(.rect(cornerRadius: 12))
                             }
+                            .frame(width: 120, height: 180)
+                            .clipped()
+                            .clipShape(.rect(cornerRadius: 12))
+
                             Text(star.name)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(.primary)
                                 .multilineTextAlignment(.center)
                                 .lineLimit(2)
-                                .frame(maxWidth: .infinity, alignment: .top)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(height: 36, alignment: .top)
                         }
                     }
                 }
             }
+            .padding(8)
+            .background {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.white.opacity(0.06))
+            }
         }
-        .padding(8)
-        .background {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.white.opacity(0.06))
-        }
+    }
+}
 
+private struct MoreLikeThis: View {
+
+    @Environment(TMDBManager.self) var tmdbManager
+    @Environment(PlaybackSession.self) var playbackSession
+    let result: KTSearchResult
+
+    @State private var error: String?
+    @State private var showError: Bool = false
+
+    @State private var response: KTTVListResponse?
+
+    @State private var showDetail: Bool = false
+    @State private var selectedResult: KTSearchResult?
+
+    @State private var isResolving: Bool = false
+    @State private var resolveTask: Task<Void, Never>?
+
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack {
+                if let response {
+                    ForEach(response.results, id: \.self) { result in
+                        VStack {
+                            artwork(result: result)
+                            Text(result.name)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(height: 36, alignment: .top)
+                        }
+                        .frame(width: 120)
+                        .onTapGesture {
+                            playbackSession.stop()
+                            resolve(result)
+                        }
+                    }
+                } else {
+                    ProgressView()
+                }
+            }
+        }
+        .alert(isPresented: $showError) {
+            Alert(
+                title: Text("Error"),
+                message: Text("\(error, default: "Unknown Error")")
+            )
+        }
+        .task {
+            do {
+                response = try await tmdbManager.recommendationsForTV(for: result.id)
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
+            }
+        }
+        .navigationDestination(isPresented: $showDetail) {
+            if let selectedResult {
+                WatchDetailView(result: selectedResult)
+            }
+        }
+    }
+
+    func resolve(_ result: KTTVListResult) {
+        if isResolving { return }
+        resolveTask = Task {
+
+            isResolving = true
+            defer {
+                isResolving = false
+            }
+
+            do {
+                try await tmdbManager.search(result.displayName)
+                if !tmdbManager.searchResults.isEmpty {
+                    if let result = tmdbManager.searchResults.first(where: { $0.id == result.id }) {
+                        self.selectedResult = result
+                        self.showDetail = true
+                    }
+                    /// Clear once we finish
+                    tmdbManager.clearSearchResults()
+                }
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func artwork(result: KTTVListResult) -> some View {
+        if let posterPath = result.posterPath,
+           let url = URL(
+            string: "https://image.tmdb.org/t/p/w500\(posterPath)"
+           ) {
+            AsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+            } placeholder: {
+                ProgressView()
+            }
+            .frame(width: 120, height: 180)
+            .clipped()
+            .clipShape(.rect(cornerRadius: 12))
+        } else {
+            posterPlaceholder(for: result.mediaType)
+        }
+    }
+
+    private func posterPlaceholder(for mediaType: KTMediaType) -> some View {
+        Rectangle()
+            .fill(.quaternary)
+            .overlay {
+                Image(
+                    systemName: mediaType == .movie
+                    ? "film"
+                    : "play.rectangle"
+                )
+                .font(.title3)
+                .foregroundStyle(.secondary)
+            }
     }
 }
 
