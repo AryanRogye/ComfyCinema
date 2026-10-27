@@ -665,18 +665,37 @@ private struct SeasonsView: View {
 
     @Namespace private var nm
 
+    #if os(iOS)
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
+    #elseif os(macOS)
+    let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+    ]
+    #endif
 
     var body: some View {
         if let tvShow {
             VStack(alignment: .leading) {
-                Text("Seasons")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                if let selectedSeasonNumber {
+                    Text("Season \(selectedSeasonNumber)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                } else {
+                    Text("Seasons")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                }
 
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(tvShow.seasons, id: \.id) { season in
@@ -684,6 +703,8 @@ private struct SeasonsView: View {
                         let isSelected = selectedSeasonNumber == seasonNumber
 
                         Text("Season \(season.seasonNumber)")
+                            .minimumScaleFactor(0.5)
+                            .lineLimit(1)
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(
                                 isSelected ? .primary : .secondary
@@ -730,7 +751,7 @@ private struct SeasonsView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 20)
+            .padding(.top, 10)
         }
     }
 }
@@ -743,68 +764,72 @@ private struct EpisodesView: View {
 
     @Namespace private var nm
 
+    #if os(iOS)
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
     ]
+    #elseif os(macOS)
+    let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+    ]
+    #endif
 
     var body: some View {
         if let seasonInfo {
-            VStack(alignment: .leading) {
-                Text("Episodes")
-                    .font(.title2)
-                    .fontWeight(.bold)
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(seasonInfo.episodes, id: \.id) { episode in
+                    let isSelected = selectedEpisode == episode
 
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(seasonInfo.episodes, id: \.id) { episode in
-                        let isSelected = selectedEpisode == episode
-
-                        Text("Episode \(episode.episodeNumber)")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(
-                                isSelected ? .primary : .secondary
-                            )
-                            .frame(maxWidth: .infinity)
-                            .padding(8)
-                            .background {
-                                if isSelected {
-                                    Capsule()
-                                        .fill(.yellow.opacity(0.16))
-                                        .background {
-                                            Capsule()
-                                                .stroke(
-                                                    .yellow.opacity(0.6),
-                                                    style: .init(lineWidth: 1)
-                                                )
-                                        }
-                                        .shadow(
-                                            color: .yellow,
-                                            radius: 8
-                                        )
-                                        .matchedGeometryEffect(
-                                            id: "ACTIVE_EPISODE_PILL",
-                                            in: nm
-                                        )
-                                } else {
-                                    Capsule()
-                                        .fill(.white.opacity(0.06))
-                                }
-                            }
-                            .onTapGesture {
-                                withAnimation(
-                                    .spring(
-                                        response: 0.3,
-                                        dampingFraction: 0.7
+                    Text("EP\(episode.episodeNumber): \(episode.name)")
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(
+                            isSelected ? .primary : .secondary
+                        )
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(8)
+                        .background {
+                            if isSelected {
+                                Capsule()
+                                    .fill(.yellow.opacity(0.16))
+                                    .background {
+                                        Capsule()
+                                            .stroke(
+                                                .yellow.opacity(0.6),
+                                                style: .init(lineWidth: 1)
+                                            )
+                                    }
+                                    .shadow(
+                                        color: .yellow,
+                                        radius: 8
                                     )
-                                ) {
-                                    selectedEpisode = episode
-                                }
+                                    .matchedGeometryEffect(
+                                        id: "ACTIVE_EPISODE_PILL",
+                                        in: nm
+                                    )
+                            } else {
+                                Capsule()
+                                    .fill(.white.opacity(0.06))
                             }
-                    }
+                        }
+                        .onTapGesture {
+                            withAnimation(
+                                .spring(
+                                    response: 0.3,
+                                    dampingFraction: 0.7
+                                )
+                            ) {
+                                selectedEpisode = episode
+                            }
+                        }
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 20)
         }
     }
 }
