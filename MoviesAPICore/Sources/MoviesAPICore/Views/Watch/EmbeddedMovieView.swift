@@ -60,6 +60,8 @@ struct EmbeddedMovieView: View {
     let url: URL
     @Bindable var vm: EmbeddedMovieViewModel
 
+    var allowsInlinePlayback: Bool = false
+
     var onTimeInfo: (TimeInfo) -> Void = { _ in }
     var iFrameLogs: (String) -> Void = { _ in }
     var videoFrameLogs: (String) -> Void = { _ in }
@@ -74,6 +76,7 @@ struct EmbeddedMovieView: View {
             playbackSession: playbackSession,
             blockingService: blockingService,
             url: url,
+            allowsInlinePlayback: allowsInlinePlayback,
             onTimeInfo: onTimeInfo,
             iFrameLogs: iFrameLogs,
             videoFrameLogs: videoFrameLogs,
@@ -128,6 +131,7 @@ struct WebView: Representable {
     @Bindable var playbackSession: PlaybackSession
     let blockingService: BlockingService
     let url: URL
+    let allowsInlinePlayback: Bool
     let onTimeInfo: (TimeInfo) -> Void
     let iFrameLogs: (String) -> Void
     let videoFrameLogs: (String) -> Void
@@ -179,7 +183,8 @@ struct WebView: Representable {
 
         let config = WKWebViewConfiguration()
 #if os(iOS)
-        config.allowsInlineMediaPlayback = false
+        // Live providers render their player inside the page.
+        config.allowsInlineMediaPlayback = allowsInlinePlayback
         config.allowsPictureInPictureMediaPlayback = true
         config.preferences.isElementFullscreenEnabled = false
 #else
@@ -188,6 +193,16 @@ struct WebView: Representable {
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
         config.mediaTypesRequiringUserActionForPlayback = []
         config.websiteDataStore = .default()
+#if os(iOS)
+        if allowsInlinePlayback {
+            config.userContentController.addUserScript(WKUserScript(
+                source: Self.liveMediaSourceScript,
+                injectionTime: .atDocumentStart,
+                forMainFrameOnly: false,
+                in: .page
+            ))
+        }
+#endif
         synchronizePlaybackCompatibility(in: config.userContentController)
         blockingService.attachPopupBlocking(to: config)
 
@@ -220,6 +235,29 @@ struct WebView: Representable {
         SettingLogs.shared.add("WebView: \(url.absoluteString)")
         return wv
     }
+
+#if os(iOS)
+    /// This live provider's JW player detects only MediaSource on iPhone and
+    /// otherwise bypasses its custom HLS loader. Use the managed implementation
+    /// when standard MSE is absent. Managed playback requires disabling AirPlay
+    /// without an alternative source; scope that change to this provider's videos.
+    private static let liveMediaSourceScript = """
+    (() => {
+        if (location.hostname !== 'dembed.st') return;
+        if (typeof window.MediaSource !== 'undefined' || typeof window.ManagedMediaSource !== 'function') return;
+        Object.defineProperty(window, 'MediaSource', { value: window.ManagedMediaSource, configurable: true });
+        const createElement = Document.prototype.createElement;
+        Document.prototype.createElement = function (...args) {
+            const element = Reflect.apply(createElement, this, args);
+            if (element instanceof HTMLVideoElement) {
+                element.disableRemotePlayback = true;
+                element.playsInline = true;
+            }
+            return element;
+        };
+    })();
+    """
+#endif
 
     /// Works around slow or stalled seeks in provider players that prefer
     /// WebKit's ManagedMediaSource over ordinary MediaSource.

@@ -32,7 +32,7 @@ struct LiveTVDetailView: View {
             if let liveUrl {
 #if os(iOS)
                 GeometryReader { proxy in
-                    EmbeddedMovieView(url: liveUrl, vm: webviewModel)
+                    EmbeddedMovieView(url: liveUrl, vm: webviewModel, allowsInlinePlayback: true)
                         .id(reloadID)
                         .frame(maxWidth: .infinity)
                         .frame(height: 200)
@@ -40,7 +40,7 @@ struct LiveTVDetailView: View {
                 }
                 .frame(height: 200)
 #elseif os(macOS)
-                EmbeddedMovieView(url: liveUrl, vm: webviewModel)
+                EmbeddedMovieView(url: liveUrl, vm: webviewModel, allowsInlinePlayback: true)
                     .id(reloadID)
                     .frame(
                         maxWidth: .infinity,
