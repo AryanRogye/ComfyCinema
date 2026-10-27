@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HistoryRow: View {
     let history: History
+    let isResolving: Bool
 
     private let durationFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -75,6 +76,13 @@ struct HistoryRow: View {
         .contentShape(Rectangle())
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
+        .overlay {
+            if isResolving {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(.black.opacity(0.1))
+            }
+        }
     }
 
     private var artwork: some View {

@@ -50,18 +50,15 @@ public struct HistoryView: View {
                 emptyView
             } else {
                 ScrollView {
-                    ForEach(history, id: \.id) { item in
-                        HistoryRow(history: item)
+                    LazyVStack {
+                        ForEach(history, id: \.id) { item in
+                            HistoryRow(
+                                history: item,
+                                isResolving: resolvingHistory == item
+                            )
                             .onTapGesture {
                                 playbackSession.stop()
                                 resolve(item)
-                            }
-                            .overlay {
-                                if resolvingHistory == item {
-                                    ProgressView()
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        .background(.black.opacity(0.1))
-                                }
                             }
                             .contextMenu {
                                 Button(role: .destructive) {
@@ -73,6 +70,7 @@ public struct HistoryView: View {
                                     )
                                 }
                             }
+                        }
                     }
                 }
                 .alert(isPresented: $showError) {

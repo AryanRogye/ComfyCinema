@@ -178,9 +178,6 @@ struct WebView: Representable {
         }
 
         let config = WKWebViewConfiguration()
-#if os(macOS)
-        UBOLWebExtensionSpikeHost.shared.configure(config)
-#endif
 #if os(iOS)
         config.allowsInlineMediaPlayback = false
         config.allowsPictureInPictureMediaPlayback = true
@@ -195,9 +192,6 @@ struct WebView: Representable {
         blockingService.attachPopupBlocking(to: config)
 
         let wv = WKWebView(frame: .zero, configuration: config)
-#if os(macOS)
-        UBOLWebExtensionSpikeHost.shared.register(wv)
-#endif
 #if DEBUG
         wv.isInspectable = true
 #endif
@@ -220,7 +214,6 @@ struct WebView: Representable {
         playbackSession.webView = wv
 #elseif os(macOS)
         vm.webView = wv
-        UBOLWebExtensionSpikeHost.shared.activate(wv)
 #endif
         wv.load(url)
         return wv
@@ -579,9 +572,6 @@ extension WebView {
 #endif
 
     private static func dismantleView(_ view: WKWebView, coordinator: WebView.Coordinator) {
-#if os(macOS)
-        UBOLWebExtensionSpikeHost.shared.close(view)
-#endif
         // Split changes can mount a new wrapper around the same WKWebView
         // before SwiftUI dismantles the old one. Only its current owner may
         // remove delegates, message handlers, or the active video styling.

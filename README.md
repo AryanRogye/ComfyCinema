@@ -81,7 +81,6 @@ TMDB_API_READ_ACCESS_TOKEN=your_token
 ## Build iOS or macOS
 
 ```shell
-./install-ubol.sh
 ./MoviesAPICore/update-shared-logic.sh
 ```
 

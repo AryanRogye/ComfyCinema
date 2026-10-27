@@ -7,13 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1B2C3D40000000000000001 /* uBOLite in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000002 /* uBOLite */; };
 		9B8E2D623070379400190F1C /* MoviesAPIClientIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9B8E2D613070379400190F1C /* MoviesAPIClientIcon.icon */; };
 		9BE82336305CA83B003801A2 /* MoviesAPICore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BE82335305CA83B003801A2 /* MoviesAPICore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1B2C3D40000000000000002 /* uBOLite */ = {isa = PBXFileReference; lastKnownFileType = folder; path = MoviesAPIClient/Resources/uBOLite; sourceTree = SOURCE_ROOT; };
 		9B6EBD8C3058AC940058478C /* ComfyCinema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ComfyCinema.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B8E2D613070379400190F1C /* MoviesAPIClientIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = MoviesAPIClientIcon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -23,7 +21,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Resources/uBOLite,
 			);
 			target = 9B6EBD8B3058AC940058478C /* MoviesAPIClient */;
 		};
@@ -34,12 +31,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				9B6EBDB83058ADF10058478C /* Exceptions for "MoviesAPIClient" folder in "MoviesAPIClient" target */,
-			);
-			explicitFileTypes = {
-				"Resources/uBOLite" = folder;
-			};
-			explicitFolders = (
-				Resources/uBOLite,
 			);
 			path = MoviesAPIClient;
 			sourceTree = "<group>";
@@ -60,7 +51,6 @@
 			isa = PBXGroup;
 			children = (
 				9B8E2D613070379400190F1C /* MoviesAPIClientIcon.icon */,
-				A1B2C3D40000000000000002 /* uBOLite */,
 				9B6EBD8E3058AC940058478C /* MoviesAPIClient */,
 				9B6EBD8D3058AC940058478C /* Products */,
 			);
@@ -140,7 +130,6 @@
 			isa = PBXResourcesBuildPhase;
 			files = (
 				9B8E2D623070379400190F1C /* MoviesAPIClientIcon.icon in Resources */,
-				A1B2C3D40000000000000001 /* uBOLite in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -281,6 +270,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = B9P888266K;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;

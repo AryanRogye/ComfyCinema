@@ -129,11 +129,12 @@ public struct TVDetailView: View {
                     .frame(maxWidth: .infinity)
                     .frame(
                         height: hideSeasonsAndEpisodes
-                        ? geometry.size.height
+                        ? geometry.size.height - 50
                         : 400
                     )
                     .padding(.horizontal, 10)
-                    .padding(.vertical, hideSeasonsAndEpisodes ? 10 : 0)
+                    .padding(.top, hideSeasonsAndEpisodes ? 0 : 50)
+                    .padding(.vertical, hideSeasonsAndEpisodes ? 50 : 0)
 #endif
                 } else {
                     EpisodeImageView(
@@ -644,8 +645,13 @@ private struct TVShowInfo: View {
                 )
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.white.opacity(0.06))
+            }
             .padding(.horizontal)
-            .padding(.top, 32)
+            .padding(.top)
         }
     }
 }
