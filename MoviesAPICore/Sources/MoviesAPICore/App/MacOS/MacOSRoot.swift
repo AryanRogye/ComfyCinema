@@ -21,6 +21,7 @@ struct MacOSRoot: View {
     @State private var showError: Bool = false
 
     @State private var path = NavigationPath()
+    @State private var navigationID = UUID()
 
     var body: some View {
         ZStack {
@@ -28,7 +29,12 @@ struct MacOSRoot: View {
                 VisualEffectView()
 
                 HStack(spacing: 0) {
-                    MacOSRootSidebar(selectedTab: $selectedTab, path: $path)
+                    MacOSRootSidebar(selectedTab: $selectedTab, path: $path) { tab in
+                        path = NavigationPath()
+                        selectedTab = tab
+                        // Reset Boolean-driven destinations as well as value-based routes.
+                        navigationID = UUID()
+                    }
                         .environment(tmdbManager)
                         .environment(blockingService)
                         .environment(playbackSession)
@@ -70,6 +76,7 @@ struct MacOSRoot: View {
                             }
                         }
                     }
+                    .id(navigationID)
                     .environment(windowContainer)
                     .environment(tmdbManager)
                     .environment(blockingService)
