@@ -13,6 +13,8 @@ for tool in node ares-package ares-install ares-launch; do
   fi
 done
 
+node "$APP_DIR/scripts/sync-live-tv.js"
+
 APP_ID="$(node -e 'process.stdout.write(require(process.argv[1]).id)' "$APP_DIR/appinfo.json")"
 APP_VERSION="$(node -e 'process.stdout.write(require(process.argv[1]).version)' "$APP_DIR/appinfo.json")"
 PACKAGE_PATH="$PACKAGE_DIR/${APP_ID}_${APP_VERSION}_all.ipk"
