@@ -13,6 +13,7 @@ import WebKit
 public final class BlockingService {
     let networkFilteringService = NetworkFilteringService()
     let popupFilteringService = PopupFilteringService()
+    let adFilteringService = AdFilteringService()
 
     public var isCompilingNetworkFiltering: Bool = false
     public var appliedNetworkFiltering = false
@@ -39,10 +40,25 @@ public final class BlockingService {
                 in: .defaultClient
             )
             config.userContentController.addUserScript(script)
+
             appliedPopupBlocking = true
         } catch {
             self.popupBlockingError = error.localizedDescription
             appliedPopupBlocking = false
+        }
+
+        // Cosmetic filtering is independent of loading the popup rules.
+        if let adBlocking = adFilteringService.getJavascript() {
+            let blockingScript = WKUserScript(
+                source: adBlocking,
+                injectionTime: .atDocumentStart,
+                forMainFrameOnly: false,
+                in: .page
+            )
+            config.userContentController.addUserScript(blockingScript)
+            print("Added Ad Blocking Script")
+        } else {
+            print("Cant Find Javascript For Ad Blocking")
         }
     }
 

@@ -14,7 +14,7 @@ final class NetworkFilteringService {
     private(set) var ruleList: WKContentRuleList?
 
     /// Update On Change
-    private static let networkFilteringIdentifier: String = "com.aryanrogye.ComfyPortal.network-blocking.\(1)"
+    private static let networkFilteringIdentifier: String = "com.aryanrogye.ComfyPortal.network-blocking.\(2)"
 
     private var compilationTask: Task<WKContentRuleList, Error>?
 

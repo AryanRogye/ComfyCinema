@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct HomeListView<Media: MediaListItem>: View {
+struct MoviesAndTVShowListView<Media: MediaListItem>: View {
 
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(PlaybackSession.self) var playbackSession
@@ -43,7 +43,7 @@ struct HomeListView<Media: MediaListItem>: View {
                     ProgressView()
                 } else {
                     ForEach(contents, id: \.mediaListItemID) { content in
-                        HomeRow(
+                        MoviesAndTVShowRow(
                             imagePath: content.backdropPath,
                             name: content.displayName,
                             mediaType: content.mediaType

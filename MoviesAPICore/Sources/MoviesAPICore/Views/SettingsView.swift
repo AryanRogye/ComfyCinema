@@ -22,6 +22,7 @@ final class SettingLogs {
 public struct SettingsView: View {
 
     @Environment(TMDBManager.self) var tmdbManager
+    @Environment(DefaultManager.self) var defaultManager
     @Environment(BlockingService.self) var blockingService
 
     public init() {}
@@ -37,11 +38,11 @@ public struct SettingsView: View {
 
     public var body: some View {
 
-        @Bindable var tmdbManager = tmdbManager
+        @Bindable var defaultManager = defaultManager
 
         Form {
             Section {
-                Toggle("Include Adult Content", isOn: $tmdbManager.includeAdult)
+                Toggle("Include Adult Content", isOn: $defaultManager.includeAdult)
                     .toggleStyle(.switch)
             } header: {
                 Label("Search Settings", systemImage: "magnifyingglass")
