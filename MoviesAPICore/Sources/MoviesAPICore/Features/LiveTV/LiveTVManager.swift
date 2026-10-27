@@ -22,14 +22,14 @@ struct LiveTVContainer: Codable {
     let LiveTV: [LiveTVSection]
 }
 
-struct LiveTVSection: Codable, Identifiable {
+struct LiveTVSection: Codable, Identifiable, Hashable {
     var id: String { name }
 
     let name: String
     let channels: [LiveTVChannel]
 }
 
-struct LiveTVChannel: Codable, Identifiable {
+struct LiveTVChannel: Codable, Identifiable, Hashable {
     let name: String
     let id: Int
     let isAdult: Bool
@@ -60,6 +60,7 @@ final class LiveTVManager {
     }
 
     private let defaultManager: DefaultManager
+    private let json: URL
     private var sectionInternal: [LiveTVSection] = []
 
     private var includeAdult: Bool {
@@ -74,13 +75,17 @@ final class LiveTVManager {
             throw LiveTVError.cantFindLiveTVJson
         }
 
+        self.json = json
+        self.defaultManager = defaultManager
+        try sync()
+    }
+
+    public func sync() throws {
         let data = try Data(contentsOf: json)
         let container = try JSONDecoder().decode(
             LiveTVContainer.self,
             from: data
         )
-
         self.sectionInternal = container.LiveTV
-        self.defaultManager = defaultManager
     }
 }

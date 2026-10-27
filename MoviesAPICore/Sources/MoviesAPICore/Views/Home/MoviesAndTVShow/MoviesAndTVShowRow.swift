@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct HomeRow: View {
+struct MoviesAndTVShowRow: View {
 
     let imagePath: String?
     let name: String
