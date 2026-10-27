@@ -12,6 +12,7 @@ class ChannelCatalogParser(HTMLParser):
     def __init__(self):
         super().__init__()
         self.channels = None
+        self.sections = None
 
     def handle_starttag(self, tag, attrs):
         attributes = dict(attrs)
@@ -22,6 +23,7 @@ class ChannelCatalogParser(HTMLParser):
         # attribute entities before JSON parsing, so no JavaScript is needed.
         props = json.loads(attributes["props"])
         channels = {}
+        sections = {}
         for _, entry in props["channels"][1]:
             channel_id = int(entry["id"][1])
             name = entry["name"][1]
@@ -31,7 +33,19 @@ class ChannelCatalogParser(HTMLParser):
                 "id": channel_id,
                 "isAdult": "adult" in categories or "18+" in name,
             }
+            # Put each channel in its categories, just like the site's tabs.
+            # Channels with multiple categories appear in each matching section.
+            for category in categories or ["uncategorized"]:
+                sections.setdefault(category, {})[channel_id] = channels[channel_id]
         self.channels = sorted(channels.values(), key=lambda channel: channel["id"])
+        # Keep LiveTV as an array, with a name and channel list for each section.
+        self.sections = [
+            {
+                "name": category.title(),
+                "channels": sorted(section.values(), key=lambda channel: channel["id"]),
+            }
+            for category, section in sorted(sections.items())
+        ]
 
 
 def main():
@@ -65,7 +79,7 @@ def main():
     output_file.unlink(missing_ok=True)
 
     # Write the fresh JSON data
-    output_file.write_text(json.dumps({"LiveTV": parser.channels}, indent=4), encoding="utf-8")
+    output_file.write_text(json.dumps({"LiveTV": parser.sections}, indent=4), encoding="utf-8")
     print(f"Extracted {len(parser.channels)} channels to {output_file}!")
 
 

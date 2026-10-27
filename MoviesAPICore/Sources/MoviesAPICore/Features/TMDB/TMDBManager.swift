@@ -27,6 +27,7 @@ enum TMDBError: LocalizedError {
 public final class TMDBManager {
 
     private let tmdbClient: TMDBClientProviding
+    private let defaultManager: DefaultManager
     private let token: String
 
     private var fullTrendingResults: [KTTrendingResult] = []
@@ -59,15 +60,18 @@ public final class TMDBManager {
     public private(set) var topRatedTV: [KTTVListResult] = []
     public private(set) var searchResults: [KTSearchResult] = []
 
-    public var includeAdult: Bool = Defaults[.includeAdult] {
-        didSet {
-            Defaults[.includeAdult] = includeAdult
-        }
+    var includeAdult: Bool {
+        defaultManager.includeAdult
     }
 
-    public init(tmdbClient: TMDBClientProviding = TMDBClient(), token tokenOverride: String? = nil) throws {
+    public init(
+        tmdbClient: TMDBClientProviding = TMDBClient(),
+        defaultManager: DefaultManager,
+        token tokenOverride: String? = nil
+    ) throws {
         if let tokenOverride {
             self.tmdbClient = tmdbClient
+            self.defaultManager = defaultManager
             self.token = tokenOverride
             return
         }
@@ -81,6 +85,7 @@ public final class TMDBManager {
             throw TMDBError.tokenEmpty
         }
 
+        self.defaultManager = defaultManager
         self.tmdbClient = tmdbClient
         self.token = token
     }

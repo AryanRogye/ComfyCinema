@@ -15,6 +15,8 @@ public struct Root: View {
     }
 
     @State private var tmdbManager: TMDBManager?
+    @State private var liveTVManager: LiveTVManager?
+    @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
 
@@ -33,7 +35,7 @@ public struct Root: View {
 
     public var body: some View {
         VStack {
-            if let tmdbManager {
+            if let tmdbManager, let liveTVManager {
                 TabView(selection: $selectedTab) {
 
                     Tab("Home", systemImage: "house", value: .home) {
@@ -92,8 +94,10 @@ public struct Root: View {
                 .tabBarMinimizeBehavior(.onScrollDown)
 #endif
                 .environment(tmdbManager)
+                .environment(liveTVManager)
                 .environment(blockingService)
                 .environment(playbackSession)
+                .environment(defaultManager)
                 .modifier(
                     SearchTabModifier(
                         isSearchTabSelected: selectedTab == .search,
@@ -112,8 +116,10 @@ public struct Root: View {
         }
         .task {
             do {
-                let manager = try TMDBManager()
+                let manager = try TMDBManager(defaultManager: defaultManager)
+                let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
                 self.tmdbManager = manager
+                self.liveTVManager = liveTVManager
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true

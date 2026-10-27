@@ -12,6 +12,8 @@ struct MacOSRoot: View {
 
     @Bindable var windowContainer: WindowCoordinatorContainer
     @State private var tmdbManager: TMDBManager?
+    @State private var liveTVManager: LiveTVManager?
+    @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
 
@@ -25,7 +27,7 @@ struct MacOSRoot: View {
 
     var body: some View {
         ZStack {
-            if let tmdbManager {
+            if let tmdbManager, let liveTVManager {
                 VisualEffectView()
 
                 HStack(spacing: 0) {
@@ -38,6 +40,7 @@ struct MacOSRoot: View {
                         .environment(tmdbManager)
                         .environment(blockingService)
                         .environment(playbackSession)
+                        .environment(defaultManager)
 
                     Divider()
 
@@ -79,8 +82,10 @@ struct MacOSRoot: View {
                     .id(navigationID)
                     .environment(windowContainer)
                     .environment(tmdbManager)
+                    .environment(liveTVManager)
                     .environment(blockingService)
                     .environment(playbackSession)
+                    .environment(defaultManager)
                 }
             } else {
                 ProgressView()
@@ -92,8 +97,10 @@ struct MacOSRoot: View {
                     }
                     .task {
                         do {
-                            let manager = try TMDBManager()
+                            let manager = try TMDBManager(defaultManager: defaultManager)
+                            let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
                             self.tmdbManager = manager
+                            self.liveTVManager = liveTVManager
                         } catch {
                             self.error = error.localizedDescription
                             self.showError = true

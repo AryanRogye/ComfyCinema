@@ -18,5 +18,25 @@ python3 get_live_from_pressplayz.py
 ```
 
 It downloads the channel directory HTML and reads the embedded Astro catalog
-without executing page scripts or opening a browser. It writes `channels.json`
-in the current working directory, preserving the `LiveTV` output structure.
+without executing page scripts or opening a browser. It writes
+`MoviesAPIClient/LiveTV.json` relative to the repository root.
+
+`LiveTV` contains sections grouped by the site's categories:
+
+```json
+{
+  "LiveTV": [
+    {
+      "name": "Basic Cable",
+      "channels": [
+        { "name": "Animal Planet", "id": 304, "isAdult": false }
+      ]
+    }
+  ]
+}
+```
+
+Sections are sorted alphabetically, and channels are sorted by ID. A channel
+with multiple categories appears in each matching section. Channels without a
+category go in `Uncategorized`. Consumers of the previous flat array must now
+read each section's `channels` array.

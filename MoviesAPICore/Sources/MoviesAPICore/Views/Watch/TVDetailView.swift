@@ -1280,6 +1280,7 @@ private final class TVDetailMenubarController: NSObject {
                 do {
                     tmdbManager = try .init(
                         tmdbClient: TMDBClientPreview(),
+                        defaultManager: DefaultManager(),
                         token: "preview"
                     )
                 } catch {

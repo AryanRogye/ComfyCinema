@@ -623,7 +623,7 @@ private struct MoreLikeThis: View {
     } else {
         ProgressView()
             .task {
-                tmdbManager = try? .init()
+                tmdbManager = try? .init(defaultManager: DefaultManager())
             }
     }
 }
