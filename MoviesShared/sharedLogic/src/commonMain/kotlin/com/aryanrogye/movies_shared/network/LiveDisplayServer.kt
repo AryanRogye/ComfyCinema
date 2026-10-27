@@ -10,7 +10,7 @@ enum class KTLiveDisplayServer(val rawValue: String) {
             return when (this) {
                 DLIVE_STREAM -> "https://dlive.sx/stream/stream-"
                 DLIVE_CAST -> "https://dlive.sx/cast/stream-"
-                DLIVE_WATCH -> "https://dlive.sx/watch/stream"
+                DLIVE_WATCH -> "https://dlive.sx/watch/stream-"
                 DEMBED -> "https://dembed.st/premiumtv/daddy.php"
             }
         }
