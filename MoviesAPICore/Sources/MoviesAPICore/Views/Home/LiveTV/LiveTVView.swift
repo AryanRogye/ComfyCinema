@@ -63,52 +63,66 @@ private struct LiveTVSectionView: View {
     ]
 #endif
 
+    @State private var didPressChannel: Bool = false
+    @State private var selectedChannel: LiveTVChannel? = nil
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVGrid(columns: columns) {
                 ForEach(section.channels, id: \.id) { channel in
-                    VStack {
-                        // Load the logo link, keeping the full logo visible.
-                        AsyncImage(url: channel.logo.isEmpty ? nil : URL(string: channel.logo)) { phase in
-                            ZStack {
-                                Rectangle()
-                                    .fill(.quaternary)
+                    Button {
+                        didPressChannel = true
+                        selectedChannel = channel
+                    } label: {
+                        VStack {
+                            // Load the logo link, keeping the full logo visible.
+                            AsyncImage(url: channel.logo.isEmpty ? nil : URL(string: channel.logo)) { phase in
+                                ZStack {
+                                    Rectangle()
+                                        .fill(.quaternary)
 
-                                if let image = phase.image {
-                                    image
-                                        .resizable()
-                                        .scaledToFit()
-                                        .padding(8)
-                                } else if phase.error != nil || channel.logo.isEmpty || URL(string: channel.logo) == nil {
-                                    Image(systemName: "photo")
-                                        .font(.title2)
-                                        .foregroundStyle(.secondary)
-                                } else {
-                                    ProgressView()
+                                    if let image = phase.image {
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .padding(8)
+                                    } else if phase.error != nil || channel.logo.isEmpty || URL(string: channel.logo) == nil {
+                                        Image(systemName: "photo")
+                                            .font(.title2)
+                                            .foregroundStyle(.secondary)
+                                    } else {
+                                        ProgressView()
+                                    }
                                 }
                             }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 100)
-                        .clipShape(.rect(cornerRadius: 12))
-                        Text(channel.name)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.primary)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.8)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 40, alignment: .center)
+                            .frame(height: 100)
+                            .clipShape(.rect(cornerRadius: 12))
+                            Text(channel.name)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 40, alignment: .center)
+                        }
+                        .padding(4)
+                        .background {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(.white.opacity(0.2))
+                        }
                     }
-                    .padding(4)
-                    .background {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(.white.opacity(0.2))
-                    }
+                    .buttonStyle(LiveTVButtonStyle())
                 }
             }
             .padding(.horizontal, 8)
             .padding(.bottom, 16)
+            .navigationDestination(isPresented: $didPressChannel) {
+                if let selectedChannel {
+                    LiveTVDetailView(channel: selectedChannel)
+                }
+            }
         }
     }
 }

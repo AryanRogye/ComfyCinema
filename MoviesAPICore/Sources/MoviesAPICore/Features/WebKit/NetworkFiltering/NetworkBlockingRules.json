@@ -1,6 +1,15 @@
 [
   {
     "trigger": {
+      "url-filter": ".*"
+    },
+    "action": {
+      "type": "css-display-none",
+      "selector": "[id^=\"note-\"]"
+    }
+  },
+  {
+    "trigger": {
       "url-filter": "example\\.com"
     },
     "action": {

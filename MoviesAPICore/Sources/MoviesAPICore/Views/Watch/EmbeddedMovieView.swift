@@ -216,6 +216,8 @@ struct WebView: Representable {
         vm.webView = wv
 #endif
         wv.load(url)
+
+        SettingLogs.shared.add("WebView: \(url.absoluteString)")
         return wv
     }
 
@@ -281,6 +283,7 @@ struct WebView: Representable {
     func makeCoordinator() -> Coordinator {
         Coordinator(
             vm: vm,
+            url: url,
             onTimeInfo: onTimeInfo,
             iFrameLogs: iFrameLogs,
             videoFrameLogs: videoFrameLogs,
@@ -295,6 +298,7 @@ struct WebView: Representable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
 
+        let url: URL
         private var videoFrame: WKFrameInfo?
         private var vm: EmbeddedMovieViewModel
         let onTimeInfo: (TimeInfo) -> Void
@@ -319,6 +323,7 @@ struct WebView: Representable {
 
         init(
             vm: EmbeddedMovieViewModel,
+            url: URL,
             onTimeInfo: @escaping (TimeInfo) -> Void,
             iFrameLogs: @escaping (String) -> Void,
             videoFrameLogs: @escaping (String) -> Void,
@@ -329,6 +334,7 @@ struct WebView: Representable {
 
         ) {
             self.vm = vm
+            self.url = url
             self.onTimeInfo = onTimeInfo
             self.iFrameLogs = iFrameLogs
             self.videoFrameLogs = videoFrameLogs
@@ -383,6 +389,33 @@ extension WebView.Coordinator {
         return nil
     }
 
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        guard navigationAction.targetFrame?.isMainFrame == true else {
+            decisionHandler(.allow)
+            return
+        }
+
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.cancel)
+            return
+        }
+
+        SettingLogs.shared.add("➡️ NAVIGATION: \(url.absoluteString)")
+
+        if let allowedHost = url.host() {
+            if url.host?.lowercased() == allowedHost {
+                decisionHandler(.allow)
+            } else {
+                print("🚫 BLOCKED REDIRECT:", url.absoluteString)
+                decisionHandler(.cancel)
+            }
+        }
+    }
+
     /// Errors
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         Task { @MainActor in
@@ -405,7 +438,6 @@ extension WebView.Coordinator {
             loadStartTimeForPID()
         }
     }
-
 }
 
 // MARK: - Observation

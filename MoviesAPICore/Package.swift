@@ -40,6 +40,7 @@ let package = Package(
                 .process("Features/WebKit/NetworkFiltering/NetworkBlockingRules.json"),
                 .copy("Features/WebKit/NetworkFiltering/NetworkBlockingRules.json.license"),
                 .process("Features/WebKit/PopupFiltering/PopupFilters.json"),
+                .process("Features/WebKit/AdFiltering/AdFiltering.js"),
                 .process("Views/Watch/monitorIFrame.js"),
                 .process("Views/Watch/IFrameLogger.js"),
                 .process("Views/Watch/VideoLogger.js"),
