@@ -159,7 +159,9 @@ public struct TVDetailView: View {
                         seasonInfo: seasonInfo,
                         selectedEpisode: $selectedEpisode
                     )
-                    .padding(.bottom, 24)
+
+                    MoreInfo(selectedEpisode: selectedEpisode)
+                        .padding(.bottom, 24)
                 }
             }
         }
@@ -834,6 +836,139 @@ private struct EpisodesView: View {
     }
 }
 
+private struct MoreInfo: View {
+
+    let selectedEpisode: KTEpisode?
+    @State private var selected: SelectedOption = .castAndCrew
+
+    enum SelectedOption: String {
+        case castAndCrew = "Cast & Crew"
+    }
+
+    var body: some View {
+        VStack {
+            HStack {
+                if selectedEpisode != nil {
+                    MoreInfoButton(
+                        selected: .castAndCrew,
+                        isSelected: selected == .castAndCrew
+                    ) {
+                        self.selected = .castAndCrew
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.white.opacity(0.06))
+            }
+
+            switch selected {
+            case .castAndCrew:
+                CastAndCrew(selectedEpisode: selectedEpisode)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+private struct MoreInfoButton: View {
+
+    let selected: MoreInfo.SelectedOption
+    let isSelected: Bool
+    let onSelect: () -> Void
+
+    var body: some View {
+        Button(action: {
+            onSelect()
+        }) {
+            Text(selected.rawValue)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .frame(width: 100, height: 30)
+                .background {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(
+                            isSelected
+                            ? .yellow.opacity(0.16)
+                            : .white.opacity(0.06)
+                        )
+                        .background {
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(
+                                    isSelected
+                                    ? .yellow.opacity(0.6)
+                                    : .white.opacity(0.06),
+                                    style: .init(lineWidth: 1)
+                                )
+                        }
+                        .shadow(
+                            color: isSelected
+                            ? .yellow
+                            : .white,
+                            radius: 8
+                        )
+                }
+        }
+        .buttonStyle(.plain)
+
+    }
+}
+
+private struct CastAndCrew: View {
+
+    let selectedEpisode: KTEpisode?
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            if let selectedEpisode {
+                LazyHStack {
+                    ForEach(selectedEpisode.guestStars, id: \.self) { star in
+                        VStack {
+                            if let path = star.profilePath,
+                               let url = URL(string: "https://image.tmdb.org/t/p/w185\(path)") {
+                                AsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                .frame(maxWidth: .infinity)
+                                .aspectRatio(2.0 / 3.0, contentMode: .fit)
+                                .clipped()
+                                .clipShape(.rect(cornerRadius: 12))
+                            } else {
+                                Image(systemName: "person.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .foregroundStyle(.secondary)
+                                    .padding(30)
+                                    .frame(maxWidth: .infinity)
+                                    .aspectRatio(2.0 / 3.0, contentMode: .fit)
+                                    .background(.gray.opacity(0.15))
+                                    .clipShape(.rect(cornerRadius: 12))
+                            }
+                            Text(star.name)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .frame(maxWidth: .infinity, alignment: .top)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(8)
+        .background {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.white.opacity(0.06))
+        }
+
+    }
+}
 
 #if os(macOS)
 @MainActor

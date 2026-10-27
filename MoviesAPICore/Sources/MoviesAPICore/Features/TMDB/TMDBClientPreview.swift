@@ -34,7 +34,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
                 seasonNumber: seasonNumber,
                 airDate: "2012-02-27",
                 runtime: KotlinInt(int: 24),
-                stillPath: nil
+                stillPath: nil,
+                guestStars: [],
             )
         }
 
