@@ -1,0 +1,4504 @@
+{
+    "LiveTV": [
+        {
+            "name": "TNT Sports 1 UK",
+            "id": 31,
+            "isAdult": false
+        },
+        {
+            "name": "TNT Sports 2 UK",
+            "id": 32,
+            "isAdult": false
+        },
+        {
+            "name": "TNT Sports 3 UK",
+            "id": 33,
+            "isAdult": false
+        },
+        {
+            "name": "TNT Sports 4 UK",
+            "id": 34,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Football UK",
+            "id": 35,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Arena UK",
+            "id": 36,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Action UK",
+            "id": 37,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Main Event",
+            "id": 38,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports 1 USA",
+            "id": 39,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis Channel",
+            "id": 40,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 1 UK",
+            "id": 41,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 2 UK",
+            "id": 42,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS XTRA 2",
+            "id": 43,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN USA",
+            "id": 44,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN2 USA",
+            "id": 45,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA English 3",
+            "id": 46,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Poland",
+            "id": 47,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport Poland",
+            "id": 48,
+            "isAdult": false
+        },
+        {
+            "name": "Sport TV1 Portugal",
+            "id": 49,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Extra Poland",
+            "id": 50,
+            "isAdult": false
+        },
+        {
+            "name": "ABC USA",
+            "id": 51,
+            "isAdult": false
+        },
+        {
+            "name": "CBS USA",
+            "id": 52,
+            "isAdult": false
+        },
+        {
+            "name": "NBC USA",
+            "id": 53,
+            "isAdult": false
+        },
+        {
+            "name": "FOX USA",
+            "id": 54,
+            "isAdult": false
+        },
+        {
+            "name": "Supersport Football",
+            "id": 56,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 1 Poland",
+            "id": 57,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 2 Poland",
+            "id": 58,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports F1 UK",
+            "id": 60,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA English 1",
+            "id": 61,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS 1 Turkey",
+            "id": 62,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS 2 Turkey",
+            "id": 63,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS 3 Turkey",
+            "id": 64,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Cricket",
+            "id": 65,
+            "isAdult": false
+        },
+        {
+            "name": "TUDN USA",
+            "id": 66,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS 4 Turkey",
+            "id": 67,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Golf UK",
+            "id": 70,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 1 Poland",
+            "id": 71,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 2 Poland",
+            "id": 72,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 2 Poland",
+            "id": 73,
+            "isAdult": false
+        },
+        {
+            "name": "Sport TV2 Portugal",
+            "id": 74,
+            "isAdult": false
+        },
+        {
+            "name": "CANAL+ SPORT 5 Poland",
+            "id": 75,
+            "isAdult": false
+        },
+        {
+            "name": "SporTV Brasil",
+            "id": 78,
+            "isAdult": false
+        },
+        {
+            "name": "SporTV2 Brasil",
+            "id": 79,
+            "isAdult": false
+        },
+        {
+            "name": "SporTV3 Brasil",
+            "id": 80,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN Brasil",
+            "id": 81,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN2 Brasil",
+            "id": 82,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN3 Brasil",
+            "id": 83,
+            "isAdult": false
+        },
+        {
+            "name": "Movistar Laliga",
+            "id": 84,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN4 Brasil",
+            "id": 85,
+            "isAdult": false
+        },
+        {
+            "name": "TNT Brasil",
+            "id": 87,
+            "isAdult": false
+        },
+        {
+            "name": "Premier Brasil",
+            "id": 88,
+            "isAdult": false
+        },
+        {
+            "name": "Combate Brasil",
+            "id": 89,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA English 2",
+            "id": 90,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA 1",
+            "id": 91,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA 2",
+            "id": 92,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA 3",
+            "id": 93,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA 4",
+            "id": 94,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA 5",
+            "id": 95,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA 6",
+            "id": 96,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA 7",
+            "id": 97,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA Premium 1",
+            "id": 98,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA Premium 2",
+            "id": 99,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MENA Premium 3",
+            "id": 100,
+            "isAdult": false
+        },
+        {
+            "name": "Sport Klub 1 Serbia",
+            "id": 101,
+            "isAdult": false
+        },
+        {
+            "name": "Sport Klub 2 Serbia",
+            "id": 102,
+            "isAdult": false
+        },
+        {
+            "name": "Sport Klub 3 Serbia",
+            "id": 103,
+            "isAdult": false
+        },
+        {
+            "name": "Sport Klub 4 Serbia",
+            "id": 104,
+            "isAdult": false
+        },
+        {
+            "name": "TSN1",
+            "id": 111,
+            "isAdult": false
+        },
+        {
+            "name": "TSN2",
+            "id": 112,
+            "isAdult": false
+        },
+        {
+            "name": "TSN3",
+            "id": 113,
+            "isAdult": false
+        },
+        {
+            "name": "TSN4",
+            "id": 114,
+            "isAdult": false
+        },
+        {
+            "name": "TSN5",
+            "id": 115,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS 1 France",
+            "id": 116,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS 2 France",
+            "id": 117,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS 3 France",
+            "id": 118,
+            "isAdult": false
+        },
+        {
+            "name": "RMC Sport 1 France",
+            "id": 119,
+            "isAdult": false
+        },
+        {
+            "name": "RMC Sport 2 France",
+            "id": 120,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ France",
+            "id": 121,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport France",
+            "id": 122,
+            "isAdult": false
+        },
+        {
+            "name": "Astro SuperSport 1",
+            "id": 123,
+            "isAdult": false
+        },
+        {
+            "name": "Astro SuperSport 2",
+            "id": 124,
+            "isAdult": false
+        },
+        {
+            "name": "Astro SuperSport 3",
+            "id": 125,
+            "isAdult": false
+        },
+        {
+            "name": "Astro SuperSport 4",
+            "id": 126,
+            "isAdult": false
+        },
+        {
+            "name": "Match TV Russia",
+            "id": 127,
+            "isAdult": false
+        },
+        {
+            "name": "TVP Sport Poland",
+            "id": 128,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport News Poland",
+            "id": 129,
+            "isAdult": false
+        },
+        {
+            "name": "Sky sports Premier League",
+            "id": 130,
+            "isAdult": false
+        },
+        {
+            "name": "Telemundo",
+            "id": 131,
+            "isAdult": false
+        },
+        {
+            "name": "Univision",
+            "id": 132,
+            "isAdult": false
+        },
+        {
+            "name": "Unimas",
+            "id": 133,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 1 Premium",
+            "id": 134,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 2 Premium",
+            "id": 135,
+            "isAdult": false
+        },
+        {
+            "name": "Match Football 1 Russia",
+            "id": 136,
+            "isAdult": false
+        },
+        {
+            "name": "Match Football 2 Russia",
+            "id": 137,
+            "isAdult": false
+        },
+        {
+            "name": "Match Football 3 Russia",
+            "id": 138,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 3 Premium",
+            "id": 139,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 1 Israel",
+            "id": 140,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 2 Israel",
+            "id": 141,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 3 Israel",
+            "id": 142,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 4 Israel",
+            "id": 143,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 5 Israel",
+            "id": 144,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 5 PLUS Israel",
+            "id": 145,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 5 Live Israel",
+            "id": 146,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 5 Star Israel",
+            "id": 147,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 5 Gold Israel",
+            "id": 148,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN SUR",
+            "id": 149,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN2 SUR",
+            "id": 150,
+            "isAdult": false
+        },
+        {
+            "name": "AHC (American Heroes Channel)",
+            "id": 206,
+            "isAdult": false
+        },
+        {
+            "name": "PBS USA USA",
+            "id": 210,
+            "isAdult": false
+        },
+        {
+            "name": "TV3 Max Denmark",
+            "id": 223,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN 1 UK",
+            "id": 230,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 1 SW",
+            "id": 231,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 2 SW",
+            "id": 232,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 1 NL",
+            "id": 233,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 2 NL",
+            "id": 234,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports 1 DE",
+            "id": 240,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports 2 DE",
+            "id": 241,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 3 Poland",
+            "id": 259,
+            "isAdult": false
+        },
+        {
+            "name": "Vodafone Sport",
+            "id": 260,
+            "isAdult": false
+        },
+        {
+            "name": "M4 Sports Hungary",
+            "id": 265,
+            "isAdult": false
+        },
+        {
+            "name": "Star Sports 1 IN",
+            "id": 267,
+            "isAdult": false
+        },
+        {
+            "name": "Star Sports Hindi IN",
+            "id": 268,
+            "isAdult": false
+        },
+        {
+            "name": "A Sport PK",
+            "id": 269,
+            "isAdult": false
+        },
+        {
+            "name": "T Sports BD",
+            "id": 270,
+            "isAdult": false
+        },
+        {
+            "name": "CANAL+ MotoGP France",
+            "id": 271,
+            "isAdult": false
+        },
+        {
+            "name": "V Sport Motor Sweden",
+            "id": 272,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Formula 1",
+            "id": 273,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports F1 DE",
+            "id": 274,
+            "isAdult": false
+        },
+        {
+            "name": "Bandsports Brasil",
+            "id": 275,
+            "isAdult": false
+        },
+        {
+            "name": "LaLigaTV UK",
+            "id": 276,
+            "isAdult": false
+        },
+        {
+            "name": "NBC10 Philadelphia",
+            "id": 277,
+            "isAdult": false
+        },
+        {
+            "name": "Law & Crime Network",
+            "id": 278,
+            "isAdult": false
+        },
+        {
+            "name": "FUSE TV USA",
+            "id": 279,
+            "isAdult": false
+        },
+        {
+            "name": "CW PIX 11 USA",
+            "id": 280,
+            "isAdult": false
+        },
+        {
+            "name": "Court TV USA",
+            "id": 281,
+            "isAdult": false
+        },
+        {
+            "name": "StarzPlay CricLife 3 HD",
+            "id": 282,
+            "isAdult": false
+        },
+        {
+            "name": "StarzPlay CricLife 2 HD",
+            "id": 283,
+            "isAdult": false
+        },
+        {
+            "name": "StarzPlay CricLife 1 HD",
+            "id": 284,
+            "isAdult": false
+        },
+        {
+            "name": "Discovery Velocity CA",
+            "id": 285,
+            "isAdult": false
+        },
+        {
+            "name": "YTV CA",
+            "id": 286,
+            "isAdult": false
+        },
+        {
+            "name": "Pac-12 Network USA",
+            "id": 287,
+            "isAdult": false
+        },
+        {
+            "name": "ESPNews",
+            "id": 288,
+            "isAdult": false
+        },
+        {
+            "name": "Sport TV4 Portugal",
+            "id": 289,
+            "isAdult": false
+        },
+        {
+            "name": "Sport TV5 Portugal",
+            "id": 290,
+            "isAdult": false
+        },
+        {
+            "name": "Sport TV6 Portugal",
+            "id": 291,
+            "isAdult": false
+        },
+        {
+            "name": "NewsNation USA",
+            "id": 292,
+            "isAdult": false
+        },
+        {
+            "name": "Reelz Channel",
+            "id": 293,
+            "isAdult": false
+        },
+        {
+            "name": "Science Channel",
+            "id": 294,
+            "isAdult": false
+        },
+        {
+            "name": "Adult Swim",
+            "id": 295,
+            "isAdult": false
+        },
+        {
+            "name": "Hallmark Movies & Mysterie",
+            "id": 296,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Business",
+            "id": 297,
+            "isAdult": false
+        },
+        {
+            "name": "FXX USA",
+            "id": 298,
+            "isAdult": false
+        },
+        {
+            "name": "Magnolia Network",
+            "id": 299,
+            "isAdult": false
+        },
+        {
+            "name": "CW USA",
+            "id": 300,
+            "isAdult": false
+        },
+        {
+            "name": "Freeform",
+            "id": 301,
+            "isAdult": false
+        },
+        {
+            "name": "A&E USA",
+            "id": 302,
+            "isAdult": false
+        },
+        {
+            "name": "AMC USA",
+            "id": 303,
+            "isAdult": false
+        },
+        {
+            "name": "Animal Planet",
+            "id": 304,
+            "isAdult": false
+        },
+        {
+            "name": "BBC America (BBCA)",
+            "id": 305,
+            "isAdult": false
+        },
+        {
+            "name": "BET USA",
+            "id": 306,
+            "isAdult": false
+        },
+        {
+            "name": "Bravo USA",
+            "id": 307,
+            "isAdult": false
+        },
+        {
+            "name": "CBS Sports Network (CBSSN)",
+            "id": 308,
+            "isAdult": false
+        },
+        {
+            "name": "CNBC USA",
+            "id": 309,
+            "isAdult": false
+        },
+        {
+            "name": "Comedy Central",
+            "id": 310,
+            "isAdult": false
+        },
+        {
+            "name": "Discovery Life Channel",
+            "id": 311,
+            "isAdult": false
+        },
+        {
+            "name": "Disney Channel",
+            "id": 312,
+            "isAdult": false
+        },
+        {
+            "name": "Discovery Channel",
+            "id": 313,
+            "isAdult": false
+        },
+        {
+            "name": "Disney XD",
+            "id": 314,
+            "isAdult": false
+        },
+        {
+            "name": "E! Entertainment Television",
+            "id": 315,
+            "isAdult": false
+        },
+        {
+            "name": "ESPNU USA",
+            "id": 316,
+            "isAdult": false
+        },
+        {
+            "name": "FX USA",
+            "id": 317,
+            "isAdult": false
+        },
+        {
+            "name": "GOLF Channel USA",
+            "id": 318,
+            "isAdult": false
+        },
+        {
+            "name": "Game Show Network",
+            "id": 319,
+            "isAdult": false
+        },
+        {
+            "name": "The Hallmark Channel",
+            "id": 320,
+            "isAdult": false
+        },
+        {
+            "name": "HBO USA",
+            "id": 321,
+            "isAdult": false
+        },
+        {
+            "name": "History USA",
+            "id": 322,
+            "isAdult": false
+        },
+        {
+            "name": "Headline News",
+            "id": 323,
+            "isAdult": false
+        },
+        {
+            "name": "Investigation Discovery (ID USA)",
+            "id": 324,
+            "isAdult": false
+        },
+        {
+            "name": "ION USA",
+            "id": 325,
+            "isAdult": false
+        },
+        {
+            "name": "Lifetime Network",
+            "id": 326,
+            "isAdult": false
+        },
+        {
+            "name": "MSNBC",
+            "id": 327,
+            "isAdult": false
+        },
+        {
+            "name": "National Geographic (NGC)",
+            "id": 328,
+            "isAdult": false
+        },
+        {
+            "name": "NICK JR",
+            "id": 329,
+            "isAdult": false
+        },
+        {
+            "name": "NICK",
+            "id": 330,
+            "isAdult": false
+        },
+        {
+            "name": "Oprah Winfrey Network (OWN)",
+            "id": 331,
+            "isAdult": false
+        },
+        {
+            "name": "Oxygen True Crime",
+            "id": 332,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime USA",
+            "id": 333,
+            "isAdult": false
+        },
+        {
+            "name": "Paramount Network",
+            "id": 334,
+            "isAdult": false
+        },
+        {
+            "name": "Starz",
+            "id": 335,
+            "isAdult": false
+        },
+        {
+            "name": "TBS USA",
+            "id": 336,
+            "isAdult": false
+        },
+        {
+            "name": "TLC",
+            "id": 337,
+            "isAdult": false
+        },
+        {
+            "name": "TNT USA",
+            "id": 338,
+            "isAdult": false
+        },
+        {
+            "name": "Cartoon Network",
+            "id": 339,
+            "isAdult": false
+        },
+        {
+            "name": "Travel Channel",
+            "id": 340,
+            "isAdult": false
+        },
+        {
+            "name": "TruTV USA",
+            "id": 341,
+            "isAdult": false
+        },
+        {
+            "name": "TVLAND",
+            "id": 342,
+            "isAdult": false
+        },
+        {
+            "name": "USA Network",
+            "id": 343,
+            "isAdult": false
+        },
+        {
+            "name": "VH1 USA",
+            "id": 344,
+            "isAdult": false
+        },
+        {
+            "name": "CNN USA",
+            "id": 345,
+            "isAdult": false
+        },
+        {
+            "name": "Willow Cricket",
+            "id": 346,
+            "isAdult": false
+        },
+        {
+            "name": "Fox News",
+            "id": 347,
+            "isAdult": false
+        },
+        {
+            "name": "Dave",
+            "id": 348,
+            "isAdult": false
+        },
+        {
+            "name": "BBC News Channel HD",
+            "id": 349,
+            "isAdult": false
+        },
+        {
+            "name": "ITV 1 UK",
+            "id": 350,
+            "isAdult": false
+        },
+        {
+            "name": "ITV 2 UK",
+            "id": 351,
+            "isAdult": false
+        },
+        {
+            "name": "ITV 3 UK",
+            "id": 352,
+            "isAdult": false
+        },
+        {
+            "name": "ITV 4 UK",
+            "id": 353,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 4 UK",
+            "id": 354,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 5 UK",
+            "id": 355,
+            "isAdult": false
+        },
+        {
+            "name": "BBC One UK",
+            "id": 356,
+            "isAdult": false
+        },
+        {
+            "name": "BBC Two UK",
+            "id": 357,
+            "isAdult": false
+        },
+        {
+            "name": "BBC Three UK",
+            "id": 358,
+            "isAdult": false
+        },
+        {
+            "name": "BBC Four UK",
+            "id": 359,
+            "isAdult": false
+        },
+        {
+            "name": "5 USA",
+            "id": 360,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Witness HD",
+            "id": 361,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Atlantic",
+            "id": 362,
+            "isAdult": false
+        },
+        {
+            "name": "E4 Channel",
+            "id": 363,
+            "isAdult": false
+        },
+        {
+            "name": "RTE 1",
+            "id": 364,
+            "isAdult": false
+        },
+        {
+            "name": "RTE 2",
+            "id": 365,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports News UK",
+            "id": 366,
+            "isAdult": false
+        },
+        {
+            "name": "MTV UK",
+            "id": 367,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Cricket",
+            "id": 368,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Cricket",
+            "id": 369,
+            "isAdult": false
+        },
+        {
+            "name": "Astro Cricket",
+            "id": 370,
+            "isAdult": false
+        },
+        {
+            "name": "MTV USA",
+            "id": 371,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS en Espa\u5358ol",
+            "id": 372,
+            "isAdult": false
+        },
+        {
+            "name": "SYFY USA",
+            "id": 373,
+            "isAdult": false
+        },
+        {
+            "name": "Cinemax USA",
+            "id": 374,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN Deportes",
+            "id": 375,
+            "isAdult": false
+        },
+        {
+            "name": "WWE Network",
+            "id": 376,
+            "isAdult": false
+        },
+        {
+            "name": "MUTV UK",
+            "id": 377,
+            "isAdult": false
+        },
+        {
+            "name": "Veronica NL Netherland",
+            "id": 378,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN 1 NL",
+            "id": 379,
+            "isAdult": false
+        },
+        {
+            "name": "Benfica TV PT",
+            "id": 380,
+            "isAdult": false
+        },
+        {
+            "name": "FX Movie Channel",
+            "id": 381,
+            "isAdult": false
+        },
+        {
+            "name": "HGTV",
+            "id": 382,
+            "isAdult": false
+        },
+        {
+            "name": "Ziggo Sport Docu NL",
+            "id": 383,
+            "isAdult": false
+        },
+        {
+            "name": "The Food Network",
+            "id": 384,
+            "isAdult": false
+        },
+        {
+            "name": "SEC Network USA",
+            "id": 385,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN 2 NL",
+            "id": 386,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN Premium Argentina",
+            "id": 387,
+            "isAdult": false
+        },
+        {
+            "name": "TNT Sports Argentina",
+            "id": 388,
+            "isAdult": false
+        },
+        {
+            "name": "Lifetime Movies Network",
+            "id": 389,
+            "isAdult": false
+        },
+        {
+            "name": "RTL7 Netherland",
+            "id": 390,
+            "isAdult": false
+        },
+        {
+            "name": "VTV+ Uruguay",
+            "id": 391,
+            "isAdult": false
+        },
+        {
+            "name": "Win Sports+ Columbia",
+            "id": 392,
+            "isAdult": false
+        },
+        {
+            "name": "Ziggo Sport Select NL",
+            "id": 393,
+            "isAdult": false
+        },
+        {
+            "name": "The Weather Channel",
+            "id": 394,
+            "isAdult": false
+        },
+        {
+            "name": "\u041c\u0410\u0422\u0427! \u0411\u041e\u0415\u0426 Russia",
+            "id": 395,
+            "isAdult": false
+        },
+        {
+            "name": "Ziggo Sport Racing NL",
+            "id": 396,
+            "isAdult": false
+        },
+        {
+            "name": "BIG TEN Network (BTN USA)",
+            "id": 397,
+            "isAdult": false
+        },
+        {
+            "name": "Ziggo Sport Voetbal NL",
+            "id": 398,
+            "isAdult": false
+        },
+        {
+            "name": "MLB Network USA",
+            "id": 399,
+            "isAdult": false
+        },
+        {
+            "name": "Digi Sport 1 Romania",
+            "id": 400,
+            "isAdult": false
+        },
+        {
+            "name": "Digi Sport 2 Romania",
+            "id": 401,
+            "isAdult": false
+        },
+        {
+            "name": "Digi Sport 3 Romania",
+            "id": 402,
+            "isAdult": false
+        },
+        {
+            "name": "Digi Sport 4 Romania",
+            "id": 403,
+            "isAdult": false
+        },
+        {
+            "name": "NBA TV USA",
+            "id": 404,
+            "isAdult": false
+        },
+        {
+            "name": "NFL Network",
+            "id": 405,
+            "isAdult": false
+        },
+        {
+            "name": "Sportsnet Ontario",
+            "id": 406,
+            "isAdult": false
+        },
+        {
+            "name": "Sportsnet West",
+            "id": 407,
+            "isAdult": false
+        },
+        {
+            "name": "Sportsnet East",
+            "id": 408,
+            "isAdult": false
+        },
+        {
+            "name": "Sportsnet 360",
+            "id": 409,
+            "isAdult": false
+        },
+        {
+            "name": "Sportsnet World",
+            "id": 410,
+            "isAdult": false
+        },
+        {
+            "name": "Sportsnet One",
+            "id": 411,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Grandstand",
+            "id": 412,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport PSL",
+            "id": 413,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Premier league",
+            "id": 414,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport LaLiga",
+            "id": 415,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Variety 1",
+            "id": 416,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Variety 2",
+            "id": 417,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Variety 3",
+            "id": 418,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Variety 4",
+            "id": 419,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Action",
+            "id": 420,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Rugby",
+            "id": 421,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Golf",
+            "id": 422,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Tennis",
+            "id": 423,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport Motorsport",
+            "id": 424,
+            "isAdult": false
+        },
+        {
+            "name": "BeIN SPORTS USA",
+            "id": 425,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN 1 Bar DE",
+            "id": 426,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN 2 Bar DE",
+            "id": 427,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 3 Poland",
+            "id": 428,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 1 Serbia",
+            "id": 429,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 2 Serbia",
+            "id": 430,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 3 Serbia",
+            "id": 431,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 1 Croatia",
+            "id": 432,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 2 Croatia",
+            "id": 433,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 3 Croatia",
+            "id": 434,
+            "isAdult": false
+        },
+        {
+            "name": "Movistar Liga de Campeones",
+            "id": 435,
+            "isAdult": false
+        },
+        {
+            "name": "Movistar Deportes Spain",
+            "id": 436,
+            "isAdult": false
+        },
+        {
+            "name": "#0 Spain",
+            "id": 437,
+            "isAdult": false
+        },
+        {
+            "name": "Movistar Deportes 2 Spain",
+            "id": 438,
+            "isAdult": false
+        },
+        {
+            "name": "Orange Sport 1 Romania",
+            "id": 439,
+            "isAdult": false
+        },
+        {
+            "name": "Orange Sport 2 Romania",
+            "id": 440,
+            "isAdult": false
+        },
+        {
+            "name": "Orange Sport 3 Romania",
+            "id": 441,
+            "isAdult": false
+        },
+        {
+            "name": "Orange Sport 4 Romania",
+            "id": 442,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat News Poland",
+            "id": 443,
+            "isAdult": false
+        },
+        {
+            "name": "TVN24 Poland",
+            "id": 444,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN 1 Spain",
+            "id": 445,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN 2 Spain",
+            "id": 446,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN 3 Spain",
+            "id": 447,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN 4 Spain",
+            "id": 448,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports MIX UK",
+            "id": 449,
+            "isAdult": false
+        },
+        {
+            "name": "PTV Sports",
+            "id": 450,
+            "isAdult": false
+        },
+        {
+            "name": "Viaplay Sports 1 UK",
+            "id": 451,
+            "isAdult": false
+        },
+        {
+            "name": "TVP INFO",
+            "id": 452,
+            "isAdult": false
+        },
+        {
+            "name": "Sport Klub HD Serbia",
+            "id": 453,
+            "isAdult": false
+        },
+        {
+            "name": "Sport TV3 Portugal",
+            "id": 454,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 1 Portugal",
+            "id": 455,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 2 Portugal",
+            "id": 456,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 3 Portugal",
+            "id": 457,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 4 Portugal",
+            "id": 458,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 5 Portugal",
+            "id": 459,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Football Italy",
+            "id": 460,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport UNO Italy",
+            "id": 461,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Arena Italy",
+            "id": 462,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Foot France",
+            "id": 463,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport360",
+            "id": 464,
+            "isAdult": false
+        },
+        {
+            "name": "Diema Sport Bulgaria",
+            "id": 465,
+            "isAdult": false
+        },
+        {
+            "name": "Diema Sport 2 Bulgaria",
+            "id": 466,
+            "isAdult": false
+        },
+        {
+            "name": "Diema Sport 3 Bulgaria",
+            "id": 467,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport Bulgaria",
+            "id": 468,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 1 Bulgaria",
+            "id": 469,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 2 Bulgaria",
+            "id": 470,
+            "isAdult": false
+        },
+        {
+            "name": "Ring Bulgaria",
+            "id": 471,
+            "isAdult": false
+        },
+        {
+            "name": "Max Sport 1 Bulgaria",
+            "id": 472,
+            "isAdult": false
+        },
+        {
+            "name": "Max Sport 2 Bulgaria",
+            "id": 473,
+            "isAdult": false
+        },
+        {
+            "name": "Max Sport 3 Bulgaria",
+            "id": 474,
+            "isAdult": false
+        },
+        {
+            "name": "Max Sport 4 Bulgaria",
+            "id": 475,
+            "isAdult": false
+        },
+        {
+            "name": "BNT 1 Bulgaria",
+            "id": 476,
+            "isAdult": false
+        },
+        {
+            "name": "BNT 2 Bulgaria",
+            "id": 477,
+            "isAdult": false
+        },
+        {
+            "name": "BNT 3 Bulgaria",
+            "id": 478,
+            "isAdult": false
+        },
+        {
+            "name": "bTV Bulgaria",
+            "id": 479,
+            "isAdult": false
+        },
+        {
+            "name": "Nova TV Bulgaria",
+            "id": 480,
+            "isAdult": false
+        },
+        {
+            "name": "bTV Action Bulgaria",
+            "id": 481,
+            "isAdult": false
+        },
+        {
+            "name": "Diema Bulgaria",
+            "id": 482,
+            "isAdult": false
+        },
+        {
+            "name": "FOX HD Bulgaria",
+            "id": 483,
+            "isAdult": false
+        },
+        {
+            "name": "bTV Lady Bulgaria",
+            "id": 484,
+            "isAdult": false
+        },
+        {
+            "name": "Diema Family Bulgaria",
+            "id": 485,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 1 Afrique",
+            "id": 486,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 2 Afrique",
+            "id": 487,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 3 Afrique",
+            "id": 488,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 4 Afrique",
+            "id": 489,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 5 Afrique",
+            "id": 490,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS Australia 1",
+            "id": 491,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS Australia 2",
+            "id": 492,
+            "isAdult": false
+        },
+        {
+            "name": "beIN SPORTS Australia 3",
+            "id": 493,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MAX 4 France",
+            "id": 494,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MAX 5 France",
+            "id": 495,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MAX 6 France",
+            "id": 496,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MAX 7 France",
+            "id": 497,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MAX 8 France",
+            "id": 498,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MAX 9 France",
+            "id": 499,
+            "isAdult": false
+        },
+        {
+            "name": "beIN Sports MAX 10 France",
+            "id": 500,
+            "isAdult": false
+        },
+        {
+            "name": "18+ (Player-01)",
+            "id": 501,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-02)",
+            "id": 502,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-03)",
+            "id": 503,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-04)",
+            "id": 504,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-05)",
+            "id": 505,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-06)",
+            "id": 506,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-07)",
+            "id": 507,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-08)",
+            "id": 508,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-09)",
+            "id": 509,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-10)",
+            "id": 510,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-11)",
+            "id": 511,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-12)",
+            "id": 512,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-13)",
+            "id": 513,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-14)",
+            "id": 514,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-15)",
+            "id": 515,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-16)",
+            "id": 516,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-17)",
+            "id": 517,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-18)",
+            "id": 518,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-19)",
+            "id": 519,
+            "isAdult": true
+        },
+        {
+            "name": "18+ (Player-20)",
+            "id": 520,
+            "isAdult": true
+        },
+        {
+            "name": "#Vamos Spain",
+            "id": 521,
+            "isAdult": false
+        },
+        {
+            "name": "Barca TV Spain",
+            "id": 522,
+            "isAdult": false
+        },
+        {
+            "name": "Real Madrid TV Spain",
+            "id": 523,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 1 Spain",
+            "id": 524,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 2 Spain",
+            "id": 525,
+            "isAdult": false
+        },
+        {
+            "name": "Movistar Deportes 3 Spain",
+            "id": 526,
+            "isAdult": false
+        },
+        {
+            "name": "Movistar Deportes 4 Spain",
+            "id": 527,
+            "isAdult": false
+        },
+        {
+            "name": "Movistar Golf Spain",
+            "id": 528,
+            "isAdult": false
+        },
+        {
+            "name": "Teledeporte Spain (TDP)",
+            "id": 529,
+            "isAdult": false
+        },
+        {
+            "name": "GOL PLAY Spain",
+            "id": 530,
+            "isAdult": false
+        },
+        {
+            "name": "Antena 3 Spain",
+            "id": 531,
+            "isAdult": false
+        },
+        {
+            "name": "Telecinco Spain",
+            "id": 532,
+            "isAdult": false
+        },
+        {
+            "name": "TVE La 1 Spain",
+            "id": 533,
+            "isAdult": false
+        },
+        {
+            "name": "La Sexta Spain",
+            "id": 534,
+            "isAdult": false
+        },
+        {
+            "name": "Cuatro Spain",
+            "id": 535,
+            "isAdult": false
+        },
+        {
+            "name": "TVE La 2 Spain",
+            "id": 536,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN F1 ES",
+            "id": 537,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN LaLiga",
+            "id": 538,
+            "isAdult": false
+        },
+        {
+            "name": "LALIGA TV Hypermotion",
+            "id": 539,
+            "isAdult": false
+        },
+        {
+            "name": "Canal 11 Portugal",
+            "id": 540,
+            "isAdult": false
+        },
+        {
+            "name": "ONE 1 HD Israel",
+            "id": 541,
+            "isAdult": false
+        },
+        {
+            "name": "ONE 2 HD Israel",
+            "id": 542,
+            "isAdult": false
+        },
+        {
+            "name": "Yes Movies Action Israel",
+            "id": 543,
+            "isAdult": false
+        },
+        {
+            "name": "Yes Movies Kids Israel",
+            "id": 544,
+            "isAdult": false
+        },
+        {
+            "name": "Yes Movies Comedy Israel",
+            "id": 545,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 9 Israel",
+            "id": 546,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 10 Israe",
+            "id": 547,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 11 Israel",
+            "id": 548,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 12 Israel",
+            "id": 549,
+            "isAdult": false
+        },
+        {
+            "name": "Viaplay Sports 2 UK",
+            "id": 550,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 13 Israel",
+            "id": 551,
+            "isAdult": false
+        },
+        {
+            "name": "Channel 14 Israel",
+            "id": 552,
+            "isAdult": false
+        },
+        {
+            "name": "HOT3 Israel",
+            "id": 553,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Racing UK",
+            "id": 554,
+            "isAdult": false
+        },
+        {
+            "name": "Racing Tv UK",
+            "id": 555,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Top Event DE",
+            "id": 556,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Mix DE",
+            "id": 557,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Bundesliga 1 HD",
+            "id": 558,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Austria 1 HD",
+            "id": 559,
+            "isAdult": false
+        },
+        {
+            "name": "TVP1 Poland",
+            "id": 560,
+            "isAdult": false
+        },
+        {
+            "name": "TVP2 Poland",
+            "id": 561,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Poland",
+            "id": 562,
+            "isAdult": false
+        },
+        {
+            "name": "Motowizja Poland",
+            "id": 563,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Film Poland",
+            "id": 564,
+            "isAdult": false
+        },
+        {
+            "name": "TVN HD Poland",
+            "id": 565,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Premium Poland",
+            "id": 566,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Family Poland",
+            "id": 567,
+            "isAdult": false
+        },
+        {
+            "name": "FilmBox Premium Poland",
+            "id": 568,
+            "isAdult": false
+        },
+        {
+            "name": "HBO Poland",
+            "id": 569,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Seriale Poland",
+            "id": 570,
+            "isAdult": false
+        },
+        {
+            "name": "SportDigital Fussball",
+            "id": 571,
+            "isAdult": false
+        },
+        {
+            "name": "SuperSport MaXimo 1",
+            "id": 572,
+            "isAdult": false
+        },
+        {
+            "name": "Match Premier Russia",
+            "id": 573,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Golf Italy",
+            "id": 574,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport MotoGP Italy",
+            "id": 575,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Tennis Italy",
+            "id": 576,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport F1 Italy",
+            "id": 577,
+            "isAdult": false
+        },
+        {
+            "name": "BeIN Sports HD Qatar",
+            "id": 578,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 1 BiH",
+            "id": 579,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 4 Croatia",
+            "id": 580,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 4 Serbia",
+            "id": 581,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport Serbia",
+            "id": 582,
+            "isAdult": false
+        },
+        {
+            "name": "Prima Sport 1",
+            "id": 583,
+            "isAdult": false
+        },
+        {
+            "name": "Prima Sport 2",
+            "id": 584,
+            "isAdult": false
+        },
+        {
+            "name": "Prima Sport 3",
+            "id": 585,
+            "isAdult": false
+        },
+        {
+            "name": "Prima Sport 4",
+            "id": 586,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Select NZ",
+            "id": 587,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 1 NZ",
+            "id": 588,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 2 NZ",
+            "id": 589,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 3 NZ",
+            "id": 590,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 4 NZ",
+            "id": 591,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 5 NZ",
+            "id": 592,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 6 NZ",
+            "id": 593,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 7 NZ",
+            "id": 594,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 8 NZ",
+            "id": 595,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 9 NZ",
+            "id": 596,
+            "isAdult": false
+        },
+        {
+            "name": "Viaplay Xtra UK",
+            "id": 597,
+            "isAdult": false
+        },
+        {
+            "name": "Willow XTRA",
+            "id": 598,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports Premier League Greece",
+            "id": 599,
+            "isAdult": false
+        },
+        {
+            "name": "Abu Dhabi Sports 1 UAE",
+            "id": 600,
+            "isAdult": false
+        },
+        {
+            "name": "Abu Dhabi Sports 2 UAE",
+            "id": 601,
+            "isAdult": false
+        },
+        {
+            "name": "CTV Canada",
+            "id": 602,
+            "isAdult": false
+        },
+        {
+            "name": "Smithsonian Channel",
+            "id": 603,
+            "isAdult": false
+        },
+        {
+            "name": "Dubai Sports 1 UAE",
+            "id": 604,
+            "isAdult": false
+        },
+        {
+            "name": "Dubai Sports 2 UAE",
+            "id": 605,
+            "isAdult": false
+        },
+        {
+            "name": "Dubai Sports 3 UAE",
+            "id": 606,
+            "isAdult": false
+        },
+        {
+            "name": "Dubai Racing 1 UAE",
+            "id": 607,
+            "isAdult": false
+        },
+        {
+            "name": "Dubai Racing 2 UAE",
+            "id": 608,
+            "isAdult": false
+        },
+        {
+            "name": "Abu Dhabi Sports 1 Premium",
+            "id": 609,
+            "isAdult": false
+        },
+        {
+            "name": "Abu Dhabi Sports 2 Premium",
+            "id": 610,
+            "isAdult": false
+        },
+        {
+            "name": "OnTime Sports",
+            "id": 611,
+            "isAdult": false
+        },
+        {
+            "name": "OnTime Sports 2",
+            "id": 612,
+            "isAdult": false
+        },
+        {
+            "name": "Newsmax USA",
+            "id": 613,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport 1",
+            "id": 614,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport 2",
+            "id": 615,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport 3",
+            "id": 616,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport 4",
+            "id": 617,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport 5",
+            "id": 618,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport Extra 1",
+            "id": 619,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport Extra 2",
+            "id": 620,
+            "isAdult": false
+        },
+        {
+            "name": "SSC Sport Extra 3",
+            "id": 621,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 1 HD",
+            "id": 622,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 2 HD",
+            "id": 623,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 3 HD",
+            "id": 624,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 4 HD",
+            "id": 625,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 5 HD",
+            "id": 626,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 6 HD",
+            "id": 627,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 7 HD",
+            "id": 628,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 8 HD",
+            "id": 629,
+            "isAdult": false
+        },
+        {
+            "name": "Cosmote Sport 9 HD",
+            "id": 630,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports 1 Greece",
+            "id": 631,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports 2 Greece",
+            "id": 632,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports 3 Greece",
+            "id": 633,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports 4 Greece",
+            "id": 634,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports 5 Greece",
+            "id": 635,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports 6 Greece",
+            "id": 636,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports Start Greece",
+            "id": 637,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports Prime Greece",
+            "id": 638,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sports News Greece",
+            "id": 639,
+            "isAdult": false
+        },
+        {
+            "name": "Sport1+ Germany",
+            "id": 640,
+            "isAdult": false
+        },
+        {
+            "name": "Sport1 Germany",
+            "id": 641,
+            "isAdult": false
+        },
+        {
+            "name": "TNT Sports HD Chile",
+            "id": 642,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Deportes USA",
+            "id": 643,
+            "isAdult": false
+        },
+        {
+            "name": "TCM USA",
+            "id": 644,
+            "isAdult": false
+        },
+        {
+            "name": "L'Equipe France",
+            "id": 645,
+            "isAdult": false
+        },
+        {
+            "name": "MAVTV USA",
+            "id": 646,
+            "isAdult": false
+        },
+        {
+            "name": "CMT USA",
+            "id": 647,
+            "isAdult": false
+        },
+        {
+            "name": "Boomerang",
+            "id": 648,
+            "isAdult": false
+        },
+        {
+            "name": "Nicktoons",
+            "id": 649,
+            "isAdult": false
+        },
+        {
+            "name": "TeenNick",
+            "id": 650,
+            "isAdult": false
+        },
+        {
+            "name": "Destination America",
+            "id": 651,
+            "isAdult": false
+        },
+        {
+            "name": "Disney JR",
+            "id": 652,
+            "isAdult": false
+        },
+        {
+            "name": "POP TV USA",
+            "id": 653,
+            "isAdult": false
+        },
+        {
+            "name": "MY9TV USA",
+            "id": 654,
+            "isAdult": false
+        },
+        {
+            "name": "WETV USA",
+            "id": 655,
+            "isAdult": false
+        },
+        {
+            "name": "IFC TV USA",
+            "id": 656,
+            "isAdult": false
+        },
+        {
+            "name": "Discovery Family",
+            "id": 657,
+            "isAdult": false
+        },
+        {
+            "name": "Sundance TV",
+            "id": 658,
+            "isAdult": false
+        },
+        {
+            "name": "VICE TV",
+            "id": 659,
+            "isAdult": false
+        },
+        {
+            "name": "TV ONE USA",
+            "id": 660,
+            "isAdult": false
+        },
+        {
+            "name": "Motor Trend",
+            "id": 661,
+            "isAdult": false
+        },
+        {
+            "name": "METV USA",
+            "id": 662,
+            "isAdult": false
+        },
+        {
+            "name": "NHL Network USA",
+            "id": 663,
+            "isAdult": false
+        },
+        {
+            "name": "ACC Network USA",
+            "id": 664,
+            "isAdult": false
+        },
+        {
+            "name": "FYI",
+            "id": 665,
+            "isAdult": false
+        },
+        {
+            "name": "ACC Network USA",
+            "id": 666,
+            "isAdult": false
+        },
+        {
+            "name": "Longhorn Network USA",
+            "id": 667,
+            "isAdult": false
+        },
+        {
+            "name": "Universal Kids USA",
+            "id": 668,
+            "isAdult": false
+        },
+        {
+            "name": "Crime+ Investigation USA",
+            "id": 669,
+            "isAdult": false
+        },
+        {
+            "name": "S4C UK",
+            "id": 670,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Premiere UK",
+            "id": 671,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Select UK",
+            "id": 672,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Hits UK",
+            "id": 673,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Greats UK",
+            "id": 674,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Animation UK",
+            "id": 675,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Family UK",
+            "id": 676,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Action UK",
+            "id": 677,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Comedy UK",
+            "id": 678,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Thriller UK",
+            "id": 679,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Drama UK",
+            "id": 680,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Sci-Fi Horror UK",
+            "id": 681,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Showcase UK",
+            "id": 682,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Arts UK",
+            "id": 683,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Comedy UK",
+            "id": 684,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime SHOxBET USA",
+            "id": 685,
+            "isAdult": false
+        },
+        {
+            "name": "Sky History",
+            "id": 686,
+            "isAdult": false
+        },
+        {
+            "name": "Gold UK",
+            "id": 687,
+            "isAdult": false
+        },
+        {
+            "name": "Film4 UK",
+            "id": 688,
+            "isAdult": false
+        },
+        {
+            "name": "HBO2 USA",
+            "id": 689,
+            "isAdult": false
+        },
+        {
+            "name": "HBO Comedy USA",
+            "id": 690,
+            "isAdult": false
+        },
+        {
+            "name": "HBO Family USA",
+            "id": 691,
+            "isAdult": false
+        },
+        {
+            "name": "HBO Latino USA",
+            "id": 692,
+            "isAdult": false
+        },
+        {
+            "name": "HBO Signature USA",
+            "id": 693,
+            "isAdult": false
+        },
+        {
+            "name": "HBO Zone USA",
+            "id": 694,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime SHOxBET USA",
+            "id": 695,
+            "isAdult": false
+        },
+        {
+            "name": "Comet USA",
+            "id": 696,
+            "isAdult": false
+        },
+        {
+            "name": "Cooking Channel USA",
+            "id": 697,
+            "isAdult": false
+        },
+        {
+            "name": "TMC Channel USA",
+            "id": 698,
+            "isAdult": false
+        },
+        {
+            "name": "CBC CA",
+            "id": 699,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 1",
+            "id": 700,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 2",
+            "id": 701,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 3",
+            "id": 702,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 4",
+            "id": 703,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 5",
+            "id": 704,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 6",
+            "id": 705,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 7",
+            "id": 706,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 8",
+            "id": 707,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 9",
+            "id": 708,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 10",
+            "id": 709,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 11",
+            "id": 710,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 12",
+            "id": 711,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 13",
+            "id": 712,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 14",
+            "id": 713,
+            "isAdult": false
+        },
+        {
+            "name": "Tennis+ 15",
+            "id": 714,
+            "isAdult": false
+        },
+        {
+            "name": "Cleo TV",
+            "id": 715,
+            "isAdult": false
+        },
+        {
+            "name": "Sporting TV Portugal",
+            "id": 716,
+            "isAdult": false
+        },
+        {
+            "name": "AXN Movies Portugal",
+            "id": 717,
+            "isAdult": false
+        },
+        {
+            "name": "Porto Canal Portugal",
+            "id": 718,
+            "isAdult": false
+        },
+        {
+            "name": "RTP 1 Portugal",
+            "id": 719,
+            "isAdult": false
+        },
+        {
+            "name": "RTP 2 Portugal",
+            "id": 720,
+            "isAdult": false
+        },
+        {
+            "name": "RTP 3 Portugal",
+            "id": 721,
+            "isAdult": false
+        },
+        {
+            "name": "SIC Portugal",
+            "id": 722,
+            "isAdult": false
+        },
+        {
+            "name": "TVI Portugal",
+            "id": 723,
+            "isAdult": false
+        },
+        {
+            "name": "TVI Reality Portugal",
+            "id": 724,
+            "isAdult": false
+        },
+        {
+            "name": "Arte DE",
+            "id": 725,
+            "isAdult": false
+        },
+        {
+            "name": "3sat DE",
+            "id": 726,
+            "isAdult": false
+        },
+        {
+            "name": "BBC 1 DE",
+            "id": 727,
+            "isAdult": false
+        },
+        {
+            "name": "ZDF Info DE",
+            "id": 728,
+            "isAdult": false
+        },
+        {
+            "name": "SAT.1 DE",
+            "id": 729,
+            "isAdult": false
+        },
+        {
+            "name": "ProSieben (PRO7) DE",
+            "id": 730,
+            "isAdult": false
+        },
+        {
+            "name": "Kabel Eins (Kabel 1) DE",
+            "id": 731,
+            "isAdult": false
+        },
+        {
+            "name": "Sixx DE",
+            "id": 732,
+            "isAdult": false
+        },
+        {
+            "name": "MDR DE",
+            "id": 733,
+            "isAdult": false
+        },
+        {
+            "name": "WDR DE",
+            "id": 734,
+            "isAdult": false
+        },
+        {
+            "name": "SWR DE",
+            "id": 735,
+            "isAdult": false
+        },
+        {
+            "name": "NDR DE",
+            "id": 736,
+            "isAdult": false
+        },
+        {
+            "name": "BR Fernsehen DE",
+            "id": 737,
+            "isAdult": false
+        },
+        {
+            "name": "SUPER RTL DE",
+            "id": 738,
+            "isAdult": false
+        },
+        {
+            "name": "SR Fernsehen DE",
+            "id": 739,
+            "isAdult": false
+        },
+        {
+            "name": "HR Fernsehen DE",
+            "id": 740,
+            "isAdult": false
+        },
+        {
+            "name": "Ten Sports PK",
+            "id": 741,
+            "isAdult": false
+        },
+        {
+            "name": "AXS TV USA",
+            "id": 742,
+            "isAdult": false
+        },
+        {
+            "name": "Galavisi\u8d38n USA",
+            "id": 743,
+            "isAdult": false
+        },
+        {
+            "name": "Fashion TV",
+            "id": 744,
+            "isAdult": false
+        },
+        {
+            "name": "Nat Geo Wild USA",
+            "id": 745,
+            "isAdult": false
+        },
+        {
+            "name": "TYC Sports Argentina",
+            "id": 746,
+            "isAdult": false
+        },
+        {
+            "name": "C More Football Sweden",
+            "id": 747,
+            "isAdult": false
+        },
+        {
+            "name": "COZI TV USA",
+            "id": 748,
+            "isAdult": false
+        },
+        {
+            "name": "Mundotoro TV Spain",
+            "id": 749,
+            "isAdult": false
+        },
+        {
+            "name": "C SPAN 1",
+            "id": 750,
+            "isAdult": false
+        },
+        {
+            "name": "FETV - Family Entertainment Television",
+            "id": 751,
+            "isAdult": false
+        },
+        {
+            "name": "Grit Channel",
+            "id": 752,
+            "isAdult": false
+        },
+        {
+            "name": "NBC Sports Bay Area",
+            "id": 753,
+            "isAdult": false
+        },
+        {
+            "name": "NBC Sports Boston",
+            "id": 754,
+            "isAdult": false
+        },
+        {
+            "name": "NBC Sports California",
+            "id": 755,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Soccer Plus",
+            "id": 756,
+            "isAdult": false
+        },
+        {
+            "name": "Fight Network",
+            "id": 757,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports 2 USA",
+            "id": 758,
+            "isAdult": false
+        },
+        {
+            "name": "SportsNet New York (SNY)",
+            "id": 759,
+            "isAdult": false
+        },
+        {
+            "name": "Globo SP",
+            "id": 760,
+            "isAdult": false
+        },
+        {
+            "name": "Globo RIO",
+            "id": 761,
+            "isAdult": false
+        },
+        {
+            "name": "NESN USA",
+            "id": 762,
+            "isAdult": false
+        },
+        {
+            "name": "YES Network USA",
+            "id": 763,
+            "isAdult": false
+        },
+        {
+            "name": "Spectrum Sportsnet LA",
+            "id": 764,
+            "isAdult": false
+        },
+        {
+            "name": "MSG USA",
+            "id": 765,
+            "isAdult": false
+        },
+        {
+            "name": "ABCNY USA",
+            "id": 766,
+            "isAdult": false
+        },
+        {
+            "name": "CBSNY USA",
+            "id": 767,
+            "isAdult": false
+        },
+        {
+            "name": "FOXNY USA",
+            "id": 768,
+            "isAdult": false
+        },
+        {
+            "name": "NBCNY USA",
+            "id": 769,
+            "isAdult": false
+        },
+        {
+            "name": "Marquee Sports Network",
+            "id": 770,
+            "isAdult": false
+        },
+        {
+            "name": "Premier Sports Ireland 1",
+            "id": 771,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 1 France",
+            "id": 772,
+            "isAdult": false
+        },
+        {
+            "name": "Eurosport 2 France",
+            "id": 773,
+            "isAdult": false
+        },
+        {
+            "name": "ERT 1 Greece",
+            "id": 774,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Weather Channel",
+            "id": 775,
+            "isAdult": false
+        },
+        {
+            "name": "NBC Sports Chicago",
+            "id": 776,
+            "isAdult": false
+        },
+        {
+            "name": "NBC Sports Philadelphia",
+            "id": 777,
+            "isAdult": false
+        },
+        {
+            "name": "NBC Sports Washington",
+            "id": 778,
+            "isAdult": false
+        },
+        {
+            "name": "Max Sport 1 Croatia",
+            "id": 779,
+            "isAdult": false
+        },
+        {
+            "name": "Max Sport 2 Croatia",
+            "id": 780,
+            "isAdult": false
+        },
+        {
+            "name": "Alkass One",
+            "id": 781,
+            "isAdult": false
+        },
+        {
+            "name": "Alkass Two",
+            "id": 782,
+            "isAdult": false
+        },
+        {
+            "name": "Alkass Three",
+            "id": 783,
+            "isAdult": false
+        },
+        {
+            "name": "Alkass Four",
+            "id": 784,
+            "isAdult": false
+        },
+        {
+            "name": "ABS-CBN",
+            "id": 785,
+            "isAdult": false
+        },
+        {
+            "name": "DSTV Mzansi Magic",
+            "id": 786,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports Argentina",
+            "id": 787,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports 2 Argentina",
+            "id": 788,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports 3 Argentina",
+            "id": 789,
+            "isAdult": false
+        },
+        {
+            "name": "CMTV Portugal",
+            "id": 790,
+            "isAdult": false
+        },
+        {
+            "name": "MGM+ USA / Epix",
+            "id": 791,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime 2 USA (SHO2) USA",
+            "id": 792,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime Showcase USA",
+            "id": 793,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime Extreme USA",
+            "id": 794,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime Family Zone (SHO Family Zone) USA",
+            "id": 795,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime Next (SHO Next) USA",
+            "id": 796,
+            "isAdult": false
+        },
+        {
+            "name": "Showtime Women USA",
+            "id": 797,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN Extra Argentina",
+            "id": 798,
+            "isAdult": false
+        },
+        {
+            "name": "Premier Sports Ireland 2",
+            "id": 799,
+            "isAdult": false
+        },
+        {
+            "name": "6'eren Denmark",
+            "id": 800,
+            "isAdult": false
+        },
+        {
+            "name": "DR1 Denmark",
+            "id": 801,
+            "isAdult": false
+        },
+        {
+            "name": "DR2 Denmark",
+            "id": 802,
+            "isAdult": false
+        },
+        {
+            "name": "Kanal 4 Denmark",
+            "id": 803,
+            "isAdult": false
+        },
+        {
+            "name": "Kanal 5 Denmark",
+            "id": 804,
+            "isAdult": false
+        },
+        {
+            "name": "CANAL9 Denmark",
+            "id": 805,
+            "isAdult": false
+        },
+        {
+            "name": "MTV Denmark",
+            "id": 806,
+            "isAdult": false
+        },
+        {
+            "name": "TV2 Bornholm Denmark",
+            "id": 807,
+            "isAdult": false
+        },
+        {
+            "name": "TV2 Sport X Denmark",
+            "id": 808,
+            "isAdult": false
+        },
+        {
+            "name": "TV3 Sport Denmark",
+            "id": 809,
+            "isAdult": false
+        },
+        {
+            "name": "TV2 Sport Denmark",
+            "id": 810,
+            "isAdult": false
+        },
+        {
+            "name": "SEE Denmark",
+            "id": 811,
+            "isAdult": false
+        },
+        {
+            "name": "C More First Sweden",
+            "id": 812,
+            "isAdult": false
+        },
+        {
+            "name": "C More Hits Sweden",
+            "id": 813,
+            "isAdult": false
+        },
+        {
+            "name": "C More Series Sweden",
+            "id": 814,
+            "isAdult": false
+        },
+        {
+            "name": "V Film Premiere",
+            "id": 815,
+            "isAdult": false
+        },
+        {
+            "name": "V Film Family",
+            "id": 816,
+            "isAdult": false
+        },
+        {
+            "name": "TV2 Denmark",
+            "id": 817,
+            "isAdult": false
+        },
+        {
+            "name": "TV2 Zulu",
+            "id": 818,
+            "isAdult": false
+        },
+        {
+            "name": "TV3+ Denmark",
+            "id": 819,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Sports 502 AU",
+            "id": 820,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Sports 503 AU",
+            "id": 821,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Sports 504 AU",
+            "id": 822,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Sports 505 AU",
+            "id": 823,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Sports 506 AU",
+            "id": 824,
+            "isAdult": false
+        },
+        {
+            "name": "FOX Sports 507 AU",
+            "id": 825,
+            "isAdult": false
+        },
+        {
+            "name": "Liverpool TV (LFC TV)",
+            "id": 826,
+            "isAdult": false
+        },
+        {
+            "name": "DSTV M-Net",
+            "id": 827,
+            "isAdult": false
+        },
+        {
+            "name": "DSTV kykNET & kie",
+            "id": 828,
+            "isAdult": false
+        },
+        {
+            "name": "MASN USA",
+            "id": 829,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports Premium MX",
+            "id": 830,
+            "isAdult": false
+        },
+        {
+            "name": "Citytv",
+            "id": 831,
+            "isAdult": false
+        },
+        {
+            "name": "CBC CA",
+            "id": 832,
+            "isAdult": false
+        },
+        {
+            "name": "TVA Sports",
+            "id": 833,
+            "isAdult": false
+        },
+        {
+            "name": "TVA Sports 2",
+            "id": 834,
+            "isAdult": false
+        },
+        {
+            "name": "Noovo CA",
+            "id": 835,
+            "isAdult": false
+        },
+        {
+            "name": "Global CA",
+            "id": 836,
+            "isAdult": false
+        },
+        {
+            "name": "Yes TV CA",
+            "id": 837,
+            "isAdult": false
+        },
+        {
+            "name": "CTV 2 Canada",
+            "id": 838,
+            "isAdult": false
+        },
+        {
+            "name": "RDS CA",
+            "id": 839,
+            "isAdult": false
+        },
+        {
+            "name": "RDS 2 CA",
+            "id": 840,
+            "isAdult": false
+        },
+        {
+            "name": "RDS Info CA",
+            "id": 841,
+            "isAdult": false
+        },
+        {
+            "name": "TVO CA",
+            "id": 842,
+            "isAdult": false
+        },
+        {
+            "name": "Prima TV RO",
+            "id": 843,
+            "isAdult": false
+        },
+        {
+            "name": "Azteca 7 MX",
+            "id": 844,
+            "isAdult": false
+        },
+        {
+            "name": "NBC Universo",
+            "id": 845,
+            "isAdult": false
+        },
+        {
+            "name": "Happy TV Serbia",
+            "id": 846,
+            "isAdult": false
+        },
+        {
+            "name": "Nova S Serbia",
+            "id": 847,
+            "isAdult": false
+        },
+        {
+            "name": "Outdoor Channel USA",
+            "id": 848,
+            "isAdult": false
+        },
+        {
+            "name": "Logo TV USA",
+            "id": 849,
+            "isAdult": false
+        },
+        {
+            "name": "Rai 1 Italy",
+            "id": 850,
+            "isAdult": false
+        },
+        {
+            "name": "Rai 2 Italy",
+            "id": 851,
+            "isAdult": false
+        },
+        {
+            "name": "Rai 3 Italy",
+            "id": 852,
+            "isAdult": false
+        },
+        {
+            "name": "Rai 3 Italy",
+            "id": 853,
+            "isAdult": false
+        },
+        {
+            "name": "Italia 1 Italy",
+            "id": 854,
+            "isAdult": false
+        },
+        {
+            "name": "La7 Italy",
+            "id": 855,
+            "isAdult": false
+        },
+        {
+            "name": "LA7d HD+ Italy",
+            "id": 856,
+            "isAdult": false
+        },
+        {
+            "name": "20 Mediaset Italy",
+            "id": 857,
+            "isAdult": false
+        },
+        {
+            "name": "Rai Premium Italy",
+            "id": 858,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Collection Italy",
+            "id": 859,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Uno Italy",
+            "id": 860,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Action Italy",
+            "id": 861,
+            "isAdult": false
+        },
+        {
+            "name": "8Sky Cinema Comedy Italy",
+            "id": 862,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Uno +24 Italy",
+            "id": 863,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Romance Italy",
+            "id": 864,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Family Italy",
+            "id": 865,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Due +24 Italy",
+            "id": 866,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Cinema Drama Italy",
+            "id": 867,
+            "isAdult": false
+        },
+        {
+            "name": "8Sky Cinema Suspense Italy",
+            "id": 868,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport 24 Italy",
+            "id": 869,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Calcio Italy",
+            "id": 870,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Calcio 1 (251) Italy",
+            "id": 871,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Calcio 2 (252) Italy",
+            "id": 872,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Calcio 3 (253) Italy",
+            "id": 873,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Calcio 4 (254) Italy",
+            "id": 874,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Calcio 5 (255) Italy",
+            "id": 875,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Calcio 6 (256) Italy",
+            "id": 876,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Calcio 7 (257) Italy",
+            "id": 877,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 1 Italy",
+            "id": 878,
+            "isAdult": false
+        },
+        {
+            "name": "EuroSport 2 Italy",
+            "id": 879,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Serie Italy",
+            "id": 880,
+            "isAdult": false
+        },
+        {
+            "name": "Sky UNO Italy",
+            "id": 881,
+            "isAdult": false
+        },
+        {
+            "name": "Rai Sport Italy",
+            "id": 882,
+            "isAdult": false
+        },
+        {
+            "name": "SBS6 NL",
+            "id": 883,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sports Tennis DE",
+            "id": 884,
+            "isAdult": false
+        },
+        {
+            "name": "SONY TEN 1",
+            "id": 885,
+            "isAdult": false
+        },
+        {
+            "name": "SONY TEN 2",
+            "id": 886,
+            "isAdult": false
+        },
+        {
+            "name": "SONY TEN 3",
+            "id": 887,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN 3 NL",
+            "id": 888,
+            "isAdult": false
+        },
+        {
+            "name": "TRT Spor TR",
+            "id": 889,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Arizona",
+            "id": 890,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Detroit",
+            "id": 891,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Florida",
+            "id": 892,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Great Lakes",
+            "id": 893,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Indiana",
+            "id": 894,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Kansas City",
+            "id": 895,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Midwest",
+            "id": 896,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports New Orleans",
+            "id": 897,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports North",
+            "id": 898,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Ohio",
+            "id": 899,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Oklahoma",
+            "id": 900,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports San Diego",
+            "id": 901,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports SoCal",
+            "id": 902,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports South",
+            "id": 903,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Southeast",
+            "id": 904,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Sun",
+            "id": 905,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports West",
+            "id": 906,
+            "isAdult": false
+        },
+        {
+            "name": "Bally Sports Wisconsin",
+            "id": 907,
+            "isAdult": false
+        },
+        {
+            "name": "CBS Sports Golazo",
+            "id": 910,
+            "isAdult": false
+        },
+        {
+            "name": "Cytavision Sports 1 Cyprus",
+            "id": 911,
+            "isAdult": false
+        },
+        {
+            "name": "Cytavision Sports 2 Cyprus",
+            "id": 912,
+            "isAdult": false
+        },
+        {
+            "name": "Cytavision Sports 3 Cyprus",
+            "id": 913,
+            "isAdult": false
+        },
+        {
+            "name": "Cytavision Sports 4 Cyprus",
+            "id": 914,
+            "isAdult": false
+        },
+        {
+            "name": "Cytavision Sports 5 Cyprus",
+            "id": 915,
+            "isAdult": false
+        },
+        {
+            "name": "Cytavision Sports 6 Cyprus",
+            "id": 916,
+            "isAdult": false
+        },
+        {
+            "name": "Cytavision Sports 7 Cyprus",
+            "id": 917,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN Portugal FIFA Mundial de Clubes",
+            "id": 918,
+            "isAdult": false
+        },
+        {
+            "name": "Ziggo Sport 3 NL",
+            "id": 919,
+            "isAdult": false
+        },
+        {
+            "name": "Root Sports Northwest",
+            "id": 920,
+            "isAdult": false
+        },
+        {
+            "name": "Space City Home Network",
+            "id": 921,
+            "isAdult": false
+        },
+        {
+            "name": "SportsNet Pittsburgh",
+            "id": 922,
+            "isAdult": false
+        },
+        {
+            "name": "Altitude Sports",
+            "id": 923,
+            "isAdult": false
+        },
+        {
+            "name": "Monumental Sports Network",
+            "id": 924,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN 1 MX",
+            "id": 925,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN 2 MX",
+            "id": 926,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN 3 MX",
+            "id": 927,
+            "isAdult": false
+        },
+        {
+            "name": "ESPN 4 MX",
+            "id": 928,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports 1 MX",
+            "id": 929,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports 2 MX",
+            "id": 930,
+            "isAdult": false
+        },
+        {
+            "name": "Fox Sports 3 MX",
+            "id": 931,
+            "isAdult": false
+        },
+        {
+            "name": "TVC Deportes MX",
+            "id": 932,
+            "isAdult": false
+        },
+        {
+            "name": "Claro Sports MX",
+            "id": 933,
+            "isAdult": false
+        },
+        {
+            "name": "Azteca Uno MX",
+            "id": 934,
+            "isAdult": false
+        },
+        {
+            "name": "TUDN MX",
+            "id": 935,
+            "isAdult": false
+        },
+        {
+            "name": "Canal5 MX",
+            "id": 936,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 5 Serbia",
+            "id": 940,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 6 Serbia",
+            "id": 941,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 7 Serbia",
+            "id": 942,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 8 Serbia",
+            "id": 943,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 9 Serbia",
+            "id": 944,
+            "isAdult": false
+        },
+        {
+            "name": "Arena Sport 10 Serbia",
+            "id": 945,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Bundesliga 2",
+            "id": 946,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Bundesliga 3",
+            "id": 947,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Bundesliga 4",
+            "id": 948,
+            "isAdult": false
+        },
+        {
+            "name": "Sky Sport Bundesliga 5",
+            "id": 949,
+            "isAdult": false
+        },
+        {
+            "name": "France 2",
+            "id": 950,
+            "isAdult": false
+        },
+        {
+            "name": "France 3",
+            "id": 951,
+            "isAdult": false
+        },
+        {
+            "name": "France 4",
+            "id": 952,
+            "isAdult": false
+        },
+        {
+            "name": "France 5",
+            "id": 953,
+            "isAdult": false
+        },
+        {
+            "name": "RMC Story France",
+            "id": 954,
+            "isAdult": false
+        },
+        {
+            "name": "TMC France",
+            "id": 955,
+            "isAdult": false
+        },
+        {
+            "name": "C8 France",
+            "id": 956,
+            "isAdult": false
+        },
+        {
+            "name": "BFM TV France",
+            "id": 957,
+            "isAdult": false
+        },
+        {
+            "name": "Arte France",
+            "id": 958,
+            "isAdult": false
+        },
+        {
+            "name": "W9 France",
+            "id": 959,
+            "isAdult": false
+        },
+        {
+            "name": "DAZN Ligue 1 France",
+            "id": 960,
+            "isAdult": false
+        },
+        {
+            "name": "Automoto La cha\u00eene",
+            "id": 961,
+            "isAdult": false
+        },
+        {
+            "name": "LCI France",
+            "id": 962,
+            "isAdult": false
+        },
+        {
+            "name": "6ter France",
+            "id": 963,
+            "isAdult": false
+        },
+        {
+            "name": "CNews France",
+            "id": 964,
+            "isAdult": false
+        },
+        {
+            "name": "Sport en France",
+            "id": 965,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Cinema",
+            "id": 970,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Comedy",
+            "id": 971,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Edge",
+            "id": 972,
+            "isAdult": false
+        },
+        {
+            "name": "Starz In Black",
+            "id": 973,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Kids & Family",
+            "id": 974,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Encore",
+            "id": 975,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Encore Action",
+            "id": 976,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Encore Black",
+            "id": 977,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Encore Classic",
+            "id": 978,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Encore Family",
+            "id": 979,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Encore Suspense",
+            "id": 980,
+            "isAdult": false
+        },
+        {
+            "name": "Starz Encore Westerns",
+            "id": 981,
+            "isAdult": false
+        },
+        {
+            "name": "Spectrum SportsNet USA",
+            "id": 982,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Extra 1 Poland",
+            "id": 983,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Extra 2 Poland",
+            "id": 984,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Extra 3 Poland",
+            "id": 985,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Extra 4 Poland",
+            "id": 986,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Extra 5 Poland",
+            "id": 987,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Extra 6 Poland",
+            "id": 988,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Extra 7 Poland",
+            "id": 989,
+            "isAdult": false
+        },
+        {
+            "name": "MTV Poland",
+            "id": 990,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Premium 1 Super HD PL",
+            "id": 991,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Premium 2 Super HD PL",
+            "id": 992,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Extra 1 HD Poland",
+            "id": 993,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Extra 2 HD Poland",
+            "id": 994,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Extra 3 HD Poland",
+            "id": 995,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Extra 4 HD Poland",
+            "id": 996,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport Fight HD Poland",
+            "id": 997,
+            "isAdult": false
+        },
+        {
+            "name": "Polsat Sport NEWS HD Poland",
+            "id": 998,
+            "isAdult": false
+        },
+        {
+            "name": "Eleven Sports 4 Poland",
+            "id": 999,
+            "isAdult": false
+        },
+        {
+            "name": "ATV Turkey",
+            "id": 1000,
+            "isAdult": false
+        },
+        {
+            "name": "Kanal D Turkey",
+            "id": 1001,
+            "isAdult": false
+        },
+        {
+            "name": "Show TV Turkey",
+            "id": 1002,
+            "isAdult": false
+        },
+        {
+            "name": "NOW TV Turkey",
+            "id": 1003,
+            "isAdult": false
+        },
+        {
+            "name": "Star TV Turkey",
+            "id": 1004,
+            "isAdult": false
+        },
+        {
+            "name": "TV8 Turkey",
+            "id": 1005,
+            "isAdult": false
+        },
+        {
+            "name": "bein Sports 5 Turkey",
+            "id": 1010,
+            "isAdult": false
+        },
+        {
+            "name": "A Spor Turkey",
+            "id": 1011,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport CZ",
+            "id": 1020,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 1 CZ",
+            "id": 1021,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 2 CZ",
+            "id": 1022,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 3 CZ",
+            "id": 1023,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 4 CZ",
+            "id": 1024,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 5 CZ",
+            "id": 1025,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 6 CZ",
+            "id": 1026,
+            "isAdult": false
+        },
+        {
+            "name": "Oneplay Sport 1 CZ",
+            "id": 1027,
+            "isAdult": false
+        },
+        {
+            "name": "Oneplay Sport 2 CZ",
+            "id": 1028,
+            "isAdult": false
+        },
+        {
+            "name": "Oneplay Sport 3 CZ",
+            "id": 1029,
+            "isAdult": false
+        },
+        {
+            "name": "Premier Sport 1 CZ",
+            "id": 1030,
+            "isAdult": false
+        },
+        {
+            "name": "Premier Sport 2 CZ",
+            "id": 1031,
+            "isAdult": false
+        },
+        {
+            "name": "Premier Sport 3 CZ",
+            "id": 1032,
+            "isAdult": false
+        },
+        {
+            "name": "CT Sport CZ",
+            "id": 1033,
+            "isAdult": false
+        },
+        {
+            "name": "Nova HD CZ",
+            "id": 1034,
+            "isAdult": false
+        },
+        {
+            "name": "CT1 HD CZ",
+            "id": 1035,
+            "isAdult": false
+        },
+        {
+            "name": "CT2 HD CZ",
+            "id": 1036,
+            "isAdult": false
+        },
+        {
+            "name": "TN Live CZ",
+            "id": 1037,
+            "isAdult": false
+        },
+        {
+            "name": "OnePlay Sport 4 CZ",
+            "id": 1038,
+            "isAdult": false
+        },
+        {
+            "name": "OnePlay MD2 CZ",
+            "id": 1039,
+            "isAdult": false
+        },
+        {
+            "name": "OnePlay MD3 CZ",
+            "id": 1040,
+            "isAdult": false
+        },
+        {
+            "name": "OnePlay MD4 CZ",
+            "id": 1041,
+            "isAdult": false
+        },
+        {
+            "name": "Sport 1 CZ",
+            "id": 1042,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 2 CZ",
+            "id": 1043,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 3 CZ",
+            "id": 1044,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 4 CZ",
+            "id": 1045,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 5 CZ",
+            "id": 1046,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 6 CZ",
+            "id": 1047,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 7 CZ",
+            "id": 1048,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 8 CZ",
+            "id": 1049,
+            "isAdult": false
+        },
+        {
+            "name": "JOJ SK",
+            "id": 1050,
+            "isAdult": false
+        },
+        {
+            "name": "Dajto SK",
+            "id": 1051,
+            "isAdult": false
+        },
+        {
+            "name": "JOJ \u0160port SK",
+            "id": 1052,
+            "isAdult": false
+        },
+        {
+            "name": "Voyo Special 1 SK",
+            "id": 1053,
+            "isAdult": false
+        },
+        {
+            "name": "Voyo Special 2 SK",
+            "id": 1054,
+            "isAdult": false
+        },
+        {
+            "name": "Voyo Special 3 SK",
+            "id": 1055,
+            "isAdult": false
+        },
+        {
+            "name": "Voyo Special 4 SK",
+            "id": 1056,
+            "isAdult": false
+        },
+        {
+            "name": "Voyo Special 7 SK",
+            "id": 1057,
+            "isAdult": false
+        },
+        {
+            "name": "Voyo Special 8 SK",
+            "id": 1058,
+            "isAdult": false
+        },
+        {
+            "name": "Voyo Special 9 SK",
+            "id": 1059,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 3 SK",
+            "id": 1060,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 4 SK",
+            "id": 1061,
+            "isAdult": false
+        },
+        {
+            "name": "Nova Sport 5 SK",
+            "id": 1062,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport SK",
+            "id": 1063,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 2 SK",
+            "id": 1064,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 3 SK",
+            "id": 1065,
+            "isAdult": false
+        },
+        {
+            "name": "Canal+ Sport 4 SK",
+            "id": 1066,
+            "isAdult": false
+        },
+        {
+            "name": "C More Stars Sweden",
+            "id": 8111,
+            "isAdult": false
+        }
+    ]
+}
