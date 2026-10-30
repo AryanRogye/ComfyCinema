@@ -60,7 +60,7 @@ struct IFrameLogsView: View {
                 }
             }
         }
-        .navigationTitle("Logs")
+        .navigationTitle("Playback Logs")
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button {
@@ -73,6 +73,13 @@ struct IFrameLogsView: View {
             #if os(macOS)
                 ToolbarSpacer(.flexible)
             #endif
+
+            ToolbarItem(placement: .primaryAction) {
+                ShareLink(item: (["IFrame Logs"] + logs + ["Video and JavaScript Logs"] + videoLogs + ["Navigation Logs"] + navigationLogs).joined(separator: "\n\n")) {
+                    Label("Export logs", systemImage: "square.and.arrow.up")
+                }
+                .disabled(logs.isEmpty && videoLogs.isEmpty && navigationLogs.isEmpty)
+            }
 
             ToolbarItem(placement: .primaryAction) {
                 Button(role: .destructive) {

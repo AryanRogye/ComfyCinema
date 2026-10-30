@@ -339,6 +339,9 @@ struct WebView: Representable {
 
         let url: URL
         private var videoFrame: WKFrameInfo?
+        // Aggregate limit across every iframe, independent of provider-side throttling.
+        private var diagnosticWindowStart = ProcessInfo.processInfo.systemUptime
+        private var diagnosticCount = 0
         private var vm: EmbeddedMovieViewModel
         let onTimeInfo: (TimeInfo) -> Void
         let iFrameLogs: (String) -> Void
@@ -481,15 +484,25 @@ extension WebView.Coordinator {
 
     /// Errors
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        navigationLogs("[\(Date().ISO8601Format())] Navigation failed: \(error as NSError)")
         Task { @MainActor in
             vm.handleLoadFailure(error)
         }
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        navigationLogs("[\(Date().ISO8601Format())] Navigation failed: \(error as NSError)")
         Task { @MainActor in
             vm.handleLoadFailure(error)
         }
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        navigationLogs("[\(Date().ISO8601Format())] Web content process terminated")
+    }
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        navigationLogs("[\(Date().ISO8601Format())] Navigation started: \(webView.url?.absoluteString ?? "unknown")")
     }
 
     /// Navigation Did Finish
@@ -759,7 +772,8 @@ extension WebView.Coordinator: WKScriptMessageHandler {
         let videoLoggerScript = WKUserScript(
             source: videoLoggerText,
             injectionTime: .atDocumentStart,
-            forMainFrameOnly: false
+            forMainFrameOnly: false,
+            in: .page
         )
 
         addUserScriptIfNeeded(videoLoggerScript, to: webView.configuration.userContentController)
@@ -773,20 +787,21 @@ extension WebView.Coordinator: WKScriptMessageHandler {
     ) {
         switch message.name {
         case "videoLogger":
-//            guard let dictionary = message.body as? [String: Any] else {
-//                print("Couldnt convert message body into dictionary")
-//                return
-//            }
-//            guard let jsonData = try? JSONSerialization.data(withJSONObject: dictionary) else {
-//                print("Coudlnt convert dictionary into json data")
-//                return
-//            }
-//
-//            if let string = prettyPrintJSON(jsonData) {
-//                videoFrameLogs(string)
-//            }
+            let now = ProcessInfo.processInfo.systemUptime
+            if now - diagnosticWindowStart >= 10 {
+                diagnosticWindowStart = now
+                diagnosticCount = 0
+            }
+            guard diagnosticCount < 20 else { return }
+            diagnosticCount += 1
+            guard let dictionary = message.body as? [String: Any],
+                  let data = try? JSONSerialization.data(withJSONObject: dictionary),
+                  let string = prettyPrintJSON(data) else { return }
+            // TVDetailView retains at most 200 entries: at most ~1.6 MB of UTF-8
+            // payload, plus String/collection overhead. Truncation may cut JSON.
+            let capped = String(decoding: string.utf8.prefix(8_000), as: UTF8.self)
+            videoFrameLogs(capped + (string.utf8.count > 8_000 ? "\n[truncated]" : ""))
 
-            break
         case "iframeLog":
             guard let dictionary = message.body as? [String: Any] else {
                 print("Couldnt convert message body into dictionary")
