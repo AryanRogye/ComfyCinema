@@ -20,6 +20,8 @@ public final class BlockingService {
     public var hasAttemptedNetworkFiltering = false
     public var networkFilterError: String? = nil
     private var networkFilterTask: Task<Void, Never>?
+    private let filteredControllers = NSHashTable<WKUserContentController>.weakObjects()
+    private let pendingControllers = NSHashTable<WKUserContentController>.weakObjects()
 
     public var appliedPopupBlocking = false
     public var popupBlockingError: String? = nil
@@ -87,13 +89,15 @@ public final class BlockingService {
     }
 
     public func attachNetworkFilters(to webView: WKWebView) {
-        if appliedNetworkFiltering || hasAttemptedNetworkFiltering {
+        let controller = webView.configuration.userContentController
+        if filteredControllers.contains(controller) || pendingControllers.contains(controller) {
             return
         }
 
         /// Check Cache first
         if let cachedRuleList = networkFilteringService.ruleList {
-            webView.configuration.userContentController.add(cachedRuleList)
+            controller.add(cachedRuleList)
+            filteredControllers.add(controller)
             appliedNetworkFiltering = true
             hasAttemptedNetworkFiltering = true
             isNetworkFilteringReady = true
@@ -104,17 +108,20 @@ public final class BlockingService {
         isCompilingNetworkFiltering = true
         networkFilterError = nil
 
-        /// Cancel an older attachment attempt before starting a new one.
-        networkFilterTask?.cancel()
-        networkFilterTask = Task {
+        // Multiple grid players may attach concurrently; compiling is already
+        // coalesced by NetworkFilteringService. Never cancel another tile.
+        pendingControllers.add(controller)
+        Task { [weak controller] in
             defer {
-                self.isCompilingNetworkFiltering = false
-                self.networkFilterTask = nil
+                if let controller { self.pendingControllers.remove(controller) }
+                self.isCompilingNetworkFiltering = self.pendingControllers.count > 0
             }
             do {
                 let ruleList = try await networkFilteringService.compileNetworkRules()
                 try Task.checkCancellation()
-                webView.configuration.userContentController.add(ruleList)
+                guard let controller else { return }
+                controller.add(ruleList)
+                self.filteredControllers.add(controller)
                 appliedNetworkFiltering = true
                 hasAttemptedNetworkFiltering = true
                 isNetworkFilteringReady = true

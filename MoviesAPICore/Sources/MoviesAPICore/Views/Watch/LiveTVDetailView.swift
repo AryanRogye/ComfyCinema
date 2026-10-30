@@ -13,13 +13,10 @@ struct LiveTVDetailView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(PlaybackSession.self) var playbackSession
     let channel: LiveTVChannel
+    @Binding var displayServer: KTLiveDisplayServer
+    let onClose: () -> Void
 
-    @AppStorage("LiveDisplayServer") private var liveDisplayServerRawValue = KTLiveDisplayServer.dliveStream.rawValue
-
-    private var displayServer: KTLiveDisplayServer {
-        KTLiveDisplayServer.entries.first { $0.rawValue == liveDisplayServerRawValue } ?? .dliveStream
-    }
-
+    @State private var livePlaybackSession = PlaybackSession()
     @State private var liveUrl: URL?
     @State private var hasLoadedLiveUrl: Bool = false
     @State private var reloadID = UUID()
@@ -33,6 +30,7 @@ struct LiveTVDetailView: View {
 #if os(iOS)
                 GeometryReader { proxy in
                     EmbeddedMovieView(url: liveUrl, vm: webviewModel, allowsInlinePlayback: true)
+                        .environment(livePlaybackSession)
                         .id(reloadID)
                         .frame(maxWidth: .infinity)
                         .frame(height: 200)
@@ -41,6 +39,7 @@ struct LiveTVDetailView: View {
                 .frame(height: 200)
 #elseif os(macOS)
                 EmbeddedMovieView(url: liveUrl, vm: webviewModel, allowsInlinePlayback: true)
+                    .environment(livePlaybackSession)
                     .id(reloadID)
                     .frame(
                         maxWidth: .infinity,
@@ -55,13 +54,17 @@ struct LiveTVDetailView: View {
         .frame(maxWidth: .infinity)
         .onChange(of: displayServer) {
             if hasLoadedLiveUrl {
-                playbackSession.stop()
                 reloadLiveTV()
             }
         }
         .onAppear {
             playbackSession.stop()
             loadLiveTV()
+        }
+        .onDisappear {
+            // Dismantling owns media shutdown. Release the stored view without
+            // clearing its delegates before that cleanup can run.
+            livePlaybackSession.webView = nil
         }
         .toolbar {
             ToolbarItem(placement: .navigation) {
@@ -70,7 +73,7 @@ struct LiveTVDetailView: View {
                     webviewModel.stopPlayback()
 #endif
                     self.liveUrl = nil
-                    dismiss()
+                    onClose()
                 } label: {
                     Image(systemName: "chevron.backward")
                 }
@@ -100,7 +103,7 @@ struct LiveTVDetailView: View {
                 Menu {
                     ForEach(KTLiveDisplayServer.entries, id: \.self) { server in
                         Button {
-                            liveDisplayServerRawValue = server.rawValue
+                            displayServer = server
                         } label: {
                             if displayServer == server {
                                 Label(server.rawValue, systemImage: "checkmark")
@@ -135,6 +138,8 @@ struct LiveTVDetailView: View {
     }
 
     private func reloadLiveTV() {
+        // A new SwiftUI identity must also get a fresh WKWebView on iOS.
+        livePlaybackSession.webView = nil
         loadLiveTV()
         reloadID = UUID()
     }

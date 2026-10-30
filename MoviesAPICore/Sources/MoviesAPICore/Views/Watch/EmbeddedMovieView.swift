@@ -230,7 +230,8 @@ struct WebView: Representable {
 #elseif os(macOS)
         vm.webView = wv
 #endif
-        wv.load(url)
+        let playbackURL = allowsInlinePlayback ? LiveTVPlaybackURL.resolve(url) : url
+        wv.load(playbackURL)
 
         SettingLogs.shared.add("WebView: \(url.absoluteString)")
         return wv
@@ -432,17 +433,39 @@ extension WebView.Coordinator {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
+        guard let url = navigationAction.request.url,
+              let scheme = url.scheme?.lowercased(),
+              ["http", "https", "about", "blob", "data"].contains(scheme) else {
+            // Provider ads can try to navigate child frames to app-store or
+            // custom URL schemes. Cancel before WebKit raises unsupported URL.
+            decisionHandler(.cancel)
+            return
+        }
+
+        let liveHosts: Set<String> = ["dlive.sx", "thedaddy.pk", "dembed.st"]
+        if let originalHost = self.url.host?.lowercased(), liveHosts.contains(originalHost),
+           let targetHost = navigationAction.targetFrame?.request.url?.host?.lowercased(),
+           liveHosts.contains(targetHost),
+           ["http", "https"].contains(scheme),
+           !liveHosts.contains(url.host?.lowercased() ?? "") {
+            // Keep the published host/player frames from being replaced by ad
+            // destinations. New child frames and media subresources are separate.
+            decisionHandler(.cancel)
+            return
+        }
+
         guard navigationAction.targetFrame?.isMainFrame == true else {
             decisionHandler(.allow)
             return
         }
 
-        guard let url = navigationAction.request.url else {
-            decisionHandler(.cancel)
+        SettingLogs.shared.add("➡️ NAVIGATION: \(url.absoluteString)")
+
+        // Teardown documents navigate through about:blank.
+        if url.absoluteString == "about:blank" {
+            decisionHandler(.allow)
             return
         }
-
-        SettingLogs.shared.add("➡️ NAVIGATION: \(url.absoluteString)")
 
         if let allowedHost = url.host() {
             if url.host?.lowercased() == allowedHost {
@@ -451,6 +474,8 @@ extension WebView.Coordinator {
                 print("🚫 BLOCKED REDIRECT:", url.absoluteString)
                 decisionHandler(.cancel)
             }
+        } else {
+            decisionHandler(.cancel)
         }
     }
 
