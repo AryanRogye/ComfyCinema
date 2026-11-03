@@ -46,11 +46,13 @@ public struct SettingsView: View {
                 Label("Network", systemImage: "network")
             }
 
+#if os(iOS)
             NavigationLink {
                 StorageView()
             } label: {
                 Label("Storage", systemImage: "internaldrive")
             }
+#endif
 
             Section {
                 Link(destination: URL(string: "https://www.themoviedb.org")!) {
