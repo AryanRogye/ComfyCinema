@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import AppIntents
 import SwiftData
 
 public class AppDelegate: NSObject, NSApplicationDelegate {
@@ -42,6 +43,7 @@ final class WindowCoordinatorContainer {
 class AppCoordinator {
 
     let windowContainer = WindowCoordinatorContainer()
+    private let appRouter = AppRouter()
 
 
     private let modelContainer: ModelContainer = {
@@ -56,6 +58,8 @@ class AppCoordinator {
     }()
 
     init() {
+        AppDependencyManager.shared.add(dependency: self.appRouter)
+        AppDependencyManager.shared.add(dependency: self.modelContainer)
         openApp()
     }
 
@@ -75,7 +79,7 @@ class AppCoordinator {
         let window = windowContainer.windowCoordinator.showWindow(
             id: appID,
             title: "ComfyCinema",
-            content: MacOSRoot(windowContainer: windowContainer)
+            content: MacOSRoot(windowContainer: windowContainer, appRouter: appRouter)
                 .modelContainer(modelContainer)
                 .preferredColorScheme(.dark),
             size: size,

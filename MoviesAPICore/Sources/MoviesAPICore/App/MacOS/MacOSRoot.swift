@@ -11,6 +11,7 @@ import SwiftUI
 struct MacOSRoot: View {
 
     @Bindable var windowContainer: WindowCoordinatorContainer
+    @Bindable var appRouter: AppRouter
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
     @State private var defaultManager = DefaultManager()
@@ -24,6 +25,7 @@ struct MacOSRoot: View {
 
     @State private var path = NavigationPath()
     @State private var navigationID = UUID()
+    @State private var intentTriggeredResult: KTSearchResult?
 
     var body: some View {
         ZStack {
@@ -86,6 +88,19 @@ struct MacOSRoot: View {
                     .environment(blockingService)
                     .environment(playbackSession)
                     .environment(defaultManager)
+                    .environment(appRouter)
+                    .sheet(item: $intentTriggeredResult) { result in
+                        NavigationStack {
+                            WatchDetailView(result: result)
+                        }
+                        .environment(windowContainer)
+                        .environment(tmdbManager)
+                        .environment(liveTVManager)
+                        .environment(blockingService)
+                        .environment(playbackSession)
+                        .environment(defaultManager)
+                        .environment(appRouter)
+                    }
                 }
             } else {
                 ProgressView()
@@ -111,6 +126,19 @@ struct MacOSRoot: View {
         .background(.clear)
         .ignoresSafeArea(edges: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onChange(of: appRouter.searchTriggered, initial: true) { _, result in
+            if let result {
+                intentTriggeredResult = result
+                appRouter.searchTriggered = nil
+            }
+        }
+        .onChange(of: appRouter.selectedHistory, initial: true) { _, history in
+            if history != nil {
+                selectedTab = .history
+                path = NavigationPath()
+                navigationID = UUID()
+            }
+        }
     }
 }
 

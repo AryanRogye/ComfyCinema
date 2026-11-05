@@ -19,9 +19,8 @@ struct ComfyCinemaIntentsPackage: AppIntentsPackage {
 @main
 struct MoviesAPIClientApp: App {
 
-    @State private var appRouter: AppRouter
-
 #if os(iOS)
+    @State private var appRouter: AppRouter
     private let modelContainer: ModelContainer
 #endif
 
@@ -30,6 +29,7 @@ struct MoviesAPIClientApp: App {
 #endif
 
     init() {
+#if os(iOS)
         do {
             let schema = Schema(versionedSchema: MoviesSchemaV2.self)
             let container = try ModelContainer(for: schema)
@@ -41,6 +41,7 @@ struct MoviesAPIClientApp: App {
         let appRouter = AppRouter()
         AppDependencyManager.shared.add(dependency: appRouter)
         _appRouter = State(initialValue: appRouter)
+#endif
     }
 
     var body: some Scene {
