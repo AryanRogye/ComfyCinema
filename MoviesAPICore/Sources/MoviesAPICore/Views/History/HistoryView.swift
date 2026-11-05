@@ -10,6 +10,7 @@ import SwiftData
 
 public struct HistoryView: View {
 
+    @Environment(AppRouter.self) var appRouter
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(BlockingService.self) var blockingService
     @Environment(PlaybackSession.self) var playbackSession
@@ -129,10 +130,20 @@ public struct HistoryView: View {
                     self.searchResult = nil
                     self.goToDetail = false
                     self.resolvingHistory = nil
+                    if let h = appRouter.selectedHistory, !isResolving {
+                        resolve(h)
+                        appRouter.selectedHistory = nil
+                    }
                 }
                 .onDisappear {
                     resolveTask?.cancel()
                     resolveTask = nil
+                }
+                .onChange(of: appRouter.selectedHistory) {
+                    if let h = appRouter.selectedHistory, !isResolving {
+                        resolve(h)
+                        appRouter.selectedHistory = nil
+                    }
                 }
             }
         }

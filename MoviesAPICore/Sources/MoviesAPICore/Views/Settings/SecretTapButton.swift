@@ -117,7 +117,7 @@ struct SettingLogsView: View {
                         }
 
                         Button(role: .destructive) {
-                            logs.logs.removeAll()
+                            logs.clear()
                         } label: {
                             Label("Clear Logs", systemImage: "trash")
                         }

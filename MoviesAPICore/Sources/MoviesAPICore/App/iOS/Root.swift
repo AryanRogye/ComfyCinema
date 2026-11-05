@@ -8,11 +8,15 @@
 import SwiftUI
 import WebKit
 
+extension KTSearchResult: @retroactive Identifiable {}
+
 public struct Root: View {
 
     private enum PlaybackRoute: Hashable {
         case player(UUID)
     }
+
+    @Bindable var appRouter: AppRouter
 
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
@@ -20,7 +24,6 @@ public struct Root: View {
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
 
-    @State private var selectedTab: TabID = .home
     @State private var homePath: [PlaybackRoute] = []
     @State private var libraryPath: [PlaybackRoute] = []
     @State private var historyPath: [PlaybackRoute] = []
@@ -30,13 +33,16 @@ public struct Root: View {
     @State private var isSearching = false
     @State private var error: String?
     @State private var showError: Bool = false
+    @State private var intentTriggeredResult: KTSearchResult?
 
-    public init() {}
+    public init(appRouter: AppRouter) {
+        self.appRouter = appRouter
+    }
 
     public var body: some View {
-        VStack {
+        ZStack {
             if let tmdbManager, let liveTVManager {
-                TabView(selection: $selectedTab) {
+                TabView(selection: $appRouter.selectedTab) {
 
                     Tab("Home", systemImage: "house", value: .home) {
                         NavigationStack(path: $homePath) {
@@ -85,7 +91,7 @@ public struct Root: View {
                 }
                 .tint(.yellow)
                 .onChange(of: playbackSession.activationID) {
-                    playbackSession.sourceTab = selectedTab
+                    playbackSession.sourceTab = appRouter.selectedTab
                 }
 #if os(iOS)
                 .tabViewBottomAccessory(isEnabled: playbackSession.isActive) {
@@ -98,14 +104,38 @@ public struct Root: View {
                 .environment(blockingService)
                 .environment(playbackSession)
                 .environment(defaultManager)
+                .environment(appRouter)
                 .modifier(
                     SearchTabModifier(
-                        isSearchTabSelected: selectedTab == .search,
+                        isSearchTabSelected: appRouter.selectedTab == .search,
                         searchText: $searchText
                     ) {
                         search(using: tmdbManager)
                     }
                 )
+                .sheet(item: $intentTriggeredResult) { search in
+                    NavigationStack {
+                        WatchDetailView(result: search)
+                            .environment(tmdbManager)
+                            .environment(liveTVManager)
+                            .environment(blockingService)
+                            .environment(playbackSession)
+                            .environment(defaultManager)
+                            .environment(appRouter)
+                    }
+                }
+            }
+        }
+        .onAppear {
+            if let searchTriggered = appRouter.searchTriggered {
+                intentTriggeredResult = searchTriggered
+                SettingLogs.shared.add("Using SearchTriggered From Intent To Open: \(searchTriggered)")
+            }
+        }
+        .onChange(of: appRouter.searchTriggered) { _, newValue in
+            if let newValue {
+                intentTriggeredResult = newValue
+                SettingLogs.shared.add("Using SearchTriggered From Intent To Open: \(newValue)")
             }
         }
         .alert(isPresented: $showError) {
@@ -130,7 +160,7 @@ public struct Root: View {
     private func returnToPlayback() {
         guard let sourceTab = playbackSession.sourceTab else { return }
 
-        selectedTab = sourceTab
+        appRouter.selectedTab = sourceTab
         let route = PlaybackRoute.player(playbackSession.activationID)
 
         func append(_ route: PlaybackRoute, to path: inout [PlaybackRoute]) {
@@ -195,5 +225,5 @@ private struct SearchTabModifier: ViewModifier {
 }
 
 #Preview {
-    Root()
+    Root(appRouter: AppRouter())
 }
