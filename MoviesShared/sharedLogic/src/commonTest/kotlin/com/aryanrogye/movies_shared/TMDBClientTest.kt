@@ -39,6 +39,7 @@ class TMDBClientTest {
         assertTrue(result.totalPages > 0)
         assertTrue(result.totalResults > 0)
         assertTrue(result.results.isNotEmpty())
+        assertTrue(result.results.any { it.genres.isNotEmpty() })
         assertTrue(result.results.all { it.id > 0 && it.name.isNotBlank() })
     }
 
@@ -50,6 +51,7 @@ class TMDBClientTest {
         assertTrue(result.totalPages > 0)
         assertTrue(result.totalResults > 0)
         assertTrue(result.results.isNotEmpty())
+        assertTrue(result.results.any { it.genres.isNotEmpty() })
         assertTrue(result.results.all { it.id > 0 && it.title.isNotBlank() })
     }
 
@@ -97,6 +99,8 @@ class TMDBClientTest {
 
         assertTrue(result.page > 0)
         assertTrue(result.results.isNotEmpty())
+        assertTrue(result.results.any { it.genreType.isNotEmpty() })
+        assertTrue(result.results.all { it.genreType.all(String::isNotBlank) })
         assertTrue(result.results.all { item ->
             item.id > 0 && (item.title?.isNotBlank() == true || item.name?.isNotBlank() == true)
         })

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MoviesAndTVShowsView: View {
 
@@ -15,25 +16,6 @@ struct MoviesAndTVShowsView: View {
 
     @AppStorage("home.selectedFilter")
     private var selectedFilter: LibraryFilter = .all
-
-    @AppStorage("home.trendingExpanded")
-    private var trendingExpanded = true
-
-    @AppStorage("home.nowPlayingMoviesExpanded")
-    private var nowPlayingMoviesExpanded = true
-
-    @AppStorage("home.popularTVExpanded")
-    private var popularTVExpanded = true
-
-    @AppStorage("home.popularMoviesExpanded")
-    private var popularMoviesExpanded = true
-
-    @AppStorage("home.topRatedTVExpanded")
-    private var topRatedTVExpanded = true
-
-    @AppStorage("home.topRatedMoviesExpanded")
-    private var topRatedMoviesExpanded = true
-
 
     var filteredResults: [KTTrendingResult] {
         switch selectedFilter {
@@ -53,92 +35,57 @@ struct MoviesAndTVShowsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                DisclosureGroup(isExpanded: $trendingExpanded) {
-                    MoviesAndTVShowListView(
-                        contents: filteredResults,
+
+                MoviesAndTVShowHeroView(contents: filteredResults)
+
+                if selectedFilter == .movies || selectedFilter == .all {
+                    MoviesAndTVShowLabelView(
+                        label: "Now Playing Movies",
+                        contents: tmdbManager.nowPlayingMovies,
+                        showMediaType: false,
                         error: $error,
                         showError: $showError
                     )
-                } label: {
-                    Text("Trending Today")
-                        .font(.title2.bold())
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                }
-
-                if selectedFilter == .movies || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $nowPlayingMoviesExpanded) {
-                        MoviesAndTVShowListView(
-                            contents: tmdbManager.nowPlayingMovies,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Now Playing Movies")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
                 }
 
                 if selectedFilter == .tv || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $popularTVExpanded) {
-                        MoviesAndTVShowListView(
-                            contents: tmdbManager.popularTV,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Popular TV Shows")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
+                    MoviesAndTVShowLabelView(
+                        label: "Popular TV Shows",
+                        contents: tmdbManager.popularTV,
+                        showMediaType: false,
+                        error: $error,
+                        showError: $showError
+                    )
                 }
 
                 if selectedFilter == .movies || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $popularMoviesExpanded) {
-                        MoviesAndTVShowListView(
-                            contents: tmdbManager.popularMovies,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Popular Movies")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
+                    MoviesAndTVShowLabelView(
+                        label: "Popular Movies",
+                        contents: tmdbManager.popularMovies,
+                        showMediaType: false,
+                        error: $error,
+                        showError: $showError
+                    )
                 }
 
                 if selectedFilter == .tv || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $topRatedTVExpanded) {
-                        MoviesAndTVShowListView(
-                            contents: tmdbManager.topRatedTV,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Top Rated TV Shows")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
+                    MoviesAndTVShowLabelView(
+                        label: "Top Rated TV Shows",
+                        contents: tmdbManager.topRatedTV,
+                        showMediaType: false,
+                        error: $error,
+                        showError: $showError
+                    )
                 }
 
                 if selectedFilter == .movies || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $topRatedMoviesExpanded) {
-                        MoviesAndTVShowListView(
-                            contents: tmdbManager.topRatedMovies,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Top Rated Movies")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
+                    MoviesAndTVShowLabelView(
+                        label: "Top Rated Movies",
+                        contents: tmdbManager.topRatedMovies,
+                        showMediaType: false,
+                        error: $error,
+                        showError: $showError
+                    )
                 }
             }
             .padding(.bottom)
@@ -159,6 +106,45 @@ struct MoviesAndTVShowsView: View {
                     Image(systemName: "line.horizontal.3.decrease")
                 }
             }
+        }
+    }
+}
+
+private struct MoviesAndTVShowLabelView<Media: MediaListItem>: View {
+
+    let label: String
+    let contents: [Media]
+    let showMediaType: Bool
+    @Binding var error: String?
+    @Binding var showError: Bool
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack(alignment: .center) {
+                Text(label)
+                    .font(.title2.bold())
+                    .padding(.horizontal)
+                    .foregroundStyle(.yellow)
+
+                NavigationLink {
+                    MoviesAndTVShowDetailListView(
+                        contents: contents,
+                        error: $error,
+                        showError: $showError
+                    )
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.yellow.opacity(0.7))
+                }
+                .buttonStyle(.plain)
+            }
+
+            MoviesAndTVShowListView(
+                contents: contents,
+                showMediaType: showMediaType,
+                error: $error,
+                showError: $showError
+            )
         }
     }
 }

@@ -15,6 +15,17 @@ TMDB_API_READ_ACCESS_TOKEN=your_token
 
 Gradle user properties and the `TMDB_API_READ_ACCESS_TOKEN` environment variable are also supported.
 
+## Genre names
+
+`TMDBClient` populates `genres` with English genre names on trending, movie lists, and TV lists (including recommendations), exported to Swift as `[String]`. Trending also retains `genreType` as an alias. No additional resolver call is needed:
+
+```swift
+let response = try await TMDBClient().trending(token: token)
+let names = response.results.first?.genres ?? []
+```
+
+The network layer's `TMDBGenreResolver` singleton caches movie and TV genres separately for the app's lifetime, including across different `TMDBClient` instances. Concurrent lookups share the cache. Failed loads can be retried by calling `trending` again; a genre request failure makes the trending call fail. Unknown IDs are skipped, and person results have no genres. `genreIds` remains available on each result.
+
 ## Build and install
 
 ```shell

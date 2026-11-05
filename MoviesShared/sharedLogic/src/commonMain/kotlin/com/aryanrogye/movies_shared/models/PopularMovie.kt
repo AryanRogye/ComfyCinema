@@ -1,12 +1,15 @@
 package com.aryanrogye.movies_shared.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class KTMovieListResult(
     val adult: Boolean = false,
     val backdropPath: String? = null,
     val genreIds: List<Int> = emptyList(),
+    @Transient
+    val genres: List<String> = emptyList(),
     val id: Int,
     val originalLanguage: String,
     val originalTitle: String,

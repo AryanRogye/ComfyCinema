@@ -118,6 +118,7 @@ public final class TMDBClientPreview: TMDBClientProviding {
             posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
             mediaType: .tv,
             genreIds: [],
+            genreType: [],
             popularity: 100,
             voteAverage: 8.0,
             voteCount: 500
@@ -148,7 +149,7 @@ public final class TMDBClientPreview: TMDBClientProviding {
     @MainActor
     private static let movies = [
         KTMovieListResult(
-            adult: false, backdropPath: nil, genreIds: [], id: 969681,
+            adult: false, backdropPath: nil, genreIds: [], genres: [], id: 969681,
             originalLanguage: "en", originalTitle: "Preview Movie",
             overview: "A mock movie used by SwiftUI previews.", popularity: 100,
             posterPath: nil, releaseDate: "2026-07-31", title: "Preview Movie",
@@ -160,7 +161,7 @@ public final class TMDBClientPreview: TMDBClientProviding {
     private static let tvShows = [
         KTTVListResult(
             backdropPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg", firstAirDate: "2012-02-27",
-            genreIds: [], id: 38867, name: "Lab Rats", originCountry: ["US"],
+            genreIds: [], genres: [], id: 38867, name: "Lab Rats", originCountry: ["US"],
             originalLanguage: "en", originalName: "Lab Rats",
             overview: "A mock TV result used by SwiftUI previews.", popularity: 100,
             posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg", voteAverage: 8.0, voteCount: 500

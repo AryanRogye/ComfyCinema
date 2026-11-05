@@ -13,10 +13,9 @@ struct MoviesAndTVShowListView<Media: MediaListItem>: View {
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(PlaybackSession.self) var playbackSession
     @Environment(\.modelContext) var modelContext
-    @Query var favorites: [Favorite]
-    @Query var collections: [Collection]
 
     let contents: [Media]
+    let showMediaType: Bool
     @Binding var error: String?
     @Binding var showError: Bool
 
@@ -26,10 +25,26 @@ struct MoviesAndTVShowListView<Media: MediaListItem>: View {
     @State private var searchResult: KTSearchResult?
     @State private var goToDetail: Bool = false
 
-    let popularTVRows: [GridItem] = [
-        GridItem(.fixed(180), spacing: 12),
-        GridItem(.fixed(180), spacing: 12),
-    ]
+    var imageHeight: CGFloat {
+        165
+    }
+    var textHeight: CGFloat {
+        0
+    }
+    var spacing: CGFloat {
+        6
+    }
+
+    var totalHeight: CGFloat {
+        imageHeight + textHeight + spacing
+    }
+
+    var popularTVRows: [GridItem] {
+        [
+            GridItem(.fixed(totalHeight), spacing: 12),
+            GridItem(.fixed(totalHeight), spacing: 12),
+        ]
+    }
 
     @State private var showCreateCollection: Bool = false
     @State private var collectionName: String = ""
@@ -44,12 +59,22 @@ struct MoviesAndTVShowListView<Media: MediaListItem>: View {
                 } else {
                     ForEach(contents, id: \.mediaListItemID) { content in
                         MoviesAndTVShowRow(
-                            imagePath: content.backdropPath,
+                            imagePath: content.posterPath ?? content.backdropPath,
                             name: content.displayName,
-                            mediaType: content.mediaType
+                            mediaType: content.mediaType,
+                            showMediaType: showMediaType,
+                            imageHeight: imageHeight,
+                            textHeight: textHeight,
+                            spacing: spacing,
+                            totalHeight: totalHeight
                         )
                         .contextMenu {
-                            contextMenu(result: content)
+                            MediaContextMenu(
+                                result: content,
+                                showCreateCollection: $showCreateCollection,
+                                collectionName: $collectionName,
+                                collectionResultToAdd: $collectionResultToAdd
+                            )
                         }
                         .onTapGesture {
                             playbackSession.stop()
@@ -74,122 +99,11 @@ struct MoviesAndTVShowListView<Media: MediaListItem>: View {
                 WatchDetailView(result: searchResult)
             }
         }
-        .alert("Create Collection", isPresented: $showCreateCollection) {
-            TextField("Collection Name", text: $collectionName)
-
-            Button("Cancel", role: .cancel) {
-                collectionName = ""
-                collectionResultToAdd = nil
-            }
-
-            Button("Create") {
-                guard
-                    !collectionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                    let result = collectionResultToAdd
-                        else { return }
-
-                let item = CollectionItem(
-                    resultId: Int(result.id),
-                    name: result.displayName,
-                    mediaType: result.mediaType.rawValue,
-                    posterPath: result.posterPath
-                )
-
-                let collection = Collection(
-                    name: collectionName.trimmingCharacters(in: .whitespacesAndNewlines),
-                    results: [item]
-                )
-
-                modelContext.insert(collection)
-
-                collectionName = ""
-                collectionResultToAdd = nil
-            }
-        } message: {
-            Text("Enter a name for your new collection.")
-        }
-
-    }
-
-    @ViewBuilder
-    private func contextMenu(result: Media) -> some View {
-        let isFavorite = isFavorite(result)
-        Button {
-            if isFavorite {
-                if let favorite = favorites.first(where: { $0.id == result.id }) {
-                    modelContext.delete(favorite)
-                }
-            } else {
-                let favorite = Favorite(
-                    id: Int(result.id),
-                    name: result.displayName,
-                    mediaType: result.mediaType.rawValue,
-                    posterPath: result.posterPath
-                )
-                modelContext.insert(favorite)
-            }
-        } label: {
-            Label(
-                isFavorite ? "Unfavorite" : "Favorite",
-                systemImage: isFavorite ? "star.slash.fill" : "star.fill"
-            )
-        }
-
-        Menu {
-            ForEach(collections) { collection in
-                let inCollection = isInCollection(result, collection: collection)
-                Button {
-                    if inCollection {
-                        collection.results.removeAll(where: {
-                            $0.resultId == result.id && $0.mediaType == result.mediaType.rawValue
-                        })
-                    } else {
-                        collection.results.append(CollectionItem(
-                            resultId: Int(result.id),
-                            name: result.displayName,
-                            mediaType: result.mediaType.rawValue,
-                            posterPath: result.posterPath
-                        ))
-                    }
-                } label: {
-                    Label(
-                        collection.name,
-                        systemImage: inCollection ? "checkmark" : "rectangle.stack"
-                    )
-                }
-            }
-            Button {
-                showCreateCollection = true
-                collectionName = ""
-                collectionResultToAdd = result
-            } label: {
-                Label(
-                    "New Collection",
-                    systemImage: "plus"
-                )
-            }
-        } label: {
-            Label("Add To Collection", systemImage: "rectangle.stack.badge.plus")
-        }
-    }
-
-    func isInCollection(
-        _ result: Media,
-        collection: Collection
-    ) -> Bool {
-        collection.results.contains {
-            $0.resultId == result.id &&
-            $0.mediaType == result.mediaType.rawValue
-        }
-    }
-
-    func isFavorite(_ result: Media) -> Bool {
-        for favorite in favorites {
-            if result.id == favorite.id && favorite.mediaType == result.mediaType.rawValue {
-                return true
-            }
-        }
-        return false
+        .modifier(CreateCollectionModifier(
+            showCreateCollection: $showCreateCollection,
+            collectionName: $collectionName,
+            collectionResultToAdd: $collectionResultToAdd
+        ))
     }
 
     private func resolve(_ result: Media) {
@@ -219,5 +133,4 @@ struct MoviesAndTVShowListView<Media: MediaListItem>: View {
             }
         }
     }
-
 }

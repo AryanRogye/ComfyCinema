@@ -7,6 +7,9 @@ import com.aryanrogye.movies_shared.models.KTNowPlayingMovieResponse
 import com.aryanrogye.movies_shared.models.KTTVListResponse
 import com.aryanrogye.movies_shared.models.KTTVShow
 import com.aryanrogye.movies_shared.models.KTTrendingResponse
+import com.aryanrogye.movies_shared.models.KTGenre
+import com.aryanrogye.movies_shared.models.KTGenreResponse
+import com.aryanrogye.movies_shared.models.KTMediaType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -19,20 +22,41 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
 
 interface TMDBClientProviding {
+    @Throws(Exception::class)
     suspend fun popularTV(token: String, page: Int): KTTVListResponse
+    @Throws(Exception::class)
     suspend fun popularMovies(token: String, page: Int): KTMovieListResponse
+    @Throws(Exception::class)
     suspend fun topRatedMovies(token: String, page: Int): KTMovieListResponse
+    @Throws(Exception::class)
     suspend fun topRatedTV(token: String, page: Int): KTTVListResponse
+    @Throws(Exception::class)
     suspend fun nowPlayingMovies(token: String, page: Int): KTNowPlayingMovieResponse
+    @Throws(Exception::class)
     suspend fun trending(token: String): KTTrendingResponse
     suspend fun search(query: String, token: String, includeAdult: Boolean): KTSearchResponse
     suspend fun infoOnTV(id: Int, token: String): KTTVShow
     suspend fun seasonInfo(id: Int, seasonNumber: Int, token: String): KTSeasonInfo
+    @Throws(Exception::class)
     suspend fun recommendationsForMovie(id: Int, token: String, page: Int): KTMovieListResponse
+    @Throws(Exception::class)
     suspend fun recommendationsForTV(id: Int, token: String, page: Int): KTTVListResponse
 }
 
 class TMDBClient: TMDBClientProviding {
+
+    internal suspend fun genres(mediaType: KTMediaType, token: String): List<KTGenre> {
+        require(mediaType != KTMediaType.PERSON) { "People do not have genres." }
+        val response = client.get("https://api.themoviedb.org/3/genre/${mediaType.rawValue}/list") {
+            parameter("language", "en-US")
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+        check(response.status.value in 200..299) {
+            "TMDB genre request failed with HTTP ${response.status.value}"
+        }
+        return response.body<KTGenreResponse>().genres
+    }
 
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient {
@@ -46,58 +70,82 @@ class TMDBClient: TMDBClientProviding {
         }
     }
 
+    @Throws(Exception::class)
     override suspend fun popularTV(token: String, page: Int): KTTVListResponse {
         val response = client.get("https://api.themoviedb.org/3/tv/popular?language=en-US&page=$page") {
             header("accept", "application/json")
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTTVListResponse>()
+        return result.copy(results = result.results.map { item ->
+            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.TV, item.genreIds, token))
+        })
     }
 
+    @Throws(Exception::class)
     override suspend fun popularMovies(token: String, page: Int): KTMovieListResponse {
         val response = client.get("https://api.themoviedb.org/3/movie/popular?language=en-US&page=$page") {
             header("accept", "application/json")
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTMovieListResponse>()
+        return result.copy(results = result.results.map { item ->
+            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
+        })
     }
 
+    @Throws(Exception::class)
     override suspend fun topRatedMovies(token: String, page: Int): KTMovieListResponse {
         val response = client.get("https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=$page") {
             header("accept", "application/json")
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTMovieListResponse>()
+        return result.copy(results = result.results.map { item ->
+            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
+        })
     }
 
+    @Throws(Exception::class)
     override suspend fun topRatedTV(token: String, page: Int): KTTVListResponse {
         val response = client.get("https://api.themoviedb.org/3/tv/top_rated?language=en-US&page=$page") {
             header("accept", "application/json")
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTTVListResponse>()
+        return result.copy(results = result.results.map { item ->
+            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.TV, item.genreIds, token))
+        })
     }
 
+    @Throws(Exception::class)
     override suspend fun nowPlayingMovies(token: String, page: Int): KTNowPlayingMovieResponse {
         val response = client.get("https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=$page") {
             header("accept", "application/json")
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTNowPlayingMovieResponse>()
+        return result.copy(results = result.results.map { item ->
+            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
+        })
     }
 
+    @Throws(Exception::class)
     override suspend fun trending(token: String): KTTrendingResponse {
         val response = client.get("https://api.themoviedb.org/3/trending/all/day?language=en-US") {
             header("accept", "application/json")
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val trending = response.body<KTTrendingResponse>()
+        return trending.copy(results = trending.results.map { item ->
+            item.copy(genreType = TMDBGenreResolver.genreNames(item.mediaType, item.genreIds, token))
+        })
     }
 
     override suspend fun search(query: String, token: String, includeAdult: Boolean): KTSearchResponse {
@@ -125,6 +173,7 @@ class TMDBClient: TMDBClientProviding {
         return response.body()
     }
 
+    @Throws(Exception::class)
     override suspend fun recommendationsForMovie(id: Int, token: String, page: Int): KTMovieListResponse {
         val response = client.get("https://api.themoviedb.org/3/movie/$id/recommendations") {
             parameter("language", "en-US")
@@ -134,9 +183,13 @@ class TMDBClient: TMDBClientProviding {
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTMovieListResponse>()
+        return result.copy(results = result.results.map { item ->
+            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
+        })
     }
 
+    @Throws(Exception::class)
     override suspend fun recommendationsForTV(id: Int, token: String, page: Int): KTTVListResponse {
         val response = client.get("https://api.themoviedb.org/3/tv/$id/recommendations") {
             parameter("language", "en-US")
@@ -146,7 +199,10 @@ class TMDBClient: TMDBClientProviding {
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTTVListResponse>()
+        return result.copy(results = result.results.map { item ->
+            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.TV, item.genreIds, token))
+        })
     }
 
     override suspend fun seasonInfo(id: Int, seasonNumber: Int, token: String): KTSeasonInfo {

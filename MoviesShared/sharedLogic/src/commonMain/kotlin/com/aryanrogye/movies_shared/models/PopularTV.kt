@@ -1,12 +1,15 @@
 package com.aryanrogye.movies_shared.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class KTTVListResult(
     val backdropPath: String? = null,
     val firstAirDate: String? = null,
     val genreIds: List<Int> = emptyList(),
+    @Transient
+    val genres: List<String> = emptyList(),
     val id: Int,
     val name: String,
     val originCountry: List<String> = emptyList(),

@@ -35,6 +35,7 @@ struct LiveTVView: View {
             }
 #endif
         }
+        .padding(.top)
         .onAppear {
             do {
                 try liveTVManager.sync()

@@ -1,5 +1,6 @@
 package com.aryanrogye.movies_shared.models
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
 @Serializable
@@ -20,10 +21,14 @@ data class KTTrendingResult(
     val posterPath: String? = null,
     val mediaType: KTMediaType,
     val genreIds: List<Int> = emptyList(),
+    @Transient
+    val genreType: List<String> = emptyList(),
     val popularity: Double,
     val voteAverage: Double,
     val voteCount: Int,
-)
+) {
+    val genres: List<String> get() = genreType
+}
 
 @Serializable
 data class KTTrendingResponse(

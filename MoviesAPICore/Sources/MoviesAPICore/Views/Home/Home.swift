@@ -35,6 +35,7 @@ public struct Home: View {
                     error: $error,
                     showError: $showError
                 )
+                .ignoresSafeArea(edges: .top)
             case .liveTV:
                 LiveTVView(
                     error: $error,
@@ -42,20 +43,33 @@ public struct Home: View {
                 )
             }
         }
-        .navigationTitle("Home")
         .alert(isPresented: $showError) {
             Alert(
                 title: Text("Error"),
                 message: Text("\(error, default: "Unknown Error")")
             )
         }
+#if os(macOS)
+        .navigationTitle("Home")
+#endif
+        .toolbarBackground(.hidden, for: .automatic)
+        .scrollEdgeEffectStyle(.soft, for: .top)
         .toolbar {
+#if os(iOS)
+            ToolbarItem(placement: .topBarLeading) {
+                Text("Home")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .fixedSize()
+                    .frame(minWidth: 100, alignment: .leading)
+            }
+            .sharedBackgroundVisibility(.hidden)
+#endif
 
 #if os(macOS)
             ToolbarSpacer(.flexible)
 #endif
-
-            ToolbarItemGroup(placement: .principal) {
+            ToolbarItemGroup(placement: .primaryAction) {
                 Picker("", selection: $homeOption) {
                     ForEach(HomeOption.allCases, id: \.self) { option in
                         Text(option.rawValue)
@@ -63,9 +77,8 @@ public struct Home: View {
                             .foregroundStyle(.yellow)
                     }
                 }
-                .pickerStyle(.segmented)
+                .pickerStyle(.menu)
                 .tint(.yellow)
-                .frame(width: 250)
             }
         }
         .task {

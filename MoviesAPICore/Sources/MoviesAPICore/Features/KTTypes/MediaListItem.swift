@@ -10,6 +10,7 @@ protocol MediaListItem: Equatable {
     var displayName: String { get }
     var posterPath: String? { get }
     var backdropPath: String? { get }
+    var genresTypes: [String] { get }
     var mediaType: KTMediaType { get }
 }
 
@@ -34,13 +35,16 @@ extension Sequence where Element: MediaListItem {
 extension KTMovieListResult: MediaListItem {
     var displayName: String { title }
     var mediaType: KTMediaType { .movie }
+    var genresTypes: [String] { genres }
 }
 
 extension KTTVListResult: MediaListItem {
     var displayName: String { name }
     var mediaType: KTMediaType { .tv }
+    var genresTypes: [String] { genres }
 }
 
 extension KTTrendingResult: MediaListItem {
     var displayName: String { name ?? title ?? "" }
+    var genresTypes: [String] { genres }
 }
