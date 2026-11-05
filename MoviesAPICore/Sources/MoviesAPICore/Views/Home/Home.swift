@@ -60,9 +60,11 @@ public struct Home: View {
                     ForEach(HomeOption.allCases, id: \.self) { option in
                         Text(option.rawValue)
                             .tag(option)
+                            .foregroundStyle(.yellow)
                     }
                 }
                 .pickerStyle(.segmented)
+                .tint(.yellow)
                 .frame(width: 250)
             }
         }
