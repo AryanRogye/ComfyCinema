@@ -1,4 +1,5 @@
 # ComfyCinema
+<img width="256" height="256" src="https://github.com/user-attachments/assets/720f3642-9a87-483c-9951-8b5a36300789" />
 
 ComfyCinema is a personal movie and TV discovery client with native SwiftUI and Fire TV interfaces, plus a standalone LG webOS TV app. The Apple and Android clients use the same Kotlin Multiplatform models, TMDB networking, and display-server URL logic. The LG app implements the corresponding behavior in JavaScript.
 
