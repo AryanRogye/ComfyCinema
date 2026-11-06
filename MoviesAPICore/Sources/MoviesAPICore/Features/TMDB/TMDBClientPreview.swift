@@ -121,7 +121,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
             genreType: [],
             popularity: 100,
             voteAverage: 8.0,
-            voteCount: 500
+            voteCount: 500,
+            heroPosterPath: nil
         )
 
         return KTTrendingResponse(page: 1, results: [result], totalPages: 1, totalResults: 1)

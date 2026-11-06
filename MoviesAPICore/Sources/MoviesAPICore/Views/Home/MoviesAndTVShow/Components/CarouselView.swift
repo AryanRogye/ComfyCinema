@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CarouselView<Content: View>: View {
 
+    @Binding var selectedIndex: Int?
     @ViewBuilder var content: Content
     var scrollProgress: (CGFloat) -> ()
 
@@ -21,9 +22,8 @@ struct CarouselView<Content: View>: View {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     Group(subviews: content) { collection in
-                        ForEach(collection) { subView in
-
-                            let index = collection.firstIndex(where: { $0.id == subView.id }) ?? 0
+                        ForEach(collection.indices, id: \.self) { index in
+                            let subView = collection[index]
                             let isLast = index == collection.count - 1
                             let opacity = isLast ? 0 : max(min(progress - CGFloat(index), 1), 0)
 
@@ -38,6 +38,7 @@ struct CarouselView<Content: View>: View {
                                             .ignoresSafeArea()
                                     }
                             }
+                            .id(index)
                             .frame(width: size.width, height: size.height)
                             .compositingGroup()
                             .opacity(1 - opacity)
@@ -53,7 +54,9 @@ struct CarouselView<Content: View>: View {
                         }
                     }
                 }
+                .scrollTargetLayout()
             }
+            .scrollPosition(id: $selectedIndex)
             .scrollTargetBehavior(.paging)
             .scrollIndicators(.hidden)
             .onScrollGeometryChange(for: CGFloat.self) {

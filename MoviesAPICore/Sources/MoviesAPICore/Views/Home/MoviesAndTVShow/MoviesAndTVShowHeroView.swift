@@ -52,13 +52,14 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
 
     @State private var error: String?
     @State private var showError: Bool = false
+    @State private var selectedIndex: Int?
 
     var body: some View {
         ZStack {
-            CarouselView {
+            CarouselView(selectedIndex: $selectedIndex) {
                 ForEach(contents, id: \.id) { result in
-                    if let backdropPath = result.backdropPath,
-                       let url = URL(string: "https://image.tmdb.org/t/p/original\(backdropPath)") {
+                    if let path = result.heroPosterPath,
+                       let url = URL(string: "https://image.tmdb.org/t/p/original\(path)") {
                         AsyncImage(url: url) { image in
                             GeometryReader { geometry in
                                 image
@@ -81,15 +82,56 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
                         } placeholder: {
                             Color.gray.opacity(0.2)
                         }
+                    } else if let path = result.backdropPath,
+                              let url = URL(string: "https://image.tmdb.org/t/p/original\(path)") {
+                        AsyncImage(url: url) { image in
+                            GeometryReader { geometry in
+                                ZStack {
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: geometry.size.width, height: geometry.size.height)
+                                        .blur(radius: 35)
+                                        .overlay(Color.black.opacity(0.3))
+
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: geometry.size.width)
+                                        .mask {
+                                            LinearGradient(
+                                                stops: [
+                                                    .init(color: .clear, location: 0),
+                                                    .init(color: .black, location: 0.15),
+                                                    .init(color: .black, location: 0.85),
+                                                    .init(color: .clear, location: 1)
+                                                ],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                        }
+                                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.4)
+                                }
+                                .frame(width: geometry.size.width, height: geometry.size.height)
+                                .clipped()
+                            }
+                            .overlay {
+                                if resolvingMedia?.id == result.id && resolvingMedia?.mediaType == result.mediaType {
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .background(.black.opacity(0.1))
+                                }
+                            }
+                        } placeholder: {
+                            Color.gray.opacity(0.2)
+                        }
                     }
                 }
             } scrollProgress: { progress in
                 guard !contents.isEmpty, progress.isFinite else { return }
                 let newIndex = min(max(Int(progress.rounded()), 0), contents.count - 1)
                 guard newIndex != activeIndex else { return }
-                withAnimation(.spring) {
-                    activeIndex = newIndex
-                }
+                activeIndex = newIndex
             }
             .frame(height: 700)
             .visualEffect { content, proxy in
@@ -173,16 +215,26 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
                             let isLastVisible  = index == visibleRange.upperBound - 1
                             let showSmall = (isFirstVisible || isLastVisible) && index != activeIndex
 
-                            if activeIndex == index {
-                                Capsule()
-                                    .fill(.white)
-                                    .frame(width: 20, height: 10)
-                                    .matchedGeometryEffect(id: "active-circle", in: nm)
-                            } else {
-                                Circle()
-                                    .fill(activeIndex == index ? .white : .gray.opacity(0.8))
-                                    .frame(width: showSmall ? 8 : 10)
-                            }
+                            Capsule()
+                                .fill(.gray.opacity(0.8))
+                                .frame(
+                                    width: activeIndex == index ? 20 : (showSmall ? 8 : 10),
+                                    height: activeIndex == index ? 10 : (showSmall ? 8 : 10)
+                                )
+                                .overlay(alignment: .leading) {
+                                    if activeIndex == index {
+                                        TimelineView(.animation) { timeline in
+                                            let elapsed = timeline.date.timeIntervalSince(heroStartDate)
+                                            let progress = min(max(elapsed / heroDuration, 0), 1)
+
+                                            Capsule()
+                                                .fill(.white)
+                                                .frame(width: 10 + (progress * 10), height: 10)
+                                        }
+                                    }
+                                }
+                                .clipShape(Capsule())
+                                .animation(.smooth(duration: 0.35), value: activeIndex)
                         }
                     }
                 }
@@ -200,6 +252,38 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
         .navigationDestination(isPresented: $goToDetail) {
             if let searchResult {
                 WatchDetailView(result: searchResult)
+            }
+        }
+        .onDisappear {
+            nextHeroTask?.cancel()
+        }
+        .onChange(of: selectedIndex) { _, newValue in
+            nextHeroView()
+        }
+        .onChange(of: contents) { _, newValue in
+            guard !contents.isEmpty else { return }
+            selectedIndex = 0
+        }
+    }
+
+    @State private var nextHeroTask: Task<Void, Never>?
+    @State private var heroStartDate = Date()
+    @State private var heroDuration: TimeInterval = 10
+
+    private func nextHeroView() {
+        nextHeroTask?.cancel()
+
+        heroStartDate = .now
+
+        nextHeroTask = Task {
+            try? await Task.sleep(for: .seconds(10))
+
+            guard !Task.isCancelled,
+                  let selectedIndex,
+                  !contents.isEmpty else { return }
+
+            withAnimation(.spring) {
+                self.selectedIndex = (selectedIndex + 1) % contents.count
             }
         }
     }
