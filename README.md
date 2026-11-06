@@ -64,29 +64,44 @@
 Playback availability depends on the selected third-party server.
 
 
-## Architecture
 
-```mermaid
-flowchart TB
-    KMP["Kotlin Multiplatform<br/>Shared Models · TMDB Networking · Server Logic"]
+<h2>Architecture</h2>
 
-    Apple["Apple<br/>SwiftUI · iOS & macOS"]
-    FireTV["Android / Fire TV<br/>Jetpack Compose"]
-    LG["LG webOS<br/>JavaScript"]
+<p align="center">
+  <strong>Kotlin Multiplatform</strong>
+  <br/>
+  <sub>Shared Models · TMDB Networking · Server Logic</sub>
+</p>
 
-    KMP --> Apple
-    KMP --> FireTV
+<table align="center">
+  <tr>
+    <th align="center">🍎 Apple</th>
+    <th align="center">📺 Android / Fire TV</th>
+    <th align="center">📺 LG webOS</th>
+  </tr>
+  <tr>
+    <td align="center">
+      SwiftUI<br/>
+      <sub>iOS & macOS</sub>
+    </td>
+    <td align="center">
+      Jetpack Compose<br/>
+      <sub>Kotlin Multiplatform</sub>
+    </td>
+    <td align="center">
+      JavaScript<br/>
+      <sub>Standalone implementation</sub>
+    </td>
+  </tr>
+</table>
 
-    LG -.- KMP
+<p align="center">
+  <sub>
+    Apple and Android share Kotlin Multiplatform logic.
+    LG webOS independently implements equivalent functionality.
+  </sub>
+</p>
 
-    style KMP fill:#252525,stroke:#888,color:#fff
-    style Apple fill:#252525,stroke:#888,color:#fff
-    style FireTV fill:#252525,stroke:#888,color:#fff
-    style LG fill:#252525,stroke:#888,color:#fff
-```
-
-*LG webOS independently implements equivalent functionality
-rather than directly consuming the shared Kotlin module.*
 
 ## Credits
 
