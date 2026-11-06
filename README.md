@@ -2,7 +2,7 @@
 
 <p align="center">
   <img
-    src="https://github.com/user-attachments/assets/720f3642-9a87-483c-9951-8b5a36300789"
+    src="./Assets/ComfyCinemaIcon.png"
     alt="ComfyCinema App Icon"
     width="256"
     height="256"
