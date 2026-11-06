@@ -58,6 +58,7 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
         ZStack {
             CarouselView(selectedIndex: $selectedIndex) {
                 ForEach(contents, id: \.id) { result in
+                    #if os(iOS)
                     if let path = result.heroPosterPath,
                        let url = URL(string: "https://image.tmdb.org/t/p/original\(path)") {
                         AsyncImage(url: url) { image in
@@ -126,6 +127,52 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
                             Color.gray.opacity(0.2)
                         }
                     }
+                    #elseif os(macOS)
+                    if let path = result.backdropPath,
+                       let url = URL(string: "https://image.tmdb.org/t/p/original\(path)") {
+                        AsyncImage(url: url) { image in
+                            GeometryReader { geometry in
+                                ZStack {
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: geometry.size.width, height: geometry.size.height)
+                                        .blur(radius: 35)
+                                        .overlay(Color.black.opacity(0.3))
+
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: geometry.size.width)
+                                        .mask {
+                                            LinearGradient(
+                                                stops: [
+                                                    .init(color: .clear, location: 0),
+                                                    .init(color: .black, location: 0.15),
+                                                    .init(color: .black, location: 0.85),
+                                                    .init(color: .clear, location: 1)
+                                                ],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                        }
+                                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.4)
+                                }
+                                .frame(width: geometry.size.width, height: geometry.size.height)
+                                .clipped()
+                            }
+                            .overlay {
+                                if resolvingMedia?.id == result.id && resolvingMedia?.mediaType == result.mediaType {
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .background(.black.opacity(0.1))
+                                }
+                            }
+                        } placeholder: {
+                            Color.gray.opacity(0.2)
+                        }
+                    }
+                    #endif
                 }
             } scrollProgress: { progress in
                 guard !contents.isEmpty, progress.isFinite else { return }
