@@ -1,5 +1,7 @@
 package com.aryanrogye.movies_shared.network
 
+import com.aryanrogye.movies_shared.models.KTRatingsAndReviews
+import com.aryanrogye.movies_shared.models.KTReviewResponse
 import com.aryanrogye.movies_shared.models.KTSearchResponse
 import com.aryanrogye.movies_shared.models.KTSeasonInfo
 import com.aryanrogye.movies_shared.models.KTMovieListResponse
@@ -30,6 +32,15 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
 
 interface TMDBClientProviding {
+    @Throws(Exception::class)
+    suspend fun ratingsAndReviewsForMovie(id: Int, token: String): KTRatingsAndReviews
+    @Throws(Exception::class)
+    suspend fun reviewsForMovie(id: Int, token: String, page: Int): KTReviewResponse
+    @Throws(Exception::class)
+    suspend fun ratingsAndReviewsForTV(id: Int, token: String): KTRatingsAndReviews
+    @Throws(Exception::class)
+    suspend fun reviewsForTV(id: Int, token: String, page: Int): KTReviewResponse
+
     @Throws(Exception::class)
     suspend fun popularTV(token: String, page: Int): KTTVListResponse
     @Throws(Exception::class)
@@ -74,6 +85,62 @@ class TMDBClient: TMDBClientProviding {
         }
     }
 
+
+    @Throws(Exception::class)
+    override suspend fun ratingsAndReviewsForMovie(id: Int, token: String): KTRatingsAndReviews {
+        val response = client.get("https://api.themoviedb.org/3/movie/$id") {
+            parameter("language", "en-US")
+            parameter("append_to_response", "reviews")
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+        check(response.status.value in 200..299) {
+            "TMDB ratings/reviews request failed with HTTP ${response.status.value}"
+        }
+        return response.body()
+    }
+
+    @Throws(Exception::class)
+    override suspend fun reviewsForMovie(id: Int, token: String, page: Int): KTReviewResponse {
+        val response = client.get("https://api.themoviedb.org/3/movie/$id/reviews") {
+            parameter("language", "en-US")
+            parameter("page", page)
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+        check(response.status.value in 200..299) {
+            "TMDB ratings/reviews request failed with HTTP ${response.status.value}"
+        }
+        return response.body()
+    }
+
+    @Throws(Exception::class)
+    override suspend fun ratingsAndReviewsForTV(id: Int, token: String): KTRatingsAndReviews {
+        val response = client.get("https://api.themoviedb.org/3/tv/$id") {
+            parameter("language", "en-US")
+            parameter("append_to_response", "reviews")
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+        check(response.status.value in 200..299) {
+            "TMDB ratings/reviews request failed with HTTP ${response.status.value}"
+        }
+        return response.body()
+    }
+
+    @Throws(Exception::class)
+    override suspend fun reviewsForTV(id: Int, token: String, page: Int): KTReviewResponse {
+        val response = client.get("https://api.themoviedb.org/3/tv/$id/reviews") {
+            parameter("language", "en-US")
+            parameter("page", page)
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+        check(response.status.value in 200..299) {
+            "TMDB ratings/reviews request failed with HTTP ${response.status.value}"
+        }
+        return response.body()
+    }
 
     internal suspend fun genres(mediaType: KTMediaType, token: String): List<KTGenre> {
         require(mediaType != KTMediaType.PERSON) { "People do not have genres." }

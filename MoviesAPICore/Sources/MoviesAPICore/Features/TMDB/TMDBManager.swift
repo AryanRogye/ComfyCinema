@@ -162,6 +162,22 @@ public final class TMDBManager {
         )
     }
 
+    public func ratingsAndReviewsForMovie(for id: Int32) async throws -> KTRatingsAndReviews {
+        try await tmdbClient.ratingsAndReviewsForMovie(id: id, token: token)
+    }
+
+    public func reviewsForMovie(for id: Int32, page: Int32) async throws -> KTReviewResponse {
+        try await tmdbClient.reviewsForMovie(id: id, token: token, page: page)
+    }
+
+    public func ratingsAndReviewsForTV(for id: Int32) async throws -> KTRatingsAndReviews {
+        try await tmdbClient.ratingsAndReviewsForTV(id: id, token: token)
+    }
+
+    public func reviewsForTV(for id: Int32, page: Int32) async throws -> KTReviewResponse {
+        try await tmdbClient.reviewsForTV(id: id, token: token, page: page)
+    }
+
     public func infoOnTV(for id: Int) async throws -> KTTVShow {
         return try await tmdbClient.infoOnTV(id: Int32(id), token: token)
     }

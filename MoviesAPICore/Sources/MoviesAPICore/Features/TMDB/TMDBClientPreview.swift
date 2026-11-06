@@ -19,6 +19,32 @@ public final class TMDBClientPreview: TMDBClientProviding {
     }
 
 
+    public func ratingsAndReviewsForMovie(id: Int32, token: String) async throws -> KTRatingsAndReviews {
+        KTRatingsAndReviews(id: id, voteAverage: 8.2, voteCount: 250,
+                            reviews: try await reviewsForMovie(id: id, token: token, page: 1))
+    }
+
+    public func reviewsForMovie(id: Int32, token: String, page: Int32) async throws -> KTReviewResponse {
+        KTReviewResponse(page: page, results: [
+            KTReview(id: "preview-review", author: "Preview reviewer",
+                     content: "An entertaining watch with a memorable cast.",
+                     authorDetails: KTReviewAuthor(rating: KotlinDouble(double: 8)))
+        ], totalPages: 1, totalResults: 1)
+    }
+
+    public func ratingsAndReviewsForTV(id: Int32, token: String) async throws -> KTRatingsAndReviews {
+        KTRatingsAndReviews(id: id, voteAverage: 8.2, voteCount: 250,
+                            reviews: try await reviewsForTV(id: id, token: token, page: 1))
+    }
+
+    public func reviewsForTV(id: Int32, token: String, page: Int32) async throws -> KTReviewResponse {
+        KTReviewResponse(page: page, results: [
+            KTReview(id: "preview-review", author: "Preview reviewer",
+                     content: "An entertaining watch with a memorable cast.",
+                     authorDetails: KTReviewAuthor(rating: KotlinDouble(double: 8)))
+        ], totalPages: 1, totalResults: 1)
+    }
+
     public init() {}
 
     public func infoOnTV(id: Int32, token: String) async throws -> KTTVShow {
