@@ -1,44 +1,113 @@
-# ComfyCinema
-<img width="256" height="256" src="https://github.com/user-attachments/assets/720f3642-9a87-483c-9951-8b5a36300789" />
+<h1 align="center">ComfyCinema</h1>
 
-ComfyCinema is a personal movie and TV discovery client with native SwiftUI and Fire TV interfaces, plus a standalone LG webOS TV app. The Apple and Android clients use the same Kotlin Multiplatform models, TMDB networking, and display-server URL logic. The LG app implements the corresponding behavior in JavaScript.
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/720f3642-9a87-483c-9951-8b5a36300789"
+    alt="ComfyCinema App Icon"
+    width="256"
+    height="256"
+  />
+</p>
+
+<p align="center">
+  ComfyCinema is a personal movie and TV discovery client with native SwiftUI and Fire TV interfaces, plus a standalone LG webOS TV app.
+</p>
+
+<p align="center">
+  The Apple and Android clients share Kotlin Multiplatform models, TMDB networking, and display-server URL logic. The LG app implements the corresponding behavior in JavaScript.
+</p>
+
+## Features
+
+- **Movie & TV Discovery** — Search movies and TV shows using TMDB, with optional adult-content filtering.
+- **Live TV** — Browse and stream live television channels.
+- **Favorites & Watch History** — Save your favorites and keep track of what you've watched.
+- **Custom Collections** — Create and organize personalized movie and TV show collections.
+- **Movies & TV Shows** — Play movies or browse TV shows by season and episode.
+- **Persistent Server Selection** — Choose a playback server and retain your preference across sessions on each device.
+- **Native Fire TV Experience** — Built with Jetpack Compose, featuring D-pad navigation, WebView cursor controls, page reloading, and fullscreen playback.
+- **Content Filtering** — Android request and popup filtering powered by shared blocking-rule lists.
+- **LG webOS Support** — Dedicated TV interface with discovery, search, favorites, collections, watch history, and embedded playback. See [LGTVScratch/README.md](LGTVScratch/README.md) for setup instructions and platform limitations.
 
 ## Screenshots
 
 ### iOS
 
-Home on the iPhone 17 simulator.
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/f098e3ff-b7fb-4a9a-a0c2-93f3cfd19ac5"
+    alt="ComfyCinema running on iPhone 17 Pro"
+    width="280"
+  />
+</p>
 
-<img src="docs/screenshots/ios-home.png" alt="iOS Home showing Trending and Now Playing Movies with Home, Library, History, Settings, and Search tabs" width="320">
+### macOS
+
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/504a9f95-d5a7-471d-b090-cfad5c268a4e"
+    alt="ComfyCinema running on macOS"
+    width="800"
+  />
+</p>
 
 ### Android / Fire TV
 
-Captured on a Fire TV, showing discovery and movie details.
-
-<img src="docs/screenshots/android-home.png" alt="Fire TV Home with a two-row Trending grid and sidebar navigation" width="800">
-
-<details>
-<summary>Movie details</summary>
-
-<img src="docs/screenshots/android-detail.png" alt="Fire TV movie detail screen for Spider-Man: Brand New Day, with server selection and Play Movie controls" width="800">
-
-</details>
-
-## What it includes
-
-- TMDB multi-search for movies and TV shows, with optional adult-result filtering
-- Favorite library and watch history
-- Movie playback plus TV season and episode selection
-- Server selection persisted per device
-- Native Fire TV Compose UI with D-pad focus, a WebView cursor, reload controls, and fullscreen playback
-- Android request and popup filtering sourced from the existing shared blocking-rule lists
-- LG webOS TV discovery, search, favorites, collections, history, and embedded playback; see [LGTVScratch/README.md](LGTVScratch/README.md) for setup and platform limits
+<p align="center">
+  <img
+    src="docs/screenshots/android-home.png"
+    alt="Fire TV Home with Trending movies and sidebar navigation"
+    width="800"
+  />
+</p>
 
 Playback availability depends on the selected third-party server.
 
+
+
+<h2>Architecture</h2>
+
+<p align="center">
+  <strong>Kotlin Multiplatform</strong>
+  <br/>
+  <sub>Shared Models · TMDB Networking · Server Logic</sub>
+</p>
+
+<table align="center">
+  <tr>
+    <th align="center">🍎 Apple</th>
+    <th align="center">📺 Android / Fire TV</th>
+    <th align="center">📺 LG webOS</th>
+  </tr>
+  <tr>
+    <td align="center">
+      SwiftUI<br/>
+      <sub>iOS & macOS</sub>
+    </td>
+    <td align="center">
+      Jetpack Compose<br/>
+      <sub>Kotlin Multiplatform</sub>
+    </td>
+    <td align="center">
+      JavaScript<br/>
+      <sub>Standalone implementation</sub>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <sub>
+    Apple and Android share Kotlin Multiplatform logic.
+    LG webOS independently implements equivalent functionality.
+  </sub>
+</p>
+
+
 ## Credits
 
-The Android/Fire TV UI was written by Codex. The business logic and Swift implementation are written by Aryan Rogye.
+ComfyCinema was developed by Aryan Rogye.
+
+The SwiftUI implementation, shared business logic, and application architecture were developed by Aryan Rogye. The Android/Fire TV interface was implemented with assistance from OpenAI Codex.
 
 This product uses the [TMDB API](https://www.themoviedb.org/) but is not endorsed or certified by TMDB.
 
@@ -47,6 +116,7 @@ This product uses the [TMDB API](https://www.themoviedb.org/) but is not endorse
 | Path | Purpose |
 | --- | --- |
 | `MoviesAPIClient/` | SwiftUI app for Apple platforms |
+| `MoviesAPICore/` | Swift Package for iOS and macOS, created for faster previews |
 | `MoviesShared/sharedLogic/` | Kotlin Multiplatform models, TMDB client, and display-server behavior |
 | `MoviesShared/androidApp/` | Native Jetpack Compose Fire TV app and Android WebView implementation |
 | `LGTVScratch/` | Standalone LG webOS TV app; see its README for setup and platform limits |
@@ -81,9 +151,15 @@ TMDB_API_READ_ACCESS_TOKEN=your_token
 
 ## Build iOS or macOS
 
+Both the iOS and macOS apps depend on the `MoviesAPICore` Swift package, which requires the Kotlin Multiplatform (KMP) framework to be built first.
+
+To build and update the shared framework, run:
+
 ```shell
 ./MoviesAPICore/update-shared-logic.sh
 ```
+
+Once the framework is built, open `MoviesAPIClient.xcodeproj` in Xcode and build or run the desired target.
 
 ## Build the Fire TV app
 
