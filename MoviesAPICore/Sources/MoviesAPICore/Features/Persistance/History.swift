@@ -24,6 +24,7 @@ public class History {
     public var episode: Int?
     public var watchedAt: Date
     public var posterPath: String?
+    public var backdropPath: String?
     public var lastStoppedAt: Double?
 
     public init(

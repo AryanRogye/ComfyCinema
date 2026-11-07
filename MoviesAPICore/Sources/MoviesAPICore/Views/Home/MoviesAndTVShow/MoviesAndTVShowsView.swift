@@ -38,6 +38,8 @@ struct MoviesAndTVShowsView: View {
 
                 MoviesAndTVShowHeroView(contents: filteredResults)
 
+                ContinueWhereYouLeftOffView()
+
                 if selectedFilter == .movies || selectedFilter == .all {
                     MoviesAndTVShowLabelView(
                         label: "Now Playing Movies",

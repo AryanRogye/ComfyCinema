@@ -69,6 +69,7 @@ struct EmbeddedMovieView: View {
     var memoryInfo: (Double) -> Void = { _ in }
     var cpuInfo: (Double) -> Void = { _ in }
     var threadInfo: (Int32) -> Void = { _ in }
+    var onWKWebView: (WKWebView) -> Void = { _ in }
 
     var body: some View {
         WebView(
@@ -83,7 +84,8 @@ struct EmbeddedMovieView: View {
             navigationLogs: navigationLogs,
             memoryInfo: memoryInfo,
             cpuInfo: cpuInfo,
-            threadInfo: threadInfo
+            threadInfo: threadInfo,
+            onWKWebView: onWKWebView
         )
         .overlay(alignment: .topLeading) {
             loadingProgress
@@ -139,10 +141,13 @@ struct WebView: Representable {
     let memoryInfo: (Double) -> Void
     let cpuInfo: (Double) -> Void
     let threadInfo: (Int32) -> Void
+    let onWKWebView: (WKWebView) -> Void
 
 #if os(iOS)
     func makeUIView(context: Context) -> WKWebView {
-        return makeWebView(context: context)
+        let webView = makeWebView(context: context)
+        onWKWebView(webView)
+        return webView
     }
     func updateUIView(_ uiView: WKWebView, context: Context) {
         updatePlaybackCompatibility(in: uiView)
@@ -151,6 +156,7 @@ struct WebView: Representable {
     func makeNSView(context: Context) -> NSView {
         let container = NSView()
         let webView = makeWebView(context: context)
+        onWKWebView(webView)
 
         webView.removeFromSuperview()
         webView.translatesAutoresizingMaskIntoConstraints = true
@@ -340,9 +346,9 @@ struct WebView: Representable {
         let url: URL
         private var videoFrame: WKFrameInfo?
         // Aggregate limit across every iframe, independent of provider-side throttling.
-        private var diagnosticWindowStart = ProcessInfo.processInfo.systemUptime
-        private var diagnosticCount = 0
-        private var vm: EmbeddedMovieViewModel
+        internal var diagnosticWindowStart = ProcessInfo.processInfo.systemUptime
+        internal var diagnosticCount = 0
+        internal var vm: EmbeddedMovieViewModel
         let onTimeInfo: (TimeInfo) -> Void
         let iFrameLogs: (String) -> Void
         let videoFrameLogs: (String) -> Void
@@ -536,128 +542,6 @@ extension WebView.Coordinator {
     }
 }
 
-// MARK: - MacOS WebView Performance
-extension WebView.Coordinator {
-
-    private func loadPID(for webView: WKWebView) {
-#if os(macOS)
-        self.pid = WebKitProcessLocator.webProcessIdentifier(for: webView)
-#endif
-    }
-
-    private func loadStartTimeForPID() {
-#if os(macOS)
-        guard let pid else { return }
-        var start_time: timeval = .init();
-        get_process_start_time(pid, &start_time);
-
-        let seconds = TimeInterval(start_time.tv_sec)
-        let microseconds = TimeInterval(start_time.tv_usec) / 1_000_000
-        let startDate = Date(timeIntervalSince1970: seconds + microseconds)
-
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .medium
-        print("Start Time: \(formatter.string(from: startDate))")
-#endif
-    }
-
-    private func beginMonitoringPID() {
-#if os(macOS)
-        perfMonitor?.cancel()
-
-        var lastCPUTime: UInt64 = 0
-        var lastPidChecked: pid_t? = nil
-
-        perfMonitor = Task.detached(priority: .background) { [weak self] in
-
-            func getMemory(for pid: pid_t) -> Double {
-                let mem = getMemoryForProcess(pid)
-                let gb = Double(mem) / 1_000_000_000
-                return gb
-            }
-
-            func getCPUUsage(for pid: pid_t) -> (Int32, Double) {
-
-                if lastPidChecked != pid {
-                    lastPidChecked = pid
-                    lastCPUTime = 0
-                }
-
-                var processThreadInfo: ProcessThreadInfo = .init()
-                let result = getCPUInfo(pid, &processThreadInfo)
-                if result == -1 {
-                    return (0, 0)
-                }
-
-                let cpuTime = processThreadInfo.cpuTime
-
-                guard cpuTime >= lastCPUTime else {
-                    lastCPUTime = cpuTime
-                    return (processThreadInfo.count, 0.0)
-                }
-
-                if lastCPUTime != 0 {
-                    let delta = cpuTime - lastCPUTime
-                    let cpuSeconds = Double(delta) / 1_000_000_000
-                    let cpuPercent = (cpuSeconds / 5.0) * 100.0
-                    lastCPUTime = cpuTime
-                    return (processThreadInfo.count, cpuPercent)
-                }
-
-                lastCPUTime = cpuTime
-                return (processThreadInfo.count, 0);
-            }
-
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(5))
-                guard let self else { return }
-                guard let pid = await pid else { continue }
-
-                let mem = getMemory(for: pid)
-//                print("\(pid) Memory: \(mem)GB")
-                await memoryInfo(mem)
-
-                let (threadCount, cpu) = getCPUUsage(for: pid)
-//                print("CPU: \(String(format: "%.2f", cpu))%")
-//                print("Thread Count: \(threadCount)")
-
-                await threadInfo(threadCount)
-                await cpuInfo(cpu)
-            }
-        }
-#endif
-    }
-
-#if DEBUG
-    private func findProcessMethods(_ object: AnyObject) {
-        var cls: AnyClass? = object_getClass(object)
-
-        while let current = cls {
-            print("\n=== \(NSStringFromClass(current)) ===")
-
-            var count: UInt32 = 0
-
-            if let methods = class_copyMethodList(current, &count) {
-                defer { free(methods) }
-
-                for i in 0..<Int(count) {
-                    let selector = method_getName(methods[i])
-                    let name = NSStringFromSelector(selector)
-
-                    if name.localizedCaseInsensitiveContains("process") ||
-                        name.localizedCaseInsensitiveContains("pid") {
-                        print(name)
-                    }
-                }
-            }
-
-            cls = class_getSuperclass(current)
-        }
-    }
-#endif
-}
-
 // MARK: - Dismantle
 extension WebView {
 #if os(macOS)
@@ -695,176 +579,5 @@ extension WebView {
         view.configuration.userContentController.removeScriptMessageHandler(forName: "iframeDebug")
         view.configuration.userContentController.removeScriptMessageHandler(forName: "iframeLog")
         view.configuration.userContentController.removeScriptMessageHandler(forName: "videoLogger")
-    }
-}
-
-// MARK: - Scripting
-extension WebView.Coordinator: WKScriptMessageHandler {
-
-    private func addUserScriptIfNeeded(_ script: WKUserScript, to controller: WKUserContentController) {
-        // Reused WebViews retain their scripts. Rebind message handlers below,
-        // but install each watcher only once without removing popup scripts.
-        guard !controller.userScripts.contains(where: {
-            $0.source == script.source &&
-            $0.injectionTime == script.injectionTime &&
-            $0.isForMainFrameOnly == script.isForMainFrameOnly
-        }) else { return }
-        controller.addUserScript(script)
-    }
-
-    internal func attachWatcher(to webView: WKWebView) {
-        guard let monitorUrl = Bundle.module.url(
-            forResource: "monitorIFrame",
-            withExtension: "js"
-        ) else {
-            print("Couldnt find monitorIFrame.js")
-            return
-        }
-        guard let monitorText = try? String(contentsOf: monitorUrl, encoding: .utf8) else {
-            print("Couldnt convert monitorIFrame.js to text")
-            return
-        }
-
-        let monitorScript = WKUserScript(
-            source: monitorText,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: false
-        )
-        addUserScriptIfNeeded(monitorScript, to: webView.configuration.userContentController)
-        webView.configuration.userContentController.removeScriptMessageHandler(forName: "iframeDebug")
-        webView.configuration.userContentController.add(self, name: "iframeDebug")
-
-
-        guard let iFrameLoggerUrl = Bundle.module.url(
-            forResource: "IFrameLogger",
-            withExtension: "js"
-        ) else {
-            print("Couldnt Find IFrameLogger.js")
-            return
-        }
-        guard let iFrameLoggerText = try? String(contentsOf: iFrameLoggerUrl, encoding: .utf8) else {
-            print("Couldnt convert IFrameLogger.js to text")
-            return
-        }
-
-        let loggerScript = WKUserScript(
-            source: iFrameLoggerText,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: false
-        )
-
-        addUserScriptIfNeeded(loggerScript, to: webView.configuration.userContentController)
-        webView.configuration.userContentController.removeScriptMessageHandler(forName: "iframeLog")
-        webView.configuration.userContentController.add(self, name: "iframeLog")
-
-        guard let videoLoggerUrl = Bundle.module.url(
-            forResource: "VideoLogger",
-            withExtension: "js"
-        ) else {
-            print("Couldnt Find VideoLogger.js")
-            return
-        }
-        guard let videoLoggerText = try? String(contentsOf: videoLoggerUrl, encoding: .utf8) else {
-            print("Couldnt convert VideoLogger.js to text")
-            return
-        }
-
-        let videoLoggerScript = WKUserScript(
-            source: videoLoggerText,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: false,
-            in: .page
-        )
-
-        addUserScriptIfNeeded(videoLoggerScript, to: webView.configuration.userContentController)
-        webView.configuration.userContentController.removeScriptMessageHandler(forName: "videoLogger")
-        webView.configuration.userContentController.add(self, name: "videoLogger")
-    }
-
-    func userContentController(
-        _ userContentController: WKUserContentController,
-        didReceive message: WKScriptMessage
-    ) {
-        switch message.name {
-        case "videoLogger":
-            let now = ProcessInfo.processInfo.systemUptime
-            if now - diagnosticWindowStart >= 10 {
-                diagnosticWindowStart = now
-                diagnosticCount = 0
-            }
-            guard diagnosticCount < 20 else { return }
-            diagnosticCount += 1
-            guard let dictionary = message.body as? [String: Any],
-                  let data = try? JSONSerialization.data(withJSONObject: dictionary),
-                  let string = prettyPrintJSON(data) else { return }
-            // TVDetailView retains at most 200 entries: at most ~1.6 MB of UTF-8
-            // payload, plus String/collection overhead. Truncation may cut JSON.
-            let capped = String(decoding: string.utf8.prefix(8_000), as: UTF8.self)
-            videoFrameLogs(capped + (string.utf8.count > 8_000 ? "\n[truncated]" : ""))
-
-        case "iframeLog":
-            guard let dictionary = message.body as? [String: Any] else {
-                print("Couldnt convert message body into dictionary")
-                return
-            }
-            guard let jsonData = try? JSONSerialization.data(withJSONObject: dictionary) else {
-                print("Coudlnt convert dictionary into json data")
-                return
-            }
-
-            if let string = prettyPrintJSON(jsonData) {
-//                print(string)
-                iFrameLogs(string)
-            }
-
-        case "iframeDebug":
-
-            guard let dictionary = message.body as? [String: Any] else {
-                print("Couldnt convert message body into dictionary")
-                return
-            }
-            guard let jsonData = try? JSONSerialization.data(withJSONObject: dictionary) else {
-                print("Coudlnt convert dictionary into json data")
-                return
-            }
-
-            iFrameLogs(String(data: jsonData, encoding: .utf8) ?? "Unable To Decode message.body")
-
-            do {
-                let timeInfo = try JSONDecoder().decode(TimeInfo.self, from: jsonData)
-                onTimeInfo(timeInfo)
-            } catch {
-                print("Error Converting iframeDebug body into `TimeInfo`: \(error.localizedDescription)")
-            }
-        default:
-            break
-        }
-    }
-
-    func prettyPrintJSON(_ jsonData: Data) -> String? {
-        guard
-            var outer = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
-                else {
-            return nil
-        }
-
-        // Parse nested JSON string
-        if let dataString = outer["data"] as? String,
-           let data = dataString.data(using: .utf8),
-           let inner = try? JSONSerialization.jsonObject(with: data) {
-            outer["data"] = inner
-        }
-
-        guard
-            let prettyData = try? JSONSerialization.data(
-                withJSONObject: outer,
-                options: [.prettyPrinted, .sortedKeys]
-            ),
-            let pretty = String(data: prettyData, encoding: .utf8)
-                else {
-            return nil
-        }
-
-        return pretty
     }
 }
