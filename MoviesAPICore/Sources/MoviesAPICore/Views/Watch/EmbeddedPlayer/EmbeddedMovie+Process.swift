@@ -6,6 +6,7 @@
 //
 
 import WebKit
+import ProccesInfo
 
 extension WebView.Coordinator {
 
