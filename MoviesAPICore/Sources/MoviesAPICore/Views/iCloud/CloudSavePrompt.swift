@@ -56,5 +56,9 @@ struct CloudSavePrompt: View {
             }
         }
         .formStyle(.grouped)
+#if os(macOS)
+        .scrollContentBackground(.hidden)
+        .background(.clear)
+#endif
     }
 }
