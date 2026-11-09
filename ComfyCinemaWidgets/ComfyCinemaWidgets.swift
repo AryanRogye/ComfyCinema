@@ -11,27 +11,11 @@ import SwiftData
 import MoviesAPIData
 import AppIntents
 
-#if os(macOS)
-typealias SystemImage = NSImage
-#elseif os(iOS)
-typealias SystemImage = UIImage
-#endif
-
-struct HistoryInfo: TimelineEntry {
+internal struct HistoryInfo: TimelineEntry {
     let date: Date
     let systemImage: SystemImage?
     let color: SystemColor?
     let history: History
-}
-
-private struct HistorySnapshot: Sendable {
-    let resultId: Int
-    let name: String
-    let mediaType: HistoryMediaType
-    let posterPath: String?
-    let season: Int?
-    let episode: Int?
-    let updatedAt: Date
 }
 
 struct ConfigurationAppIntent: WidgetConfigurationIntent {
@@ -39,22 +23,6 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
 }
 
 struct Provider: AppIntentTimelineProvider {
-
-    static func loadImage(from posterPath: String?) async throws -> SystemImage? {
-        guard let posterPath else { return nil }
-        guard let url = URL(    string: "https://image.tmdb.org/t/p/w500\(posterPath)") else { return nil }
-        let (data, response) = try await URLSession.shared.data(from: url)
-
-        print("Poster response:", response)
-        print("Poster bytes:", data.count)
-
-#if os(macOS)
-        return NSImage(data: data)
-#else
-        return UIImage(data: data)
-#endif
-    }
-
     /// placeholder WidgetKit displays when it needs a temporary representation of
     /// the widget before the actual data is available
     func placeholder(in context: Context) -> HistoryInfo {
@@ -74,7 +42,7 @@ struct Provider: AppIntentTimelineProvider {
 
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> HistoryInfo {
-        let image = try? await Self.loadImage(from: "/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg")
+        let image = try? await HistoryHelper.loadHistoryImage(from: "/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg")
         return HistoryInfo(
             date: Date(),
             systemImage: image,
@@ -89,57 +57,12 @@ struct Provider: AppIntentTimelineProvider {
         )
     }
 
-    @MainActor
-    private func fetchLatestHistory(
-        from container: ModelContainer
-    ) throws -> HistorySnapshot? {
-        let context = container.mainContext
-
-        var descriptor = FetchDescriptor<History>(
-            sortBy: [
-                SortDescriptor(\.watchedAt, order: .reverse)
-            ]
-        )
-        descriptor.fetchLimit = 1
-
-        guard let history = try context.fetch(descriptor).first else {
-            return nil
-        }
-
-        return HistorySnapshot(
-            resultId: history.resultId,
-            name: history.name,
-            mediaType: history.mediaType,
-            posterPath: history.posterPath,
-            season: history.season,
-            episode: history.episode,
-            updatedAt: history.watchedAt
-        )
-    }
-
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<HistoryInfo> {
-
-        guard let identifier = Bundle.main.object(
-            forInfoDictionaryKey: "AppGroup"
-        ) as? String else {
-            fatalError("AppGroup not found")
-        }
-        if identifier.isEmpty {
-            fatalError("AppGroup Empty")
-        }
-
-
         let history: HistorySnapshot?
         do {
             history = try await MainActor.run {
-                let schema = Schema(versionedSchema: MoviesSchemaV2.self)
-                let configuration = ModelConfiguration(
-                    schema: schema,
-                    groupContainer: .identifier(identifier),
-                    cloudKitDatabase: .none
-                )
-                let container = try ModelContainer(for: schema, configurations: configuration)
-                return try fetchLatestHistory(from: container)
+                let container = try ModelConfigFetcher.fetch()
+                return try HistoryHelper.fetchLatestHistory(from: container)
             }
         } catch {
             print("Could not load widget history:", error)
@@ -149,7 +72,7 @@ struct Provider: AppIntentTimelineProvider {
             return Timeline(entries: [], policy: .never)
         }
 
-        let image = try? await Self.loadImage(from: history.posterPath)
+        let image = try? await HistoryHelper.loadHistoryImage(from: history.posterPath)
         let entry = HistoryInfo(
             date: .now,
             systemImage: image,
@@ -169,100 +92,6 @@ struct Provider: AppIntentTimelineProvider {
             entries: [entry],
             policy: .never
         )
-    }
-}
-
-struct ComfyCinemaWidgetsEntryView : View {
-
-    var entry: Provider.Entry
-    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
-
-    var backgroundColor: Color {
-        if widgetRenderingMode == .accented {
-            return .clear
-        }
-        if let color = entry.color {
-#if os(macOS)
-            return Color(nsColor: color)
-#elseif os(iOS)
-            return Color(uiColor: color)
-#endif
-        } else {
-            return .white
-        }
-    }
-
-    var foregroundColor: Color {
-        if widgetRenderingMode == .accented {
-            return .white
-        }
-        if backgroundColor.isDark() {
-            return .white
-        } else {
-            return .black
-        }
-    }
-
-    var oppositeForegroundColor: Color {
-        if widgetRenderingMode == .accented {
-            return .black
-        }
-        if backgroundColor.isDark() {
-            return .black
-        } else {
-            return .white
-        }
-    }
-
-    var body: some View {
-        ZStack {
-
-            backgroundColor.ignoresSafeArea()
-
-            VStack {
-                HistoryImage(image: entry.systemImage)
-
-                HStack {
-                    Text(entry.history.name)
-                        .font(
-                            .system(
-                                size: 11,
-                                weight: .medium,
-                                design: .rounded
-                            )
-                        )
-                        .foregroundStyle(foregroundColor)
-                        .multilineTextAlignment(.leading)
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(2)
-
-                    Spacer()
-
-                    Button {} label: {
-                        Circle()
-                            .fill(foregroundColor)
-                            .frame(width: 25, height: 25)
-                            .overlay {
-                                Image(systemName: "play.fill")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(
-                                        widgetRenderingMode == .accented
-                                        ? .black
-                                        : oppositeForegroundColor
-                                    )
-                                    .blendMode(
-                                        widgetRenderingMode == .accented
-                                        ? .destinationOut
-                                        : .normal
-                                    )
-                            }
-                            .compositingGroup()
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        }
     }
 }
 
@@ -293,6 +122,175 @@ private struct HistoryImage: View {
             }
         } else {
             Text("No Image Found")
+        }
+    }
+}
+
+private struct HistoryBackground: View {
+
+    let systemImage: SystemImage?
+
+
+    var linearGradientColor: Color {
+        .black
+    }
+
+    var body: some View {
+        ZStack {
+            HistoryImage(image: systemImage)
+
+            HistoryImage(image: systemImage)
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity
+                )
+                .blur(radius: 15)
+                .mask {
+                    LinearGradient(
+                        stops: [
+                            .init(
+                                color: .clear,
+                                location: 0.75
+                            ),
+                            .init(
+                                color: linearGradientColor.opacity(0.5),
+                                location: 0.8
+                            ),
+                            .init(
+                                color: linearGradientColor,
+                                location: 1
+                            )
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+                .clipShape(.rect(cornerRadius: 12))
+
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0.75),
+                    .init(color: linearGradientColor.opacity(0.35), location: 0.8),
+                    .init(color: linearGradientColor.opacity(0.65), location: 1),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .clipShape(.rect(cornerRadius: 12))
+        }
+    }
+}
+
+struct ComfyCinemaWidgetsEntryView : View {
+
+    var entry: Provider.Entry
+    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
+
+    var backgroundColor: Color {
+        if widgetRenderingMode == .accented {
+            return .clear
+        }
+        if let color = entry.color {
+#if os(macOS)
+            return Color(nsColor: color)
+#elseif os(iOS)
+            return Color(uiColor: color)
+#endif
+        } else {
+            return .white
+        }
+    }
+
+    var foregroundColor: Color {
+        .white
+    }
+
+    var oppositeForegroundColor: Color {
+        if widgetRenderingMode == .accented {
+            return .white
+        }
+        return .black
+    }
+
+    var body: some View {
+        ZStack {
+
+            backgroundColor.ignoresSafeArea()
+
+            HistoryBackground(systemImage: entry.systemImage)
+
+            HStack {
+                ViewThatFits {
+                    VStack(alignment: .leading) {
+                        Text(entry.history.name)
+                            .font(
+                                .system(
+                                    size: 7,
+                                    weight: .medium,
+                                    design: .default
+                                )
+                            )
+                            .foregroundStyle(foregroundColor)
+                            .multilineTextAlignment(.leading)
+                            .minimumScaleFactor(0.5)
+                            .lineLimit(2)
+                        if let season = entry.history.season, let episode = entry.history.episode {
+                            Text("S\(season)E\(episode)")
+                                .font(
+                                    .system(
+                                        size: 5,
+                                        weight: .bold,
+                                        design: .monospaced
+                                    )
+                                )
+                                .foregroundStyle(foregroundColor.opacity(0.5))
+                                .multilineTextAlignment(.leading)
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                        }
+                    }
+
+                    Text(entry.history.name)
+                        .font(
+                            .system(
+                                size: 7,
+                                weight: .bold,
+                                design: .default
+                            )
+                        )
+                        .foregroundStyle(foregroundColor)
+                        .multilineTextAlignment(.leading)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+
+                Button {} label: {
+                    Circle()
+                        .fill(foregroundColor)
+                        .frame(width: 25, height: 25)
+                        .overlay {
+                            Image(systemName: "play.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(
+                                    widgetRenderingMode == .accented
+                                    ? .black
+                                    : oppositeForegroundColor
+                                )
+                                .blendMode(
+                                    widgetRenderingMode == .accented
+                                    ? .destinationOut
+                                    : .normal
+                                )
+                        }
+                        .compositingGroup()
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(4)
+            .padding(.horizontal, 2)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
     }
 }
@@ -330,7 +328,7 @@ struct ComfyCinemaWidgets: Widget {
 #Preview(as: .systemSmall) {
     ComfyCinemaWidgets()
 } timeline: {
-    let image = try? await Provider.loadImage(from: "/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg")
+    let image = try? await HistoryHelper.loadHistoryImage(from: "/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg")
     HistoryInfo(
         date: .now,
         systemImage: image,
@@ -351,7 +349,7 @@ struct ComfyCinemaWidgets: Widget {
 } timeline: {
     let posterPath = "/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg"
 
-    let image = try? await Provider.loadImage(
+    let image = try? await HistoryHelper.loadHistoryImage(
         from: posterPath
     )
 
@@ -375,7 +373,7 @@ struct ComfyCinemaWidgets: Widget {
 } timeline: {
     let posterPath = "/u6tICVagGwukuFPr0qBUwOqCKSn.jpg"
 
-    let image = try? await Provider.loadImage(
+    let image = try? await HistoryHelper.loadHistoryImage(
         from: posterPath
     )
 
@@ -387,6 +385,34 @@ struct ComfyCinemaWidgets: Widget {
             resultId: 61889,
             name: "Marvel's Daredevil",
             mediaType: .episode,
+            season: 1,
+            episode: 1,
+            posterPath: posterPath,
+            updatedAt: .now
+        )
+    )
+}
+
+
+#Preview(as: .systemSmall) {
+    ComfyCinemaWidgets()
+} timeline: {
+    let posterPath = "/4ptpmWBVD9HY9hMh8Cbs6SMiy7p.jpg"
+
+    let image = try? await HistoryHelper.loadHistoryImage(
+        from: posterPath
+    )
+
+    HistoryInfo(
+        date: .now,
+        systemImage: image,
+        color: image == nil ? nil : ColorExtractor.getDominantColor(from: image!),
+        history: History(
+            resultId: 60573,
+            name: "Silicon Valley",
+            mediaType: .episode,
+            season: 2,
+            episode: 4,
             posterPath: posterPath,
             updatedAt: .now
         )
