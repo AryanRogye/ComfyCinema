@@ -12,8 +12,6 @@ import WebKit
 import SwiftData
 import Defaults
 
-extension KTSearchResult: @retroactive Identifiable {}
-
 public struct Root: View {
 
     private enum PlaybackRoute: Hashable {

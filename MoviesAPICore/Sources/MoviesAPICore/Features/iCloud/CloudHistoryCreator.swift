@@ -40,7 +40,8 @@ enum CloudHistoryCreator {
             posterPath: posterPath,
             backdropPath: backdropPath,
             watchedAt: watchedAt,
-            lastStoppedAt: lastStoppedAt
+            lastStoppedAt: lastStoppedAt,
+            updatedAt: record["updatedAt"] as? Date
         )
     }
 
@@ -77,6 +78,7 @@ enum CloudHistoryCreator {
         record["resultId"] = history.resultId
         record["season"] = history.season
         record["watchedAt"] = history.watchedAt
+        record["updatedAt"] = history.syncDate
 
         return record
     }

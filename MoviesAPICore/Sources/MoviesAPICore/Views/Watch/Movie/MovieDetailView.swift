@@ -13,6 +13,7 @@ public struct MovieDetailView: View {
 
     @Environment(\.modelContext) var modelContext
     @Environment(PlaybackSession.self) var playbackSession
+    @Environment(CloudKitSyncService.self) var cloudKitSyncService
     @Environment(\.dismiss) var dismiss
 
     @Query var history: [History]
@@ -205,7 +206,10 @@ public struct MovieDetailView: View {
                 reloadID: $reloadID,
                 webViewModel: webviewModel,
                 screenshotter: screenshotter,
-                onDismiss: { dismiss() }
+                onDismiss: {
+                    cloudKitSyncService.syncSaveToCloud()
+                    dismiss()
+                }
             )
             #elseif os(iOS)
             MovieDetailToolbar(
@@ -216,7 +220,10 @@ public struct MovieDetailView: View {
                 collectionResultToAdd: $collectionResultToAdd,
                 displayServer: $displayServer,
                 screenshotter: screenshotter,
-                onDismiss: { dismiss() }
+                onDismiss: {
+                    cloudKitSyncService.syncSaveToCloud()
+                    dismiss()
+                }
             )
             #endif
         }
@@ -251,6 +258,7 @@ public struct MovieDetailView: View {
                 $0.mediaType == .movie
             }) {
                 history.watchedAt = .now
+                history.updatedAt = history.watchedAt
             } else {
                 let history = History(
                     resultId: Int(result.id),

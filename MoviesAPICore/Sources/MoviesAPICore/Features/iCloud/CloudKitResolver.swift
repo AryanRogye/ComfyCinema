@@ -43,8 +43,8 @@ enum CloudKitResolver {
                     stored.episode == history.episode
                 }
             }) {
-                /// this means that there is a record found in here so we compare its mostRecently watchedAt
-                if history.watchedAt > stored.watchedAt {
+                /// Keep the most recently edited history, including playback progress.
+                if history.syncDate > stored.syncDate {
                     updatedHistory.append(history)
                 } else {
                     updatedHistory.append(stored)
@@ -89,12 +89,13 @@ enum CloudKitResolver {
                 }
 
                 /// Cloud already has the latest version.
-                if stored.watchedAt >= history.watchedAt {
+                if stored.syncDate >= history.syncDate {
                     continue
                 }
 
                 /// Update the existing record, preserving its ID/change tag.
                 existingRecord["watchedAt"] = history.watchedAt
+                existingRecord["updatedAt"] = history.syncDate
                 existingRecord["lastStoppedAt"] =
                 history.lastStoppedAt.map { NSNumber(value: $0) }
 

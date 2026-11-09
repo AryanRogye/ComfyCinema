@@ -34,19 +34,38 @@ public final class CloudKitSyncService {
         self.cloudKitManager = cloudKitManager
     }
 
+    var pendingSyncs: Int = 0
+
+    func syncSaveToCloud() {
+        Task {
+            do {
+                try await saveToCloud()
+            } catch {
+                // Log or expose the failure.
+            }
+        }
+    }
     func saveToCloud() async throws {
-        if isSyncing { return }
+        guard enabledCloudSave else { return }
+
+        pendingSyncs += 1
+        guard !isSyncing else { return }
+
         isSyncing = true
         defer { isSyncing = false }
 
         let ctx = modelContainer.mainContext
 
-        guard enabledCloudSave else { return }
+        repeat {
+            pendingSyncs = 0
 
-        let merged = try await cloudKitManager.resolveHistory(from: ctx)
+            let merged = try await cloudKitManager.resolveHistory(from: ctx)
+            try reconcileLocalHistory(merged, in: ctx)
 
-        // Reconcile merged history into ctx without deleting everything.
-        try reconcileLocalHistory(merged, in: ctx)
+#if os(iOS)
+            SettingLogs.shared.add("Synced to iCloud")
+#endif
+        } while pendingSyncs > 0 && enabledCloudSave
     }
 
     @MainActor
@@ -72,9 +91,13 @@ public final class CloudKitSyncService {
             }
 
             if let match {
+                // Preserve local edits made while CloudKit was awaiting a response.
+                guard incoming.syncDate > match.syncDate else { continue }
+
                 // Update the existing SwiftData object.
                 match.watchedAt = incoming.watchedAt
                 match.lastStoppedAt = incoming.lastStoppedAt
+                match.updatedAt = incoming.updatedAt
                 match.name = incoming.name
                 match.posterPath = incoming.posterPath
                 match.backdropPath = incoming.backdropPath

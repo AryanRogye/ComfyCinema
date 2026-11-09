@@ -16,6 +16,7 @@ public struct TVDetailView: View {
 #endif
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(PlaybackSession.self) var playbackSession
+    @Environment(CloudKitSyncService.self) var cloudKitSyncService
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -203,6 +204,7 @@ public struct TVDetailView: View {
                 menubarController: menubarController,
                 onSaveCurrentPlaybackPosition: saveCurrentPlaybackPosition,
                 onDismiss: {
+                    cloudKitSyncService.syncSaveToCloud()
                     screenshotter.stop()
                     dismiss()
                 }
@@ -222,6 +224,7 @@ public struct TVDetailView: View {
                 lastProgressSaveAt: $lastProgressSaveAt,
                 onSaveCurrentPlaybackPosition: saveCurrentPlaybackPosition,
                 onDismiss: {
+                    cloudKitSyncService.syncSaveToCloud()
                     screenshotter.stop()
                     dismiss()
                 }
@@ -364,6 +367,7 @@ public struct TVDetailView: View {
             $0.episode == episode
         }) {
             history.watchedAt = .now
+            history.updatedAt = history.watchedAt
             currentHistory = history
         } else {
             let history = History(
@@ -396,6 +400,7 @@ public struct TVDetailView: View {
     private func updateLastStoppedAt(with timeInfo: TimeInfo) {
         guard let currentHistory else { return }
         currentHistory.lastStoppedAt = timeInfo.currentTime
+        currentHistory.updatedAt = .now
         try? modelContext.save()
     }
 

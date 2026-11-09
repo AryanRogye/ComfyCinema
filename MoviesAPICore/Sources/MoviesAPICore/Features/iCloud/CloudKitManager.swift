@@ -99,8 +99,10 @@ public final class CloudKitManager {
             guard error.code == .serverRecordChanged,
                   retriesRemaining > 0,
                   let server = error.serverRecord,
-                  let localDate = record["watchedAt"] as? Date,
-                  let serverDate = server["watchedAt"] as? Date else {
+                  let localDate = (record["updatedAt"] as? Date)
+                    ?? (record["watchedAt"] as? Date),
+                  let serverDate = (server["updatedAt"] as? Date)
+                    ?? (server["watchedAt"] as? Date) else {
                 throw error
             }
 
@@ -113,6 +115,7 @@ public final class CloudKitManager {
 
             // Local wins, but use the server record's current change tag.
             server["watchedAt"] = record["watchedAt"]
+            server["updatedAt"] = localDate
             server["lastStoppedAt"] = record["lastStoppedAt"]
 
             return try await saveResolvingConflict(

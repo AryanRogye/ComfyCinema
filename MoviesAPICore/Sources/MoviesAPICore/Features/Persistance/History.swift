@@ -26,6 +26,10 @@ public class History {
     public var posterPath: String?
     public var backdropPath: String?
     public var lastStoppedAt: Double?
+    public var updatedAt: Date? = nil
+
+    /// Older local and cloud records use their last watch date.
+    public var syncDate: Date { updatedAt ?? watchedAt }
 
     public init(
         id: UUID = UUID(),
@@ -37,7 +41,8 @@ public class History {
         posterPath: String? = nil,
         backdropPath: String? = nil,
         watchedAt: Date = .now,
-        lastStoppedAt: Double? = nil
+        lastStoppedAt: Double? = nil,
+        updatedAt: Date? = nil
     ) {
         self.id = id
         self.resultId = resultId
@@ -49,5 +54,6 @@ public class History {
         self.watchedAt = watchedAt
         self.backdropPath = backdropPath
         self.lastStoppedAt = lastStoppedAt
+        self.updatedAt = updatedAt
     }
 }
