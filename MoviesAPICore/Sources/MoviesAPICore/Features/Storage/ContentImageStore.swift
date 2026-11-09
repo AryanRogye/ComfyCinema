@@ -19,7 +19,6 @@ enum ContentImageStore {
     @MainActor
     static func encode(_ image: SystemImage) -> Data? {
         guard image.size.width > 0, image.size.height > 0 else {
-            print("[Screenshot] Cannot encode empty image, size: \(image.size)")
             return nil
         }
 #if os(macOS)
@@ -30,12 +29,10 @@ enum ContentImageStore {
            ) {
             return data
         }
-        print("[Screenshot] CGImage encoding failed; trying TIFF fallback. Representations: \(image.representations)")
         if let tiff = image.tiffRepresentation,
            let bitmap = NSBitmapImageRep(data: tiff) {
             return bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.85])
         }
-        print("[Screenshot] Snapshot has no encodable bitmap, size: \(image.size)")
         return nil
 #elseif os(iOS)
         return image.jpegData(compressionQuality: 0.85)
@@ -56,9 +53,7 @@ enum ContentImageStore {
                 at: url,
                 withIntermediateDirectories: true
             )
-            print("[Screenshot] Cache directory: \(url.path)")
         } catch {
-            print("[Screenshot] Cache directory creation failed at \(url.path): \(error)")
         }
 
         return url
@@ -81,9 +76,7 @@ enum ContentImageStore {
         let destination = url(forID: id, mediaType: mediaType)
         do {
             try data.write(to: destination, options: .atomic)
-            print("[Screenshot] Saved \(data.count) bytes to \(destination.path)")
         } catch {
-            print("[Screenshot] Save failed at \(destination.path): \(error)")
             throw error
         }
     }
@@ -95,10 +88,8 @@ enum ContentImageStore {
         let source = url(forID: id, mediaType: mediaType)
         do {
             let data = try Data(contentsOf: source)
-            print("[Screenshot] Loaded \(data.count) bytes from \(source.path)")
             return data
         } catch {
-            print("[Screenshot] Cache load failed at \(source.path): \(error)")
             return nil
         }
     }

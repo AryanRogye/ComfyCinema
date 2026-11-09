@@ -17,7 +17,11 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.isSwiftUIPreview else { return }
 
-        appCoordinator = AppCoordinator()
+        do {
+            appCoordinator = try AppCoordinator()
+        } catch {
+            fatalError("Cant Load iCloud Config")
+        }
     }
 
     public func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
@@ -25,10 +29,34 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+    @MainActor
+    public func applicationShouldTerminate(
+        _ sender: NSApplication
+    ) -> NSApplication.TerminateReply {
+        Task {
+            do {
+                try await appCoordinator?.cloudKitSync.saveToCloud()
+            } catch {
+                print("CloudKit sync failed during termination:", error)
+            }
+
+            sender.reply(toApplicationShouldTerminate: true)
+        }
+
+        return .terminateLater
+    }
+
     public func applicationWillTerminate(_ notification: Notification) {
     }
 
     public func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        Task {
+            do {
+                try await appCoordinator?.cloudKitSync.saveToCloud()
+            } catch {
+                print("CloudKit sync failed during termination:", error)
+            }
+        }
         return false
     }
 }
@@ -43,6 +71,7 @@ final class WindowCoordinatorContainer {
 class AppCoordinator {
 
     let windowContainer = WindowCoordinatorContainer()
+    let cloudKitSync: CloudKitSyncService
     private let appRouter = AppRouter()
 
 
@@ -57,7 +86,11 @@ class AppCoordinator {
         }
     }()
 
-    init() {
+    init() throws {
+        cloudKitSync = .init(
+            modelContainer: modelContainer,
+            cloudKitManager: try CloudKitManager()
+        )
         AppDependencyManager.shared.add(dependency: self.appRouter)
         AppDependencyManager.shared.add(dependency: self.modelContainer)
         openApp()
@@ -79,7 +112,7 @@ class AppCoordinator {
         let window = windowContainer.windowCoordinator.showWindow(
             id: appID,
             title: "ComfyCinema",
-            content: MacOSRoot(windowContainer: windowContainer, appRouter: appRouter)
+            content: MacOSRoot(windowContainer: windowContainer, appRouter: appRouter, cloudKitSync: cloudKitSync)
                 .modelContainer(modelContainer)
                 .preferredColorScheme(.dark),
             size: size,

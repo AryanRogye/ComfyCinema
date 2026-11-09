@@ -5,6 +5,8 @@
 //  Created by Aryan Rogye on 9/14/26.
 //
 
+#if os(iOS)
+
 import SwiftUI
 import WebKit
 import SwiftData
@@ -23,9 +25,9 @@ public struct Root: View {
 
     @Environment(\.modelContext) private var ctx
 
+    @Bindable var cloudKitSync: CloudKitSyncService
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
-    @State private var cloudKitManager: CloudKitManager?
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
@@ -41,8 +43,9 @@ public struct Root: View {
     @State private var showError: Bool = false
     @State private var intentTriggeredResult: KTSearchResult?
 
-    public init(appRouter: AppRouter) {
+    public init(appRouter: AppRouter, cloudKitSync: CloudKitSyncService) {
         self.appRouter = appRouter
+        self.cloudKitSync = cloudKitSync
     }
 
     @Default(.hasShownCloudSavePrompt)
@@ -50,7 +53,7 @@ public struct Root: View {
 
     public var body: some View {
         ZStack {
-            if let tmdbManager, let liveTVManager, let cloudKitManager, hasShownCloudSavePrompt {
+            if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
                 TabView(selection: $appRouter.selectedTab) {
 
                     Tab("Home", systemImage: "house", value: .home) {
@@ -102,16 +105,14 @@ public struct Root: View {
                 .onChange(of: playbackSession.activationID) {
                     playbackSession.sourceTab = appRouter.selectedTab
                 }
-#if os(iOS)
                 .tabViewBottomAccessory(isEnabled: playbackSession.isActive) {
                     PlaybackPlayerView(returnToPlayback: returnToPlayback)
                 }
                 .tabBarMinimizeBehavior(.onScrollDown)
-#endif
                 .environment(tmdbManager)
                 .environment(liveTVManager)
                 .environment(blockingService)
-                .environment(cloudKitManager)
+                .environment(cloudKitSync)
                 .environment(playbackSession)
                 .environment(defaultManager)
                 .environment(appRouter)
@@ -128,15 +129,15 @@ public struct Root: View {
                         WatchDetailView(result: search)
                             .environment(tmdbManager)
                             .environment(liveTVManager)
-                            .environment(cloudKitManager)
+                            .environment(cloudKitSync)
                             .environment(blockingService)
                             .environment(playbackSession)
                             .environment(defaultManager)
                             .environment(appRouter)
                     }
                 }
-            } else if !hasShownCloudSavePrompt, let cloudKitManager {
-                CloudSavePrompt(cloudKitManager: cloudKitManager)
+            } else if !hasShownCloudSavePrompt {
+                CloudSavePrompt(cloudKitSync: cloudKitSync)
             } else {
                 ProgressView()
             }
@@ -165,21 +166,10 @@ public struct Root: View {
                 let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
                 let cloudKitManager = try CloudKitManager()
 
-                self.cloudKitManager = cloudKitManager
                 self.tmdbManager = manager
                 self.liveTVManager = liveTVManager
 
-                if cloudKitManager.enabledCloudSave {
-                    let hist = try await cloudKitManager.resolveHistory(from: ctx)
-
-                    for existing in history {
-                        ctx.delete(existing)
-                    }
-                    for item in hist {
-                        ctx.insert(item)
-                    }
-                    try ctx.save()
-                }
+                try await self.cloudKitSync.saveToCloud()
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true
@@ -255,5 +245,17 @@ private struct SearchTabModifier: ViewModifier {
 }
 
 #Preview {
-    Root(appRouter: AppRouter())
+    let schema = Schema(versionedSchema: MoviesSchemaV2.self)
+    let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
+    let container = try! ModelContainer(for: schema, configurations: configuration)
+
+    Root(
+        appRouter: AppRouter(),
+        cloudKitSync: CloudKitSyncService(
+            modelContainer: container,
+            cloudKitManager: try! CloudKitManager()
+        )
+    )
+    .modelContainer(container)
 }
+#endif

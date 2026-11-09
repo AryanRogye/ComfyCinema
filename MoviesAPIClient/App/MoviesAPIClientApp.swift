@@ -22,6 +22,7 @@ struct MoviesAPIClientApp: App {
 #if os(iOS)
     @State private var appRouter: AppRouter
     private let modelContainer: ModelContainer
+    private let cloudKitSync: CloudKitSyncService
 #endif
 
 #if os(macOS)
@@ -36,6 +37,10 @@ struct MoviesAPIClientApp: App {
             let container = try ModelContainer(for: schema, configurations: configuration)
             AppDependencyManager.shared.add(dependency: container)
             self.modelContainer = container
+            self.cloudKitSync = .init(
+                modelContainer: container,
+                cloudKitManager: try CloudKitManager()
+            )
         } catch {
             fatalError("Could not create model container: \(error)")
         }
@@ -48,7 +53,7 @@ struct MoviesAPIClientApp: App {
     var body: some Scene {
 #if os(iOS)
         WindowGroup {
-            Root(appRouter: appRouter)
+            Root(appRouter: appRouter, cloudKitSync: cloudKitSync)
                 .preferredColorScheme(.dark)
         }
         .modelContainer(modelContainer)

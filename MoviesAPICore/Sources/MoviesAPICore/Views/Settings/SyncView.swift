@@ -11,7 +11,7 @@ import SwiftData
 
 struct SyncView: View {
 
-    @Environment(CloudKitManager.self) var cloudKitManager
+    @Environment(CloudKitSyncService.self) var cloudKitSync
     @Environment(\.modelContext) private var ctx
     @Query private var history: [History]
 
@@ -19,7 +19,7 @@ struct SyncView: View {
     @State private var showError: Bool = false
 
     var body: some View {
-        @Bindable var cloudKitManager = cloudKitManager
+        @Bindable var cloudKitSync = cloudKitSync
         Form {
             Section {
                 VStack(spacing: 12) {
@@ -40,28 +40,18 @@ struct SyncView: View {
                 .listRowBackground(Color.clear)
             }
 
-            Toggle(isOn: $cloudKitManager.enabledCloudSave) {
+            Toggle(isOn: $cloudKitSync.enabledCloudSave) {
                 Label("Sync Watch History", systemImage: "clock.arrow.circlepath")
             }
 
-            if cloudKitManager.enabledCloudSave {
-                if let status = cloudKitManager.resolveStatus {
+            if cloudKitSync.enabledCloudSave {
+                if let status = cloudKitSync.resolveStatus {
                     Text(status)
                 }
                 Button("Sync With iCloud") {
                     Task {
                         do {
-                            if cloudKitManager.enabledCloudSave {
-                                let hist = try await cloudKitManager.resolveHistory(from: ctx)
-
-                                for existing in history {
-                                    ctx.delete(existing)
-                                }
-                                for item in hist {
-                                    ctx.insert(item)
-                                }
-                                try ctx.save()
-                            }
+                            try await cloudKitSync.saveToCloud()
                         } catch {
                             self.error = error.localizedDescription
                             self.showError = true

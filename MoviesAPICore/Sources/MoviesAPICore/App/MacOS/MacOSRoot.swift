@@ -18,9 +18,9 @@ struct MacOSRoot: View {
 
     @Bindable var windowContainer: WindowCoordinatorContainer
     @Bindable var appRouter: AppRouter
+    @Bindable var cloudKitSync: CloudKitSyncService
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
-    @State private var cloudKitManager: CloudKitManager?
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
@@ -39,7 +39,7 @@ struct MacOSRoot: View {
 
     var body: some View {
         ZStack {
-            if let tmdbManager, let liveTVManager, let cloudKitManager, hasShownCloudSavePrompt {
+            if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
                 VisualEffectView()
 
                 HStack(spacing: 0) {
@@ -96,7 +96,7 @@ struct MacOSRoot: View {
                     .environment(tmdbManager)
                     .environment(liveTVManager)
                     .environment(blockingService)
-                    .environment(cloudKitManager)
+                    .environment(cloudKitSync)
                     .environment(playbackSession)
                     .environment(defaultManager)
                     .environment(appRouter)
@@ -107,15 +107,15 @@ struct MacOSRoot: View {
                         .environment(windowContainer)
                         .environment(tmdbManager)
                         .environment(liveTVManager)
-                        .environment(cloudKitManager)
+                        .environment(cloudKitSync)
                         .environment(blockingService)
                         .environment(playbackSession)
                         .environment(defaultManager)
                         .environment(appRouter)
                     }
                 }
-            } else if !hasShownCloudSavePrompt, let cloudKitManager {
-                CloudSavePrompt(cloudKitManager: cloudKitManager)
+            } else if !hasShownCloudSavePrompt {
+                CloudSavePrompt(cloudKitSync: cloudKitSync)
             } else {
                 ProgressView()
             }
@@ -139,23 +139,11 @@ struct MacOSRoot: View {
             do {
                 let manager = try TMDBManager(defaultManager: defaultManager)
                 let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
-                let cloudKitManager = try CloudKitManager()
 
-                self.cloudKitManager = cloudKitManager
                 self.tmdbManager = manager
                 self.liveTVManager = liveTVManager
 
-                if cloudKitManager.enabledCloudSave {
-                    let hist = try await cloudKitManager.resolveHistory(from: ctx)
-
-                    for existing in history {
-                        ctx.delete(existing)
-                    }
-                    for item in hist {
-                        ctx.insert(item)
-                    }
-                    try ctx.save()
-                }
+                try await cloudKitSync.saveToCloud()
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true

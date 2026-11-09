@@ -10,7 +10,7 @@ import SwiftUI
 
 struct CloudSavePrompt: View {
 
-    @Bindable var cloudKitManager: CloudKitManager
+    @Bindable var cloudKitSync: CloudKitSyncService
 
     @Default(.hasShownCloudSavePrompt)
     private var hasShownCloudSavePrompt
@@ -37,7 +37,7 @@ struct CloudSavePrompt: View {
             }
 
             Section {
-                Toggle(isOn: $cloudKitManager.enabledCloudSave) {
+                Toggle(isOn: $cloudKitSync.enabledCloudSave) {
                     Label("Sync Watch History", systemImage: "clock.arrow.circlepath")
                 }
             } footer: {

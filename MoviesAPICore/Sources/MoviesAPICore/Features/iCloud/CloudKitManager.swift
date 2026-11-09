@@ -24,20 +24,14 @@ enum CloudKitError: LocalizedError {
 
 @Observable
 @MainActor
-final class CloudKitManager {
+public final class CloudKitManager {
 
     let identifier: String
     let container: CKContainer
     let database: CKDatabase
     var resolveStatus: String?
 
-    var enabledCloudSave: Bool = Defaults[.enabledCloudSave] {
-        didSet {
-            Defaults[.enabledCloudSave] = enabledCloudSave
-        }
-    }
-
-    init() throws {
+    public init() throws {
         guard let identifier = Bundle.main.object(
             forInfoDictionaryKey: "iCloudIdentifier"
         ) as? String else {
