@@ -35,7 +35,7 @@ public final class Collection {
 
     public var hidesCoverImage: Bool = false
 
-    var coverImagePaths: [String] {
+    public var coverImagePaths: [String] {
         Array(
             results
                 .compactMap(\.posterPath)

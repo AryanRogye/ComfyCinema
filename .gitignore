@@ -23,7 +23,7 @@ fastlane/screenshots/
 fastlane/test_output/
 
 # Secrets and local configuration
-MoviesAPIClient/Config.xcconfig
+Config.xcconfig
 LGTVScratch/config.local.js
 *.xcconfig.local
 *.env

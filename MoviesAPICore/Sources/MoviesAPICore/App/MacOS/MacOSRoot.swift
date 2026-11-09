@@ -9,6 +9,7 @@
 import SwiftUI
 import SwiftData
 import Defaults
+import MoviesAPIData
 
 struct MacOSRoot: View {
 

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MoviesAPIData
 
 struct HistoryRow: View {
     let history: History

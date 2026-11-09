@@ -11,6 +11,7 @@ import SwiftUI
 import WebKit
 import SwiftData
 import Defaults
+import MoviesAPIData
 
 public struct Root: View {
 

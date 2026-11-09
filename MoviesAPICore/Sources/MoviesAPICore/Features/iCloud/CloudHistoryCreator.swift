@@ -6,6 +6,7 @@
 //
 
 import CloudKit
+import MoviesAPIData
 
 enum CloudHistoryCreator {
 

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import MoviesAPIData
 
 struct CollectionFavoriteMenu: View {
 

@@ -19,6 +19,9 @@ let package = Package(
         .package(
             url: "https://github.com/sindresorhus/Defaults.git",
             from: "9.0.9"
+        ),
+        .package(
+            path: "../MoviesAPIData"
         )
     ],
     targets: [
@@ -35,6 +38,7 @@ let package = Package(
                 "SharedLogic",
                 "ProccesInfo",
                 .product(name: "Defaults", package: "Defaults"),
+                .product(name: "MoviesAPIData", package: "MoviesAPIData")
             ],
             resources: [
                 .process("Features/WebKit/NetworkFiltering/NetworkBlockingRules.json"),

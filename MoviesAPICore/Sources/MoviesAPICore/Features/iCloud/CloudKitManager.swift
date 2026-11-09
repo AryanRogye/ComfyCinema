@@ -8,6 +8,7 @@
 import CloudKit
 import SwiftData
 import Defaults
+import MoviesAPIData
 
 enum CloudKitError: LocalizedError {
     case noToken

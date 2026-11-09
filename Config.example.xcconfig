@@ -1,3 +1,9 @@
 // Copy this file to Config.xcconfig and add your TMDB API read access token.
 APIReadAccessToken =
 iCloudIdentifier =
+AppGroup =
+
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) HAS_SIRI_TOOLS
+SIRI_TOOL_FLAG =
+SIRI_TOOL_FLAG[sdk=iphoneos27.3*] = HAS_SIRI_TOOLS
+SIRI_TOOL_FLAG[sdk=iphonesimulator27.3*] = HAS_SIRI_TOOLS

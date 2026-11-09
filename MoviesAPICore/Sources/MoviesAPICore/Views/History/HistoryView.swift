@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import MoviesAPIData
 
 public struct HistoryView: View {
 

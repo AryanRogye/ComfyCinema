@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import MoviesAPICore
+import MoviesAPIData
 import AppIntents
 
 struct ComfyCinemaIntentsPackage: AppIntentsPackage {
@@ -19,21 +20,37 @@ struct ComfyCinemaIntentsPackage: AppIntentsPackage {
 @main
 struct MoviesAPIClientApp: App {
 
-#if os(iOS)
-    @State private var appRouter: AppRouter
-    private let modelContainer: ModelContainer
-    private let cloudKitSync: CloudKitSyncService
-#endif
-
 #if os(macOS)
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 #endif
 
-    init() {
 #if os(iOS)
+
+    @State private var appRouter: AppRouter
+    private let modelContainer: ModelContainer
+    private let cloudKitSync: CloudKitSyncService
+
+    init() {
         do {
+
+            guard let identifier = Bundle.main.object(
+                forInfoDictionaryKey: "AppGroup"
+            ) as? String else {
+                fatalError("AppGroup not found")
+            }
+            if identifier.isEmpty {
+                fatalError("AppGroup Empty")
+            }
+
+
             let schema = Schema(versionedSchema: MoviesSchemaV2.self)
-            let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
+            let configuration = ModelConfiguration(
+                schema: schema,
+                groupContainer: .identifier(
+                    identifier
+                ),
+                cloudKitDatabase: .none,
+            )
             let container = try ModelContainer(for: schema, configurations: configuration)
             AppDependencyManager.shared.add(dependency: container)
             self.modelContainer = container
@@ -47,8 +64,8 @@ struct MoviesAPIClientApp: App {
         let appRouter = AppRouter()
         AppDependencyManager.shared.add(dependency: appRouter)
         _appRouter = State(initialValue: appRouter)
-#endif
     }
+#endif
 
     var body: some Scene {
 #if os(iOS)

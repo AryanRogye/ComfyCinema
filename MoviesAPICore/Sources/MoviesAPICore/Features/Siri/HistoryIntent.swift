@@ -7,6 +7,7 @@
 
 import AppIntents
 import SwiftData
+import MoviesAPIData
 
 struct HistoryEntity: AppEntity {
     let id: UUID

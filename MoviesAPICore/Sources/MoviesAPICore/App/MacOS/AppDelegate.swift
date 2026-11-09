@@ -9,6 +9,7 @@
 import AppKit
 import AppIntents
 import SwiftData
+import MoviesAPIData
 
 public class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -77,9 +78,22 @@ class AppCoordinator {
 
     private let modelContainer: ModelContainer = {
         do {
+
+            guard let identifier = Bundle.main.object(
+                forInfoDictionaryKey: "AppGroup"
+            ) as? String else {
+                fatalError("AppGroup not found")
+            }
+            if identifier.isEmpty {
+                fatalError("AppGroup Empty")
+            }
+
             let schema = Schema(versionedSchema: MoviesSchemaV2.self)
-            let storeURL = try MoviesPersistentStore.prepareStore()
-            let configuration = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)
+            let configuration = ModelConfiguration(
+                schema: schema,
+                groupContainer: .identifier(identifier),
+                cloudKitDatabase: .none
+            )
             return try ModelContainer(for: schema, configurations: [configuration])
         } catch {
             fatalError("Could not create model container: \(error)")

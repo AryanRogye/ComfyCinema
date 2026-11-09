@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import WebKit
+import MoviesAPIData
 
 public struct TVDetailView: View {
 

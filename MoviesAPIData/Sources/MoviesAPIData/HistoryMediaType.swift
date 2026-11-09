@@ -1,14 +1,14 @@
 //
-//  History.swift
-//  MoviesAPIClient
+//  HistoryMediaType.swift
+//  MoviesAPIData
 //
-//  Created by Aryan Rogye on 9/15/26.
+//  Created by Aryan Rogye on 11/9/26.
 //
 
 import SwiftData
 import Foundation
 
-public enum HistoryMediaType: String, Codable {
+public enum HistoryMediaType: String, Codable, Sendable {
     case movie = "movie"
     case episode = "episode"
 }

@@ -7,6 +7,7 @@
 
 import SwiftData
 import Defaults
+import MoviesAPIData
 
 @Observable
 @MainActor

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import MoviesAPIData
 
 struct LibraryCollectionView: View {
     @Environment(TMDBManager.self) var tmdbManager
