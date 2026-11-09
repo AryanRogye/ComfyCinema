@@ -12,9 +12,6 @@ public struct SettingsView: View {
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(DefaultManager.self) var defaultManager
     @Environment(BlockingService.self) var blockingService
-
-    public init() {}
-
 #if os(iOS)
     @State private var motionMonitor = SecretMotionManager()
 #endif
@@ -44,6 +41,16 @@ public struct SettingsView: View {
                 }
             } header: {
                 Label("Network", systemImage: "network")
+            }
+
+            Section {
+                NavigationLink {
+                    SyncView()
+                } label: {
+                    Label("Configuration", systemImage: "doc")
+                }
+            } header: {
+                Label("iCloud", systemImage: "cloud")
             }
 
 #if os(iOS)

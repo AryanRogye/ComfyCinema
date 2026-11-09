@@ -1,2 +1,3 @@
 // Copy this file to Config.xcconfig and add your TMDB API read access token.
 APIReadAccessToken =
+iCloudIdentifier =

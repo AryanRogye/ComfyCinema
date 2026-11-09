@@ -50,7 +50,7 @@ class AppCoordinator {
         do {
             let schema = Schema(versionedSchema: MoviesSchemaV2.self)
             let storeURL = try MoviesPersistentStore.prepareStore()
-            let configuration = ModelConfiguration(schema: schema, url: storeURL)
+            let configuration = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)
             return try ModelContainer(for: schema, configurations: [configuration])
         } catch {
             fatalError("Could not create model container: \(error)")

@@ -32,7 +32,8 @@ struct MoviesAPIClientApp: App {
 #if os(iOS)
         do {
             let schema = Schema(versionedSchema: MoviesSchemaV2.self)
-            let container = try ModelContainer(for: schema)
+            let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
+            let container = try ModelContainer(for: schema, configurations: configuration)
             AppDependencyManager.shared.add(dependency: container)
             self.modelContainer = container
         } catch {

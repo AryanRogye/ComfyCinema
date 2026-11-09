@@ -4,5 +4,7 @@
 <dict>
 	<key>APIReadAccessToken</key>
 	<string>$(APIReadAccessToken)</string>
+    <key>iCloudIdentifier</key>
+    <string>$(iCloudIdentifier)</string>
 </dict>
 </plist>

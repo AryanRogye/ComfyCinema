@@ -7,6 +7,8 @@
 
 import SwiftUI
 import WebKit
+import SwiftData
+import Defaults
 
 extension KTSearchResult: @retroactive Identifiable {}
 
@@ -17,9 +19,13 @@ public struct Root: View {
     }
 
     @Bindable var appRouter: AppRouter
+    @Query var history: [History]
+
+    @Environment(\.modelContext) private var ctx
 
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
+    @State private var cloudKitManager: CloudKitManager?
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
@@ -39,9 +45,12 @@ public struct Root: View {
         self.appRouter = appRouter
     }
 
+    @Default(.hasShownCloudSavePrompt)
+    private var hasShownCloudSavePrompt
+
     public var body: some View {
         ZStack {
-            if let tmdbManager, let liveTVManager {
+            if let tmdbManager, let liveTVManager, let cloudKitManager, hasShownCloudSavePrompt {
                 TabView(selection: $appRouter.selectedTab) {
 
                     Tab("Home", systemImage: "house", value: .home) {
@@ -102,6 +111,7 @@ public struct Root: View {
                 .environment(tmdbManager)
                 .environment(liveTVManager)
                 .environment(blockingService)
+                .environment(cloudKitManager)
                 .environment(playbackSession)
                 .environment(defaultManager)
                 .environment(appRouter)
@@ -118,12 +128,17 @@ public struct Root: View {
                         WatchDetailView(result: search)
                             .environment(tmdbManager)
                             .environment(liveTVManager)
+                            .environment(cloudKitManager)
                             .environment(blockingService)
                             .environment(playbackSession)
                             .environment(defaultManager)
                             .environment(appRouter)
                     }
                 }
+            } else if !hasShownCloudSavePrompt, let cloudKitManager {
+                CloudSavePrompt(cloudKitManager: cloudKitManager)
+            } else {
+                ProgressView()
             }
         }
         .onAppear {
@@ -148,8 +163,24 @@ public struct Root: View {
             do {
                 let manager = try TMDBManager(defaultManager: defaultManager)
                 let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
+                let cloudKitManager = try CloudKitManager()
+
+                self.cloudKitManager = cloudKitManager
                 self.tmdbManager = manager
                 self.liveTVManager = liveTVManager
+
+                if cloudKitManager.enabledCloudSave {
+                    if let hist = try await cloudKitManager.resolveHistory(from: ctx) {
+
+                        for existing in history {
+                            ctx.delete(existing)
+                        }
+                        for item in hist {
+                            ctx.insert(item)
+                        }
+                        try ctx.save()
+                    }
+                }
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true

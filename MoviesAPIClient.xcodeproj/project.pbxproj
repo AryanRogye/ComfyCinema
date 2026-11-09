@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		9B8E2D623070379400190F1C /* MoviesAPIClientIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9B8E2D613070379400190F1C /* MoviesAPIClientIcon.icon */; };
+		9BCD9D1C309FA0D500B142D7 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9BCD9D1B309FA0D500B142D7 /* README.md */; };
 		9BE82336305CA83B003801A2 /* MoviesAPICore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BE82335305CA83B003801A2 /* MoviesAPICore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		9B6EBD8C3058AC940058478C /* ComfyCinema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ComfyCinema.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B8E2D613070379400190F1C /* MoviesAPIClientIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = MoviesAPIClientIcon.icon; sourceTree = "<group>"; };
+		9BCD9D1B309FA0D500B142D7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -50,6 +52,7 @@
 		9B6EBD833058AC940058478C = {
 			isa = PBXGroup;
 			children = (
+				9BCD9D1B309FA0D500B142D7 /* README.md */,
 				9B8E2D613070379400190F1C /* MoviesAPIClientIcon.icon */,
 				9B6EBD8E3058AC940058478C /* MoviesAPIClient */,
 				9B6EBD8D3058AC940058478C /* Products */,
@@ -130,6 +133,7 @@
 			isa = PBXResourcesBuildPhase;
 			files = (
 				9B8E2D623070379400190F1C /* MoviesAPIClientIcon.icon in Resources */,
+				9BCD9D1C309FA0D500B142D7 /* README.md in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -268,6 +272,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = MoviesAPIClientIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MoviesAPIClient/MoviesAPIClient.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -302,6 +307,7 @@
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -317,6 +323,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = MoviesAPIClientIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MoviesAPIClient/MoviesAPIClient.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = B9P888266K;
@@ -350,6 +357,7 @@
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;

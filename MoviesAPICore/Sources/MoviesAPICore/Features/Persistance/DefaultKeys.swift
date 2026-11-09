@@ -9,4 +9,7 @@ import Defaults
 
 extension Defaults.Keys {
     static let includeAdult = Key<Bool>("include_adult", default: false)
+
+    static let hasShownCloudSavePrompt = Key<Bool>("hasShownCloudSavePrompt", default: false)
+    static let enabledCloudSave = Key<Bool>("enabledCloudSave", default: false)
 }

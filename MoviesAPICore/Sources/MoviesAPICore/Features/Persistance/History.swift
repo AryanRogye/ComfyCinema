@@ -9,8 +9,8 @@ import SwiftData
 import Foundation
 
 public enum HistoryMediaType: String, Codable {
-    case movie
-    case episode
+    case movie = "movie"
+    case episode = "episode"
 }
 
 @Model
@@ -35,6 +35,7 @@ public class History {
         season: Int? = nil,
         episode: Int? = nil,
         posterPath: String? = nil,
+        backdropPath: String? = nil,
         watchedAt: Date = .now,
         lastStoppedAt: Double? = nil
     ) {
@@ -46,6 +47,7 @@ public class History {
         self.episode = episode
         self.posterPath = posterPath
         self.watchedAt = watchedAt
+        self.backdropPath = backdropPath
         self.lastStoppedAt = lastStoppedAt
     }
 }

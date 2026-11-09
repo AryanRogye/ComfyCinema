@@ -106,6 +106,7 @@ struct OpenHistoryIntent: OpenIntent {
     }
 }
 
+#if HAS_SIRI_TOOLS
 @available(iOS 27.3, macOS 27.3, *)
 @AppIntent(.tool)
 struct ContentHistoryIntent: AppIntent {
@@ -159,3 +160,4 @@ struct ContentHistoryIntent: AppIntent {
         }
     }
 }
+#endif
