@@ -12,7 +12,6 @@ import Defaults
 enum CloudKitError: LocalizedError {
     case noToken
     case tokenEmpty
-
     var errorDescription: String? {
         switch self {
         case .noToken:
@@ -53,7 +52,8 @@ final class CloudKitManager {
         self.database = container.privateCloudDatabase
     }
 
-    public func resolveHistory(from ctx: ModelContext) async throws -> [History]? {
+    public func resolveHistory(from ctx: ModelContext) async throws -> [History] {
+        defer { resolveStatus = nil }
         let currentHistory = try extractHistory(from: ctx)
 
         resolveStatus = "Gathered Current History: \(currentHistory.count)"
@@ -73,26 +73,60 @@ final class CloudKitManager {
         resolveStatus = "Resolved Records To Save: \(recordsToSave.count)"
 
         guard !recordsToSave.isEmpty else {
-            resolveStatus = nil
-            return nil
+            return mergedHistory
         }
 
-        let result = try await database.modifyRecords(
-            saving: recordsToSave,
-            deleting: [],
-            savePolicy: .ifServerRecordUnchanged,
-            atomically: false
+        var latestCloudRecords = cloudHistory
+
+        for record in recordsToSave {
+            let saved = try await saveResolvingConflict(record)
+
+            latestCloudRecords.removeAll {
+                $0.recordID == saved.recordID
+            }
+            latestCloudRecords.append(saved)
+        }
+
+        /// if the server won a conflict, we need to apply its winning version locally too.
+        /// Returning your original mergedHistory would return data from before the conflict was resolved.
+        return CloudKitResolver.resolve(
+            from: currentHistory,
+            with: latestCloudRecords
         )
-        resolveStatus = "Modified Records"
-
-        for (_, saveResult) in result.saveResults {
-            let _ = try saveResult.get()
-        }
-
-        resolveStatus = nil
-        return mergedHistory
     }
 
+    private func saveResolvingConflict(
+        _ record: CKRecord,
+        retriesRemaining: Int = 3
+    ) async throws -> CKRecord {
+        do {
+            return try await database.save(record)
+        } catch let error as CKError {
+            guard error.code == .serverRecordChanged,
+                  retriesRemaining > 0,
+                  let server = error.serverRecord,
+                  let localDate = record["watchedAt"] as? Date,
+                  let serverDate = server["watchedAt"] as? Date else {
+                throw error
+            }
+
+            resolveStatus = "Saving conflict retry: \(retriesRemaining)"
+
+            // Server already has an equally recent or newer version.
+            guard localDate > serverDate else {
+                return server
+            }
+
+            // Local wins, but use the server record's current change tag.
+            server["watchedAt"] = record["watchedAt"]
+            server["lastStoppedAt"] = record["lastStoppedAt"]
+
+            return try await saveResolvingConflict(
+                server,
+                retriesRemaining: retriesRemaining - 1
+            )
+        }
+    }
 }
 
 // MARK: - SwiftData retrieval

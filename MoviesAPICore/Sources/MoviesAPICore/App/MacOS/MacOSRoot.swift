@@ -146,16 +146,15 @@ struct MacOSRoot: View {
                 self.liveTVManager = liveTVManager
 
                 if cloudKitManager.enabledCloudSave {
-                    if let hist = try await cloudKitManager.resolveHistory(from: ctx) {
+                    let hist = try await cloudKitManager.resolveHistory(from: ctx)
 
-                        for existing in history {
-                            ctx.delete(existing)
-                        }
-                        for item in hist {
-                            ctx.insert(item)
-                        }
-                        try ctx.save()
+                    for existing in history {
+                        ctx.delete(existing)
                     }
+                    for item in hist {
+                        ctx.insert(item)
+                    }
+                    try ctx.save()
                 }
             } catch {
                 self.error = error.localizedDescription

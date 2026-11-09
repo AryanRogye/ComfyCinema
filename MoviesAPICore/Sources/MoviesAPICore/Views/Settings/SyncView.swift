@@ -25,7 +25,7 @@ struct SyncView: View {
                 VStack(spacing: 12) {
                     Image(systemName: "icloud.fill")
                         .font(.system(size: 54))
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.yellow)
 
                     Text("iCloud Sync")
                         .font(.title2.bold())
@@ -52,16 +52,15 @@ struct SyncView: View {
                     Task {
                         do {
                             if cloudKitManager.enabledCloudSave {
-                                if let hist = try await cloudKitManager.resolveHistory(from: ctx) {
+                                let hist = try await cloudKitManager.resolveHistory(from: ctx)
 
-                                    for existing in history {
-                                        ctx.delete(existing)
-                                    }
-                                    for item in hist {
-                                        ctx.insert(item)
-                                    }
-                                    try ctx.save()
+                                for existing in history {
+                                    ctx.delete(existing)
                                 }
+                                for item in hist {
+                                    ctx.insert(item)
+                                }
+                                try ctx.save()
                             }
                         } catch {
                             self.error = error.localizedDescription

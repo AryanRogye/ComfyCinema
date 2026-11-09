@@ -21,7 +21,7 @@ struct CloudSavePrompt: View {
                 VStack(spacing: 12) {
                     Image(systemName: "icloud.fill")
                         .font(.system(size: 54))
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.yellow)
 
                     Text("iCloud Sync")
                         .font(.title2.bold())

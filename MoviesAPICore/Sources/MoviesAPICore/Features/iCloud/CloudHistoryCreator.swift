@@ -46,7 +46,27 @@ enum CloudHistoryCreator {
 
     /// Function created a `CKRecord` from a `History`
     public static func createHistoryRecord(basedOn history: History) async throws -> CKRecord {
-        let record = CKRecord(recordType: "SyncedHistory")
+
+        /// Avoid duplicate
+        let recordName: String
+
+        switch history.mediaType {
+        case .movie:
+            recordName = "movie-\(history.resultId)"
+
+        case .episode:
+            guard let season = history.season,
+                  let episode = history.episode else {
+                throw CocoaError(.validationMissingMandatoryProperty)
+            }
+
+            recordName = "episode-\(history.resultId)-s\(season)-e\(episode)"
+        }
+
+        let record = CKRecord(
+            recordType: "SyncedHistory",
+            recordID: CKRecord.ID(recordName: recordName)
+        )
 
         record["backdropPath"] = history.backdropPath
         record["episode"] = history.episode
