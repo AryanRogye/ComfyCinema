@@ -60,6 +60,27 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
         }
         return false
     }
+
+    @MainActor
+    public func appOpenedWithUrl(_ url: URL) {
+        guard url.scheme == "comfycinema",
+              url.host == "watch" else {
+            return
+        }
+        let components = URLComponents(
+            url: url,
+            resolvingAgainstBaseURL: false
+        )
+        guard let idString = components?
+            .queryItems?
+            .first(where: { $0.name == "id" })?
+            .value else {
+            return
+        }
+
+        self.appCoordinator?.appRouter.clickedWidgetWithResultID = idString
+        self.appCoordinator?.appRouter.selectedTab = .history
+    }
 }
 
 @Observable
@@ -73,8 +94,7 @@ class AppCoordinator {
 
     let windowContainer = WindowCoordinatorContainer()
     let cloudKitSync: CloudKitSyncService
-    private let appRouter = AppRouter()
-
+    let appRouter = AppRouter()
 
     private let modelContainer: ModelContainer = {
         do {

@@ -141,12 +141,14 @@ public struct Root: View {
                 ProgressView()
             }
         }
+        /// Checking if app was triggered by intent
         .onAppear {
             if let searchTriggered = appRouter.searchTriggered {
                 intentTriggeredResult = searchTriggered
                 SettingLogs.shared.add("Using SearchTriggered From Intent To Open: \(searchTriggered)")
             }
         }
+        /// Intent Triggered Search
         .onChange(of: appRouter.searchTriggered) { _, newValue in
             if let newValue {
                 intentTriggeredResult = newValue
@@ -163,7 +165,6 @@ public struct Root: View {
             do {
                 let manager = try TMDBManager(defaultManager: defaultManager)
                 let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
-                let cloudKitManager = try CloudKitManager()
 
                 self.tmdbManager = manager
                 self.liveTVManager = liveTVManager

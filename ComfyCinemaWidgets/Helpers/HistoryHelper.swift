@@ -51,6 +51,7 @@ enum HistoryHelper: Sendable {
 
         /// Return Snapshot
         return HistorySnapshot(
+            historyId: history.id,
             resultId: history.resultId,
             name: history.name,
             mediaType: history.mediaType,

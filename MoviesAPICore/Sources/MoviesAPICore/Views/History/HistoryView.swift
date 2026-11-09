@@ -134,6 +134,12 @@ public struct HistoryView: View {
                     if let h = appRouter.selectedHistory, !isResolving {
                         resolve(h)
                         appRouter.selectedHistory = nil
+                    } else if let id = appRouter.clickedWidgetWithResultID, !isResolving {
+                        /// we wanna find the history in current
+                        if let h = history.first(where: { $0.id.uuidString == id }) {
+                            resolve(h)
+                            appRouter.clickedWidgetWithResultID = nil
+                        }
                     }
                 }
                 .onDisappear {
@@ -144,6 +150,13 @@ public struct HistoryView: View {
                     if let h = appRouter.selectedHistory, !isResolving {
                         resolve(h)
                         appRouter.selectedHistory = nil
+                    }
+                }
+                .onChange(of: appRouter.clickedWidgetWithResultID) {
+                    guard let id = appRouter.clickedWidgetWithResultID else { return }
+                    if !isResolving, let h = history.first(where: { $0.id.uuidString == id }) {
+                        resolve(h)
+                        appRouter.clickedWidgetWithResultID = nil
                     }
                 }
             }

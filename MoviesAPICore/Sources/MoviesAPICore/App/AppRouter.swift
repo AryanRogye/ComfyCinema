@@ -12,11 +12,13 @@ import MoviesAPIData
 @MainActor
 public final class AppRouter {
 
-    var selectedTab: TabID = .home
+    public var selectedTab: TabID = .home
     /// Used for history intent
     var selectedHistory: History?
 
     var searchTriggered: KTSearchResult? = nil
+
+    public var clickedWidgetWithResultID: String?
 
     public init() {}
 

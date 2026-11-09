@@ -9,6 +9,7 @@ import MoviesAPIData
 import Foundation
 
 struct HistorySnapshot: Sendable {
+    let historyId: UUID
     let resultId: Int
     let name: String
     let mediaType: HistoryMediaType

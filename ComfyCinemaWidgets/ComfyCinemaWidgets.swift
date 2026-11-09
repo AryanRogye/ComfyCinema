@@ -78,6 +78,7 @@ struct Provider: AppIntentTimelineProvider {
             systemImage: image,
             color: image == nil ? nil : ColorExtractor.getDominantColor(from: image!),
             history: .init(
+                id: history.historyId,
                 resultId: history.resultId,
                 name: history.name,
                 mediaType: history.mediaType,
@@ -98,6 +99,7 @@ struct Provider: AppIntentTimelineProvider {
 private struct HistoryImage: View {
 
     let image: SystemImage?
+    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
 
     var body: some View {
         if let image {
@@ -110,6 +112,7 @@ private struct HistoryImage: View {
                     .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
                     .clipped()
                     .clipShape(.rect(cornerRadius: 12))
+                    .opacity(widgetRenderingMode == .accented ? 0.5 : 1)
 #elseif os(macOS)
                 Image(nsImage: image)
                     .resizable()
@@ -118,6 +121,7 @@ private struct HistoryImage: View {
                     .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
                     .clipped()
                     .clipShape(.rect(cornerRadius: 12))
+                    .opacity(widgetRenderingMode == .accented ? 0.5 : 1)
 #endif
             }
         } else {
@@ -181,6 +185,95 @@ private struct HistoryBackground: View {
     }
 }
 
+private struct HistoryDescription: View {
+
+    let entry: Provider.Entry
+    let foregroundColor: Color
+
+    var body: some View {
+        ViewThatFits {
+            VStack(alignment: .leading) {
+                Text(entry.history.name)
+                    .font(
+                        .system(
+                            size: 7,
+                            weight: .medium,
+                            design: .default
+                        )
+                    )
+                    .foregroundStyle(foregroundColor)
+                    .multilineTextAlignment(.leading)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(2)
+                if let season = entry.history.season, let episode = entry.history.episode {
+                    Text("S\(season)E\(episode)")
+                        .font(
+                            .system(
+                                size: 5,
+                                weight: .bold,
+                                design: .monospaced
+                            )
+                        )
+                        .foregroundStyle(foregroundColor.opacity(0.5))
+                        .multilineTextAlignment(.leading)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                }
+            }
+
+            Text(entry.history.name)
+                .font(
+                    .system(
+                        size: 7,
+                        weight: .bold,
+                        design: .default
+                    )
+                )
+                .foregroundStyle(foregroundColor)
+                .multilineTextAlignment(.leading)
+                .minimumScaleFactor(0.5)
+                .lineLimit(2)
+        }
+    }
+}
+
+private struct HistoryPlayButton: View {
+
+    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
+
+    let entry: Provider.Entry
+    let foregroundColor: Color
+    let oppositeForegroundColor: Color
+
+    var body: some View {
+        Link(
+            destination: URL(
+                string: "comfycinema://watch?id=\(entry.history.id)"
+            )!
+        ) {
+            Circle()
+                .fill(foregroundColor)
+                .frame(width: 25, height: 25)
+                .overlay {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(
+                            widgetRenderingMode == .accented
+                            ? .black
+                            : oppositeForegroundColor
+                        )
+                        .blendMode(
+                            widgetRenderingMode == .accented
+                            ? .destinationOut
+                            : .normal
+                        )
+                }
+                .compositingGroup()
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct ComfyCinemaWidgetsEntryView : View {
 
     var entry: Provider.Entry
@@ -201,15 +294,15 @@ struct ComfyCinemaWidgetsEntryView : View {
         }
     }
 
-    var foregroundColor: Color {
-        .white
-    }
-
     var oppositeForegroundColor: Color {
         if widgetRenderingMode == .accented {
             return .white
         }
         return .black
+    }
+
+    var foregroundColor: Color {
+        .white
     }
 
     var body: some View {
@@ -220,73 +313,19 @@ struct ComfyCinemaWidgetsEntryView : View {
             HistoryBackground(systemImage: entry.systemImage)
 
             HStack {
-                ViewThatFits {
-                    VStack(alignment: .leading) {
-                        Text(entry.history.name)
-                            .font(
-                                .system(
-                                    size: 7,
-                                    weight: .medium,
-                                    design: .default
-                                )
-                            )
-                            .foregroundStyle(foregroundColor)
-                            .multilineTextAlignment(.leading)
-                            .minimumScaleFactor(0.5)
-                            .lineLimit(2)
-                        if let season = entry.history.season, let episode = entry.history.episode {
-                            Text("S\(season)E\(episode)")
-                                .font(
-                                    .system(
-                                        size: 5,
-                                        weight: .bold,
-                                        design: .monospaced
-                                    )
-                                )
-                                .foregroundStyle(foregroundColor.opacity(0.5))
-                                .multilineTextAlignment(.leading)
-                                .minimumScaleFactor(0.5)
-                                .lineLimit(1)
-                        }
-                    }
 
-                    Text(entry.history.name)
-                        .font(
-                            .system(
-                                size: 7,
-                                weight: .bold,
-                                design: .default
-                            )
-                        )
-                        .foregroundStyle(foregroundColor)
-                        .multilineTextAlignment(.leading)
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(2)
-                }
+                HistoryDescription(
+                    entry: entry,
+                    foregroundColor: foregroundColor
+                )
 
                 Spacer()
 
-                Button {} label: {
-                    Circle()
-                        .fill(foregroundColor)
-                        .frame(width: 25, height: 25)
-                        .overlay {
-                            Image(systemName: "play.fill")
-                                .font(.system(size: 13))
-                                .foregroundStyle(
-                                    widgetRenderingMode == .accented
-                                    ? .black
-                                    : oppositeForegroundColor
-                                )
-                                .blendMode(
-                                    widgetRenderingMode == .accented
-                                    ? .destinationOut
-                                    : .normal
-                                )
-                        }
-                        .compositingGroup()
-                }
-                .buttonStyle(.plain)
+                HistoryPlayButton(
+                    entry: entry,
+                    foregroundColor: foregroundColor,
+                    oppositeForegroundColor: oppositeForegroundColor
+                )
             }
             .padding(4)
             .padding(.horizontal, 2)

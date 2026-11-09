@@ -8,6 +8,7 @@
 import SwiftData
 import Defaults
 import MoviesAPIData
+import WidgetKit
 
 @Observable
 @MainActor
@@ -67,6 +68,7 @@ public final class CloudKitSyncService {
             SettingLogs.shared.add("Synced to iCloud")
 #endif
         } while pendingSyncs > 0 && enabledCloudSave
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     @MainActor
