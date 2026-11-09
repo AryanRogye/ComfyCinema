@@ -8,6 +8,9 @@
 import CloudKit
 
 enum CloudKitResolver {
+
+    /// Function resolves current history from records
+    /// stored in iCloud
     public static func resolve(
         from history: [History],
         with records: [CKRecord]
@@ -22,16 +25,20 @@ enum CloudKitResolver {
         for history in history {
             /// Check to see if the storedHistory contains the same resultId and the mediaType
             if let stored = storedHistory.first(where: { stored in
-                guard stored.resultId == history.resultId,
-                      stored.mediaType == history.mediaType else {
+
+                /// Skip if resultID or mediaType doesnt match
+                guard stored.resultId == history.resultId, stored.mediaType == history.mediaType else {
                     return false
                 }
 
+                /// Handle each media type seperately
                 switch history.mediaType {
                 case .movie:
+                    /// Movie doesnt need any extra checks
                     return true
 
                 case .episode:
+                    /// Episodes need to match seasons and episodes
                     return stored.season == history.season &&
                     stored.episode == history.episode
                 }
@@ -56,13 +63,17 @@ enum CloudKitResolver {
         return updatedHistory
     }
 
+    /// Function returns updated CKRecords, if any history in merged is inside of existing
+    /// we will update
     static func recordsToSave(
         merged: [History],
         existing: [CKRecord]
     ) async throws -> [CKRecord] {
+
         var recordsToSave: [CKRecord] = []
 
         for history in merged {
+            /// see if history exists in stored iCloud history
             let existingRecord = existing.first { record in
                 guard let stored = CloudHistoryCreator.history(from: record) else {
                     return false
@@ -72,17 +83,17 @@ enum CloudKitResolver {
             }
 
             if let existingRecord {
-                guard let stored = CloudHistoryCreator.history(from: existingRecord)
-                        else {
+                /// Create a `History` based off stored
+                guard let stored = CloudHistoryCreator.history(from: existingRecord) else {
                     continue
                 }
 
-                // Cloud already has the latest version.
+                /// Cloud already has the latest version.
                 if stored.watchedAt >= history.watchedAt {
                     continue
                 }
 
-                // Update the existing record, preserving its ID/change tag.
+                /// Update the existing record, preserving its ID/change tag.
                 existingRecord["watchedAt"] = history.watchedAt
                 existingRecord["lastStoppedAt"] =
                 history.lastStoppedAt.map { NSNumber(value: $0) }

@@ -30,6 +30,7 @@ final class CloudKitManager {
     let identifier: String
     let container: CKContainer
     let database: CKDatabase
+    var resolveStatus: String?
 
     var enabledCloudSave: Bool = Defaults[.enabledCloudSave] {
         didSet {
@@ -52,30 +53,27 @@ final class CloudKitManager {
         self.database = container.privateCloudDatabase
     }
 
-    @discardableResult
-    func checkConnection() async throws -> CKAccountStatus {
-        try await container.accountStatus()
-    }
-
     public func resolveHistory(from ctx: ModelContext) async throws -> [History]? {
         let currentHistory = try extractHistory(from: ctx)
-        print("Gathered Current History: \(currentHistory.count)")
+
+        resolveStatus = "Gathered Current History: \(currentHistory.count)"
         let cloudHistory = try await fetchAllHistoryRecords()
-        print("Gathered Cloud History: \(cloudHistory.count)")
+        resolveStatus = "Gathered Cloud History: \(cloudHistory.count)"
 
         let mergedHistory = CloudKitResolver.resolve(
             from: currentHistory,
             with: cloudHistory
         )
-        print("Got Merged History")
+        resolveStatus = "Merged History: \(mergedHistory.count)"
 
         let recordsToSave = try await CloudKitResolver.recordsToSave(
             merged: mergedHistory,
             existing: cloudHistory
         )
-        print("Records To Save Resolved")
+        resolveStatus = "Resolved Records To Save: \(recordsToSave.count)"
 
         guard !recordsToSave.isEmpty else {
+            resolveStatus = nil
             return nil
         }
 
@@ -85,15 +83,21 @@ final class CloudKitManager {
             savePolicy: .ifServerRecordUnchanged,
             atomically: false
         )
-        print("Modified Records")
+        resolveStatus = "Modified Records"
 
         for (_, saveResult) in result.saveResults {
             let _ = try saveResult.get()
         }
 
+        resolveStatus = nil
         return mergedHistory
     }
 
+}
+
+// MARK: - SwiftData retrieval
+extension CloudKitManager {
+    /// Function Gets all the `[History]` from SwiftData
     private func extractHistory(from ctx: ModelContext) throws -> [History] {
         let descriptor = FetchDescriptor<History>(
             sortBy: [
@@ -105,8 +109,10 @@ final class CloudKitManager {
     }
 }
 
+// MARK: - Fetch From iCloud
 extension CloudKitManager {
 
+    /// Get all `[CKRecords]` for history
     @concurrent
     public func fetchAllHistoryRecords() async throws -> [CKRecord] {
 

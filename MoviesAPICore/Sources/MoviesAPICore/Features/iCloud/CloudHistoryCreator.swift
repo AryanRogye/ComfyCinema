@@ -9,7 +9,7 @@ import CloudKit
 
 enum CloudHistoryCreator {
 
-
+    /// Function Creates a `History` from a `CKRecord`
     public static func history(from record: CKRecord) -> History? {
         guard record.recordType == "SyncedHistory",
               let resultId = record["resultId"] as? Int,
@@ -44,6 +44,7 @@ enum CloudHistoryCreator {
         )
     }
 
+    /// Function created a `CKRecord` from a `History`
     public static func createHistoryRecord(basedOn history: History) async throws -> CKRecord {
         let record = CKRecord(recordType: "SyncedHistory")
 

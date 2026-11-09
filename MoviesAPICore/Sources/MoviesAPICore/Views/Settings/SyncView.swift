@@ -17,60 +17,70 @@ struct SyncView: View {
 
     @State private var error: String?
     @State private var showError: Bool = false
-    @State private var iCloudStatus: CKAccountStatus?
 
     var body: some View {
+        @Bindable var cloudKitManager = cloudKitManager
         Form {
-            Button("Sync With iCloud") {
-                Task {
-                    do {
-                        if cloudKitManager.enabledCloudSave {
-                            if let hist = try await cloudKitManager.resolveHistory(from: ctx) {
+            Section {
+                VStack(spacing: 12) {
+                    Image(systemName: "icloud.fill")
+                        .font(.system(size: 54))
+                        .foregroundStyle(.blue)
 
-                                for existing in history {
-                                    ctx.delete(existing)
+                    Text("iCloud Sync")
+                        .font(.title2.bold())
+
+                    Text("Keep your watch history up to date across all your Apple devices.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+                .listRowBackground(Color.clear)
+            }
+
+            Toggle(isOn: $cloudKitManager.enabledCloudSave) {
+                Label("Sync Watch History", systemImage: "clock.arrow.circlepath")
+            }
+
+            if cloudKitManager.enabledCloudSave {
+                if let status = cloudKitManager.resolveStatus {
+                    Text(status)
+                }
+                Button("Sync With iCloud") {
+                    Task {
+                        do {
+                            if cloudKitManager.enabledCloudSave {
+                                if let hist = try await cloudKitManager.resolveHistory(from: ctx) {
+
+                                    for existing in history {
+                                        ctx.delete(existing)
+                                    }
+                                    for item in hist {
+                                        ctx.insert(item)
+                                    }
+                                    try ctx.save()
                                 }
-                                for item in hist {
-                                    ctx.insert(item)
-                                }
-                                try ctx.save()
                             }
+                        } catch {
+                            self.error = error.localizedDescription
+                            self.showError = true
                         }
-                    } catch {
-                        self.error = error.localizedDescription
-                        self.showError = true
                     }
                 }
             }
         }
         .formStyle(.grouped)
+#if os(macOS)
+        .scrollContentBackground(.hidden)
+        .background(.clear)
+#endif
         .alert(isPresented: $showError) {
             Alert(
                 title: Text("Error"),
                 message: Text("\(error, default: "Unknown Error")")
             )
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                switch iCloudStatus {
-                case .available:
-                    Image(systemName: "checkmark")
-                case .restricted, .couldNotDetermine, .noAccount, .temporarilyUnavailable:
-                    Image(systemName: "xmark")
-                case nil:
-                    Text("Not Loaded")
-                case .some(_):
-                    Image(systemName: "xmark")
-                }
-            }
-        }
-        .task {
-            do {
-                self.iCloudStatus = try await cloudKitManager.checkConnection()
-            } catch {
-                self.error = error.localizedDescription
-                self.showError = true
-            }
         }
     }
 }
