@@ -22,7 +22,7 @@ struct EpisodeImageView: View {
         Group {
             if let posterPath = imagePath,
                let url = URL(
-                string: "https://image.tmdb.org/t/p/w500\(posterPath)"
+                string: "https://image.tmdb.org/t/p/original\(posterPath)"
                ) {
                 AsyncImage(url: url) { image in
                     image

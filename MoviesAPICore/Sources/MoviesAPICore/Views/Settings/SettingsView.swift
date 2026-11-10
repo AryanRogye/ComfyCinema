@@ -59,6 +59,16 @@ public struct SettingsView: View {
             } label: {
                 Label("Storage", systemImage: "internaldrive")
             }
+#elseif os(macOS)
+            Section {
+                NavigationLink {
+                    SettingLogsView()
+                } label: {
+                    Text("View")
+                }
+            } header: {
+                Label("Logs", systemImage: "doc.text")
+            }
 #endif
 
             Section {

@@ -15,17 +15,20 @@ fileprivate struct WindowAccessor: NSViewRepresentable {
         let v = WindowAccessorView()
         return v
     }
-    
+
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
 fileprivate class WindowAccessorView: NSView {
-    private var didClose = false
     override func viewDidMoveToWindow() {
-        guard !didClose else { return }
-        didClose = true
-        /// Close it
-        window?.performClose(nil)
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        window.alphaValue = 0
+        window.ignoresMouseEvents = true
+        window.styleMask = [.borderless]
+        window.setContentSize(.zero)
+        window.orderOut(nil)
+        window.close()
     }
 }
 

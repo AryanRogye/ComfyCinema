@@ -14,12 +14,14 @@ import MoviesAPIData
 public class AppDelegate: NSObject, NSApplicationDelegate {
 
     var appCoordinator: AppCoordinator?
+    private var pendingWidgetHistoryID: String?
 
     public func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.isSwiftUIPreview else { return }
 
         do {
             appCoordinator = try AppCoordinator()
+            openPendingWidgetHistory()
         } catch {
             fatalError("Cant Load iCloud Config")
         }
@@ -61,8 +63,18 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
 
+    public func application(
+        _ application: NSApplication,
+        open urls: [URL]
+    ) {
+        for url in urls {
+            appOpenedWithUrl(url)
+        }
+    }
+
     @MainActor
     public func appOpenedWithUrl(_ url: URL) {
+        SettingLogs.shared.add("Triggered OpenURL: \(url)")
         guard url.scheme == "comfycinema",
               url.host == "watch" else {
             return
@@ -78,8 +90,17 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        self.appCoordinator?.appRouter.clickedWidgetWithResultID = idString
-        self.appCoordinator?.appRouter.selectedTab = .history
+        pendingWidgetHistoryID = idString
+        openPendingWidgetHistory()
+    }
+
+    @MainActor
+    private func openPendingWidgetHistory() {
+        guard let appCoordinator, let idString = pendingWidgetHistoryID else { return }
+        pendingWidgetHistoryID = nil
+        appCoordinator.appRouter.clickedWidgetWithResultID = idString
+        appCoordinator.openApp()
+        SettingLogs.shared.add("Opened From Widget: \(idString)")
     }
 }
 

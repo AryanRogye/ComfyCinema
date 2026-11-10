@@ -46,6 +46,7 @@ public struct MovieDetailView: View {
 
     @State var webviewModel: EmbeddedMovieViewModel = .init()
     @State private var screenshotter = EmbeddedMovieScreenshoter()
+    @State private var currentHistory: History?
 
 #if os(macOS)
     @State private var window: NSWindow?
@@ -198,6 +199,7 @@ public struct MovieDetailView: View {
             #if os(macOS)
             MovieDetailToolbar(
                 result: result,
+                history: currentHistory,
                 movieUrl: $movieUrl,
                 showCreateCollection: $showCreateCollection,
                 collectionName: $collectionName,
@@ -215,6 +217,7 @@ public struct MovieDetailView: View {
             #elseif os(iOS)
             MovieDetailToolbar(
                 result: result,
+                history: currentHistory,
                 movieUrl: $movieUrl,
                 showCreateCollection: $showCreateCollection,
                 collectionName: $collectionName,
@@ -260,6 +263,7 @@ public struct MovieDetailView: View {
             }) {
                 history.watchedAt = .now
                 history.updatedAt = history.watchedAt
+                currentHistory = history
             } else {
                 let history = History(
                     resultId: Int(result.id),
@@ -268,6 +272,7 @@ public struct MovieDetailView: View {
                     posterPath: result.posterPath
                 )
 
+                currentHistory = history
                 modelContext.insert(history)
             }
 
@@ -275,6 +280,7 @@ public struct MovieDetailView: View {
 
             movieUrl = url
             hasLoadedMovie = true
+            cloudKitSyncService.syncSaveToCloud()
         } catch {
             self.error = error.localizedDescription
             self.showError = true

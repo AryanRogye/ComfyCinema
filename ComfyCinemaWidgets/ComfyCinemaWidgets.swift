@@ -9,20 +9,19 @@ import WidgetKit
 import SwiftUI
 import SwiftData
 import MoviesAPIData
-import AppIntents
 
 internal struct HistoryInfo: TimelineEntry {
     let date: Date
     let systemImage: SystemImage?
     let color: SystemColor?
     let history: History
+
+    var watchURL: URL {
+        URL(string: "comfycinema://watch?id=\(history.id.uuidString)")!
+    }
 }
 
-struct ConfigurationAppIntent: WidgetConfigurationIntent {
-    static let title: LocalizedStringResource = "ComfyCinema Configuration"
-}
-
-struct Provider: AppIntentTimelineProvider {
+struct Provider: TimelineProvider {
     /// placeholder WidgetKit displays when it needs a temporary representation of
     /// the widget before the actual data is available
     func placeholder(in context: Context) -> HistoryInfo {
@@ -41,7 +40,11 @@ struct Provider: AppIntentTimelineProvider {
     }
 
 
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> HistoryInfo {
+    func getSnapshot(in context: Context, completion: @escaping (HistoryInfo) -> Void) {
+        Task { completion(await snapshot()) }
+    }
+
+    private func snapshot() async -> HistoryInfo {
         let image = try? await HistoryHelper.loadHistoryImage(from: "/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg")
         return HistoryInfo(
             date: Date(),
@@ -57,7 +60,11 @@ struct Provider: AppIntentTimelineProvider {
         )
     }
 
-    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<HistoryInfo> {
+    func getTimeline(in context: Context, completion: @escaping (Timeline<HistoryInfo>) -> Void) {
+        Task { completion(await timeline()) }
+    }
+
+    private func timeline() async -> Timeline<HistoryInfo> {
         let history: HistorySnapshot?
         do {
             history = try await MainActor.run {
@@ -133,10 +140,10 @@ private struct HistoryImage: View {
 private struct HistoryBackground: View {
 
     let systemImage: SystemImage?
-
+    @Environment(\.widgetRenderingMode) private var widgetRenderingMode
 
     var linearGradientColor: Color {
-        .black
+        return .black
     }
 
     var body: some View {
@@ -157,11 +164,19 @@ private struct HistoryBackground: View {
                                 location: 0.75
                             ),
                             .init(
-                                color: linearGradientColor.opacity(0.5),
+                                color: linearGradientColor.opacity(
+                                    widgetRenderingMode == .accented
+                                    ? 0.3
+                                    : 0.5
+                                ),
                                 location: 0.8
                             ),
                             .init(
-                                color: linearGradientColor,
+                                color: linearGradientColor.opacity(
+                                    widgetRenderingMode == .accented
+                                    ? 0.5
+                                    : 1
+                                ),
                                 location: 1
                             )
                         ],
@@ -173,9 +188,26 @@ private struct HistoryBackground: View {
 
             LinearGradient(
                 stops: [
-                    .init(color: .clear, location: 0.75),
-                    .init(color: linearGradientColor.opacity(0.35), location: 0.8),
-                    .init(color: linearGradientColor.opacity(0.65), location: 1),
+                    .init(
+                        color: .clear,
+                        location: 0.75
+                    ),
+                    .init(
+                        color: linearGradientColor.opacity(
+                            widgetRenderingMode == .accented
+                            ? 0.10
+                            : 0.35
+                        ),
+                        location: 0.8
+                    ),
+                    .init(
+                        color: linearGradientColor.opacity(
+                            widgetRenderingMode == .accented
+                            ? 0.25
+                            : 0.65
+                        ),
+                        location: 1
+                    ),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -246,31 +278,35 @@ private struct HistoryPlayButton: View {
     let oppositeForegroundColor: Color
 
     var body: some View {
-        Link(
-            destination: URL(
-                string: "comfycinema://watch?id=\(entry.history.id)"
-            )!
-        ) {
-            Circle()
-                .fill(foregroundColor)
-                .frame(width: 25, height: 25)
-                .overlay {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 13))
-                        .foregroundStyle(
-                            widgetRenderingMode == .accented
-                            ? .black
-                            : oppositeForegroundColor
-                        )
-                        .blendMode(
-                            widgetRenderingMode == .accented
-                            ? .destinationOut
-                            : .normal
-                        )
-                }
-                .compositingGroup()
+#if os(macOS)
+        playIcon
+#else
+        Link(destination: entry.watchURL) {
+            playIcon
         }
         .buttonStyle(.plain)
+#endif
+    }
+
+    private var playIcon: some View {
+        Circle()
+            .fill(foregroundColor)
+            .frame(width: 25, height: 25)
+            .overlay {
+                Image(systemName: "play.fill")
+                    .font(.system(size: 13))
+                    .foregroundStyle(
+                        widgetRenderingMode == .accented
+                        ? .black
+                        : oppositeForegroundColor
+                    )
+                    .blendMode(
+                        widgetRenderingMode == .accented
+                        ? .destinationOut
+                        : .normal
+                    )
+            }
+            .compositingGroup()
     }
 }
 
@@ -339,7 +375,7 @@ struct ComfyCinemaWidgets: Widget {
     let kind: String = "ComfyCinemaWidgets"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
 
             var color: Color? = nil
             if let c = entry.color {
@@ -357,6 +393,9 @@ struct ComfyCinemaWidgets: Widget {
                     for: .widget
                 )
                 .background(.clear)
+#if os(macOS)
+                .widgetURL(entry.watchURL)
+#endif
         }
         .supportedFamilies([
             .systemSmall

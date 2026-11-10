@@ -96,11 +96,13 @@ struct MoviesAPIClientApp: App {
 #elseif os(macOS)
         WindowGroup {
             EmptyView()
-                .destroyViewWindow()
                 .onOpenURL { url in
                     appDelegate.appOpenedWithUrl(url)
                 }
+                .destroyViewWindow()
         }
+        .handlesExternalEvents(matching: ["*"])
+        .defaultLaunchBehavior(.suppressed)
 #endif
     }
 }

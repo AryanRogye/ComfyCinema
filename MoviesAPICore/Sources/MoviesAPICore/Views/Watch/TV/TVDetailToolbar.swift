@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MoviesAPIData
 
 struct TVDetailToolbar: ToolbarContent {
 
@@ -14,6 +15,7 @@ struct TVDetailToolbar: ToolbarContent {
 
     let result: KTSearchResult
     let tvUrl: URL?
+    let history: History?
     @Binding var iFrameLogs: [String]
     @Binding var videoFrameLogs: [String]
     @Binding var navigationLogs: [String]
@@ -46,6 +48,7 @@ struct TVDetailToolbar: ToolbarContent {
                 Divider()
                 hideSeasonAndEpisodes
                 logsView
+                historyId
                 CollectionFavoriteMenu(
                     result: result,
                     showCreateCollection: $showCreateCollection,
@@ -126,6 +129,25 @@ struct TVDetailToolbar: ToolbarContent {
         }
         .buttonStyle(.plain)
 #endif
+    }
+
+    @ViewBuilder
+    private var historyId: some View {
+        if let history {
+            Button {
+#if os(iOS)
+                UIPasteboard.general.string = history.id.uuidString
+#elseif os(macOS)
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(
+                    history.id.uuidString,
+                    forType: .string
+                )
+#endif
+            } label: {
+                Text(history.id.uuidString)
+            }
+        }
     }
 
     // MARK: - Display Server Picker

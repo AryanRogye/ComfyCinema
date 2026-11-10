@@ -60,7 +60,6 @@ struct SecretTapButton: View {
 }
 #endif
 
-#if os(iOS)
 struct SettingLogsView: View {
     @Bindable var logs = SettingLogs.shared
 
@@ -73,6 +72,7 @@ struct SettingLogsView: View {
                         systemImage: "text.alignleft",
                         description: Text("Logs will appear here as events occur.")
                     )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollViewReader { proxy in
                         ScrollView {
@@ -103,15 +103,27 @@ struct SettingLogsView: View {
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .navigationTitle("Developer Logs")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+#if os(macOS)
+                ToolbarSpacer(.flexible)
+#endif
+                ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button {
+#if os(iOS)
                             UIPasteboard.general.string =
                             logs.logs.joined(separator: "\n")
+#elseif os(macOS)
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(
+                                logs.logs.joined(separator: "\n"),
+                                forType: .string
+                            )
+#endif
                         } label: {
                             Label("Copy All", systemImage: "doc.on.doc")
                         }
@@ -131,6 +143,7 @@ struct SettingLogsView: View {
     }
 }
 
+#if os(iOS)
 import CoreMotion
 
 @MainActor

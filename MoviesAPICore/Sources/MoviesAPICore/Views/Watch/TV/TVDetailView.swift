@@ -190,6 +190,7 @@ public struct TVDetailView: View {
             TVDetailToolbar(
                 result: result,
                 tvUrl: tvUrl,
+                history: currentHistory,
                 iFrameLogs: $iFrameLogs,
                 videoFrameLogs: $videoFrameLogs,
                 navigationLogs: $navigationLogs,
@@ -214,6 +215,7 @@ public struct TVDetailView: View {
             TVDetailToolbar(
                 result: result,
                 tvUrl: tvUrl,
+                history: currentHistory,
                 iFrameLogs: $iFrameLogs,
                 videoFrameLogs: $videoFrameLogs,
                 navigationLogs: $navigationLogs,
@@ -382,6 +384,7 @@ public struct TVDetailView: View {
             currentHistory = history
             modelContext.insert(history)
         }
+        cloudKitSyncService.syncSaveToCloud()
     }
 
     /// Save current playback for the history item

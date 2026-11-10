@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MoviesAPIData
 
 struct MovieDetailToolbar: ToolbarContent {
 
@@ -13,6 +14,7 @@ struct MovieDetailToolbar: ToolbarContent {
     @AppStorage("PreferStandardMediaSource") private var preferStandardMediaSource = false
 
     let result: KTSearchResult
+    let history: History?
     @Binding var movieUrl: URL?
     @Binding var showCreateCollection: Bool
     @Binding var collectionName: String
@@ -39,7 +41,7 @@ struct MovieDetailToolbar: ToolbarContent {
             Menu {
                 playbackCompatibility
                 Divider()
-                processControls
+                historyId
                 CollectionFavoriteMenu(
                     result: result,
                     showCreateCollection: $showCreateCollection,
@@ -93,13 +95,23 @@ struct MovieDetailToolbar: ToolbarContent {
         Text("Changing this reloads the player.")
     }
 
-    // MARK: - Process Controls
     @ViewBuilder
-    private var processControls: some View {
-#if os(macOS)
-        Button("Freeze Proccess") { webViewModel.freezeProcess() }
-        Button("UnFreeze Proccess") { webViewModel.unfreezeProcess() }
+    private var historyId: some View {
+        if let history {
+            Button {
+#if os(iOS)
+                UIPasteboard.general.string = history.id.uuidString
+#elseif os(macOS)
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(
+                    history.id.uuidString,
+                    forType: .string
+                )
 #endif
+            } label: {
+                Text(history.id.uuidString)
+            }
+        }
     }
 
     // MARK: - Display Server Picker

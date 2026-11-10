@@ -157,6 +157,12 @@ struct MacOSRoot: View {
                 navigationID = UUID()
             }
         }
+        .onChange(of: appRouter.clickedWidgetWithResultID, initial: true) { _, id in
+            guard id != nil, selectedTab != .history else { return }
+            selectedTab = .history
+            path = NavigationPath()
+            navigationID = UUID()
+        }
     }
 }
 
