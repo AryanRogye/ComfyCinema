@@ -12,24 +12,6 @@ import SwiftUI
 
 @MainActor
 enum HistoryHelper: Sendable {
-
-    public static func loadHistoryImage(
-        from posterPath: String?
-    ) async throws -> SystemImage? {
-        guard let posterPath else { return nil }
-        guard let url = URL(    string: "https://image.tmdb.org/t/p/w500\(posterPath)") else { return nil }
-        let (data, response) = try await URLSession.shared.data(from: url)
-
-        print("Poster response:", response)
-        print("Poster bytes:", data.count)
-
-#if os(macOS)
-        return NSImage(data: data)
-#else
-        return UIImage(data: data)
-#endif
-    }
-
     public static func fetchLatestHistory(
         from container: ModelContainer
     ) throws -> HistorySnapshot? {

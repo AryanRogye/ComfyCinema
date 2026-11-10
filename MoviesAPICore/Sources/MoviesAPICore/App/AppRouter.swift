@@ -18,6 +18,7 @@ public final class AppRouter {
 
     var searchTriggered: KTSearchResult? = nil
 
+    public var clickedWidgetWithFavoriteID: Int?
     public var clickedWidgetWithResultID: String?
 
     public init() {}

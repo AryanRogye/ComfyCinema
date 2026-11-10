@@ -163,6 +163,12 @@ struct MacOSRoot: View {
             path = NavigationPath()
             navigationID = UUID()
         }
+        .onChange(of: appRouter.clickedWidgetWithFavoriteID, initial: true) { _, id in
+            guard id != nil, selectedTab != .library else { return }
+            selectedTab = .library
+            path = NavigationPath()
+            navigationID = UUID()
+        }
     }
 }
 

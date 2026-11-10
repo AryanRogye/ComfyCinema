@@ -13,15 +13,20 @@ import MoviesAPIData
 
 public class AppDelegate: NSObject, NSApplicationDelegate {
 
+    private enum WidgetRoute {
+        case history(String)
+        case favorite(Int)
+    }
+
     var appCoordinator: AppCoordinator?
-    private var pendingWidgetHistoryID: String?
+    private var pendingWidgetRoute: WidgetRoute?
 
     public func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.isSwiftUIPreview else { return }
 
         do {
             appCoordinator = try AppCoordinator()
-            openPendingWidgetHistory()
+            openPendingWidgetRoute()
         } catch {
             fatalError("Cant Load iCloud Config")
         }
@@ -75,10 +80,7 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor
     public func appOpenedWithUrl(_ url: URL) {
         SettingLogs.shared.add("Triggered OpenURL: \(url)")
-        guard url.scheme == "comfycinema",
-              url.host == "watch" else {
-            return
-        }
+        guard url.scheme == "comfycinema" else { return }
         let components = URLComponents(
             url: url,
             resolvingAgainstBaseURL: false
@@ -90,17 +92,31 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        pendingWidgetHistoryID = idString
-        openPendingWidgetHistory()
+        switch url.host {
+        case "watch":
+            pendingWidgetRoute = .history(idString)
+        case "favorite":
+            guard let id = Int(idString) else { return }
+            pendingWidgetRoute = .favorite(id)
+        default:
+            return
+        }
+        openPendingWidgetRoute()
     }
 
     @MainActor
-    private func openPendingWidgetHistory() {
-        guard let appCoordinator, let idString = pendingWidgetHistoryID else { return }
-        pendingWidgetHistoryID = nil
-        appCoordinator.appRouter.clickedWidgetWithResultID = idString
+    private func openPendingWidgetRoute() {
+        guard let appCoordinator, let route = pendingWidgetRoute else { return }
+        pendingWidgetRoute = nil
+        switch route {
+        case .history(let id):
+            appCoordinator.appRouter.clickedWidgetWithResultID = id
+            SettingLogs.shared.add("Opened From Widget: \(id)")
+        case .favorite(let id):
+            appCoordinator.appRouter.clickedWidgetWithFavoriteID = id
+            SettingLogs.shared.add("Opened Favorite From Widget: \(id)")
+        }
         appCoordinator.openApp()
-        SettingLogs.shared.add("Opened From Widget: \(idString)")
     }
 }
 

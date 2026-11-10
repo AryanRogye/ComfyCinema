@@ -73,23 +73,41 @@ struct MoviesAPIClientApp: App {
             Root(appRouter: appRouter, cloudKitSync: cloudKitSync)
                 .preferredColorScheme(.dark)
                 .onOpenURL { url in
-                    guard url.scheme == "comfycinema",
-                          url.host == "watch" else {
-                        return
-                    }
-                    let components = URLComponents(
-                        url: url,
-                        resolvingAgainstBaseURL: false
-                    )
-                    guard let idString = components?
-                        .queryItems?
-                        .first(where: { $0.name == "id" })?
-                        .value else {
+
+                    guard url.scheme == "comfycinema" else {
                         return
                     }
 
-                    self.appRouter.clickedWidgetWithResultID = idString
-                    self.appRouter.selectedTab = .history
+                    if url.host == "favorite" {
+                        let components = URLComponents(
+                            url: url,
+                            resolvingAgainstBaseURL: false
+                        )
+                        guard let idString = components?
+                            .queryItems?
+                            .first(where: { $0.name == "id" })?
+                            .value else {
+                            return
+                        }
+                        guard let id = Int(idString) else { return }
+
+                        self.appRouter.clickedWidgetWithFavoriteID = id
+                        self.appRouter.selectedTab = .library
+                    } else if url.host == "watch" {
+                        let components = URLComponents(
+                            url: url,
+                            resolvingAgainstBaseURL: false
+                        )
+                        guard let idString = components?
+                            .queryItems?
+                            .first(where: { $0.name == "id" })?
+                            .value else {
+                            return
+                        }
+
+                        self.appRouter.clickedWidgetWithResultID = idString
+                        self.appRouter.selectedTab = .history
+                    }
                 }
         }
         .modelContainer(modelContainer)

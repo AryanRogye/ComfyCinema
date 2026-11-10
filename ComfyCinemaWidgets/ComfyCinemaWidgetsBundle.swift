@@ -11,6 +11,7 @@ import SwiftUI
 @main
 struct ComfyCinemaWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        ComfyCinemaWidgets()
+        MostRecentWidget()
+        FavoritesWidget()
     }
 }
