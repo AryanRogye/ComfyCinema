@@ -71,10 +71,36 @@ public final class CloudKitManager {
             return mergedHistory
         }
 
+        let results = try await database.modifyRecords(
+            saving: recordsToSave,
+            deleting: [],
+            savePolicy: .ifServerRecordUnchanged,
+            atomically: false
+        )
+
         var latestCloudRecords = cloudHistory
 
-        for record in recordsToSave {
-            let saved = try await saveResolvingConflict(record)
+        for (_, result) in results.saveResults {
+            let saved: CKRecord
+
+            switch result {
+            case .success(let record):
+                saved = record
+
+            case .failure(let error):
+                guard let ckError = error as? CKError,
+                      ckError.code == .serverRecordChanged else {
+                    throw error
+                }
+
+                guard let original = recordsToSave.first(where: {
+                    $0.recordID == ckError.clientRecord?.recordID
+                }) else {
+                    throw error
+                }
+
+                saved = try await saveResolvingConflict(original)
+            }
 
             latestCloudRecords.removeAll {
                 $0.recordID == saved.recordID
