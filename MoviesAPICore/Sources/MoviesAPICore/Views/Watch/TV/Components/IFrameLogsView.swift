@@ -13,6 +13,9 @@ struct IFrameLogsView: View {
     @Binding var navigationLogs: [String]
 
     @State private var filter: LogFilter = .all
+    @State private var iframeEntries: [PlaybackLogEntry] = []
+    @State private var videoEntries: [PlaybackLogEntry] = []
+    @State private var navigationEntries: [PlaybackLogEntry] = []
 
     @Environment(\.dismiss) var dismiss
 
@@ -39,26 +42,35 @@ struct IFrameLogsView: View {
             } else {
                 if (filter == .all || filter == .iframe) && !logs.isEmpty {
                     Section("IFrame Logs") {
-                        ForEach(Array(logs.reversed()).enumerated(), id: \.offset) { index, log in
-                            logLink(number: logs.count - index, log: log, title: "IFrame Log")
+                        ForEach(iframeEntries.reversed()) { entry in
+                            logRow(entry: entry, title: "IFrame Log")
                         }
                     }
                 }
                 if (filter == .all || filter == .video) && !videoLogs.isEmpty {
                     Section("Video Frame Logs") {
-                        ForEach(Array(videoLogs.reversed()).enumerated(), id: \.offset) { index, log in
-                            logLink(number: videoLogs.count - index, log: log, title: "Video Frame Log")
+                        ForEach(videoEntries.reversed()) { entry in
+                            logRow(entry: entry, title: "Video Frame Log")
                         }
                     }
                 }
                 if (filter == .all || filter == .navigation) && !navigationLogs.isEmpty {
                     Section("Navigation Logs") {
-                        ForEach(Array(navigationLogs.reversed()).enumerated(), id: \.offset) { index, log in
-                            logLink(number: navigationLogs.count - index, log: log, title: "Navigation Log")
+                        ForEach(navigationEntries.reversed()) { entry in
+                            logRow(entry: entry, title: "Navigation Log")
                         }
                     }
                 }
             }
+        }
+        .onChange(of: logs, initial: true) { _, values in
+            iframeEntries = PlaybackLogEntry.updated(iframeEntries, with: values)
+        }
+        .onChange(of: videoLogs, initial: true) { _, values in
+            videoEntries = PlaybackLogEntry.updated(videoEntries, with: values)
+        }
+        .onChange(of: navigationLogs, initial: true) { _, values in
+            navigationEntries = PlaybackLogEntry.updated(navigationEntries, with: values)
         }
         .navigationTitle("Playback Logs")
         .toolbar {
@@ -95,11 +107,35 @@ struct IFrameLogsView: View {
         }
     }
 
-    private func logLink(number: Int, log: String, title: String) -> some View {
-        NavigationLink {
-            LogDetailView(title: "\(title) #\(number)", log: log)
-        } label: {
-            IFrameLogRow(number: number, log: log)
+    private func logRow(entry: PlaybackLogEntry, title: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            IFrameLogRow(number: entry.number, log: entry.text)
+
+            NavigationLink {
+                LogDetailView(title: "\(title) #\(entry.number)", log: entry.text)
+            } label: {
+                Label("View Details", systemImage: "arrow.right.circle")
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+}
+
+/// Preserve row identity when the bounded buffers append or trim old logs.
+private struct PlaybackLogEntry: Identifiable {
+    let id = UUID()
+    let number: Int
+    let text: String
+
+    static func updated(_ previous: [Self], with values: [String]) -> [Self] {
+        let overlap = stride(from: min(previous.count, values.count), through: 0, by: -1)
+            .first { count in
+                previous.suffix(count).map(\.text).elementsEqual(values.prefix(count))
+            } ?? 0
+        let retained = Array(previous.suffix(overlap))
+        let nextNumber = (previous.last?.number ?? 0) + 1
+        return retained + values.dropFirst(overlap).enumerated().map { offset, text in
+            Self(number: nextNumber + offset, text: text)
         }
     }
 }

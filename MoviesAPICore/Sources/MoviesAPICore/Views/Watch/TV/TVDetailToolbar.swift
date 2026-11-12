@@ -15,9 +15,7 @@ struct TVDetailToolbar: ToolbarContent {
     let result: KTSearchResult
     let tvUrl: URL?
     let history: History?
-    @Binding var iFrameLogs: [String]
-    @Binding var videoFrameLogs: [String]
-    @Binding var navigationLogs: [String]
+    let onShowLogs: () -> Void
     @Binding var showCreateCollection: Bool
     @Binding var collectionName: String
     @Binding var collectionResultToAdd: KTSearchResult?
@@ -106,19 +104,7 @@ struct TVDetailToolbar: ToolbarContent {
     // MARK: - Logs
     @ViewBuilder
     private var logsView: some View {
-#if os(iOS)
-        /// iOS Logs
-        NavigationLink {
-            IFrameLogsView(
-                logs: $iFrameLogs,
-                videoLogs: $videoFrameLogs,
-                navigationLogs: $navigationLogs
-            )
-        } label: {
-            Text("Logs")
-        }
-        .buttonStyle(.plain)
-#endif
+        Button("Logs", action: onShowLogs)
     }
 
     @ViewBuilder

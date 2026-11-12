@@ -71,6 +71,7 @@ public struct TVDetailView: View {
     @State private var lastProgressSaveAt: Date?
     @State private var timeInfoTask: Task<Void, Never>?
 
+    @State private var showingLogs = false
     @State private var iFrameLogs: [String] = []
     @State private var videoFrameLogs: [String] = []
     @State private var navigationLogs: [String] = []
@@ -185,15 +186,23 @@ public struct TVDetailView: View {
             collectionName: $collectionName,
             collectionResultToAdd: $collectionResultToAdd
         ))
+        .sheet(isPresented: $showingLogs) {
+            NavigationStack {
+                IFrameLogsView(
+                    logs: $iFrameLogs,
+                    videoLogs: $videoFrameLogs,
+                    navigationLogs: $navigationLogs
+                )
+            }
+            .frame(minWidth: 400, minHeight: 400)
+        }
         .toolbar {
 #if os(macOS)
             TVDetailToolbar(
                 result: result,
                 tvUrl: tvUrl,
                 history: currentHistory,
-                iFrameLogs: $iFrameLogs,
-                videoFrameLogs: $videoFrameLogs,
-                navigationLogs: $navigationLogs,
+                onShowLogs: { showingLogs = true },
                 showCreateCollection: $showCreateCollection,
                 collectionName: $collectionName,
                 collectionResultToAdd: $collectionResultToAdd,
@@ -216,9 +225,7 @@ public struct TVDetailView: View {
                 result: result,
                 tvUrl: tvUrl,
                 history: currentHistory,
-                iFrameLogs: $iFrameLogs,
-                videoFrameLogs: $videoFrameLogs,
-                navigationLogs: $navigationLogs,
+                onShowLogs: { showingLogs = true },
                 showCreateCollection: $showCreateCollection,
                 collectionName: $collectionName,
                 collectionResultToAdd: $collectionResultToAdd,
@@ -278,7 +285,7 @@ public struct TVDetailView: View {
                 loadTVShow(season: selectedSeasonNumber, episode: Int(selectedEpisode.episodeNumber))
             }
         }
-        .task {
+        .onAppear {
 #if os(macOS)
             menubarController.assignLogs(
                 iFrame: $iFrameLogs,
