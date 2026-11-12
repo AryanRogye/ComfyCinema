@@ -25,7 +25,7 @@ enum ModelConfigFetcher: Sendable {
 
         /// Load Schema
         let schema = Schema(
-            versionedSchema: MoviesSchemaV2.self
+            versionedSchema: MoviesSchemaV3.self
         )
 
         /// Load Config
@@ -38,6 +38,7 @@ enum ModelConfigFetcher: Sendable {
         /// Return Container
         return try ModelContainer(
             for: schema,
+            migrationPlan: MoviesMigrationPlan.self,
             configurations: configuration
         )
     }

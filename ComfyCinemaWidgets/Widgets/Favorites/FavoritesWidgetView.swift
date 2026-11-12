@@ -5,6 +5,7 @@
 //  Created by Aryan Rogye on 11/9/26.
 //
 
+/// TODO: Remove ifdefs and use entry seperate params
 import SwiftUI
 import WidgetKit
 import MoviesAPIData
@@ -16,29 +17,31 @@ struct FavoritesWidgetView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            switch family {
-            case .systemSmall:
-                if let favorite1 = entry.favorite1 {
-                    FavoriteWidgetView(favorite: favorite1)
-                } else {
-                    Rectangle()
+            if entry.favorite1 == nil && entry.favorite2 == nil
+                && entry.favorite3 == nil && entry.favorite4 == nil {
+                Link(destination: URL(string: "comfycinema://favorite")!) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "star")
+                            .font(.title2)
+                        Text("Favorites unavailable")
+                            .font(.headline)
+                        Text("Open ComfyCinema to check your widget selections.")
+                            .font(.caption)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-            case .systemMedium:
-                HStack(spacing: 0) {
+                .buttonStyle(.plain)
+            } else {
+                switch family {
+                case .systemSmall:
                     if let favorite1 = entry.favorite1 {
                         FavoriteWidgetView(favorite: favorite1)
                     } else {
                         Rectangle()
                     }
-
-                    if let favorite2 = entry.favorite2 {
-                        FavoriteWidgetView(favorite: favorite2)
-                    } else {
-                        Rectangle()
-                    }
-                }
-            case .systemLarge:
-                VStack(spacing: 0) {
+                case .systemMedium:
                     HStack(spacing: 0) {
                         if let favorite1 = entry.favorite1 {
                             FavoriteWidgetView(favorite: favorite1)
@@ -52,22 +55,38 @@ struct FavoritesWidgetView: View {
                             Rectangle()
                         }
                     }
-                    HStack(spacing: 0) {
-                        if let favorite3 = entry.favorite3 {
-                            FavoriteWidgetView(favorite: favorite3)
-                        } else {
-                            Rectangle()
-                        }
+                case .systemLarge:
+                    VStack(spacing: 0) {
+                        HStack(spacing: 0) {
+                            if let favorite1 = entry.favorite1 {
+                                FavoriteWidgetView(favorite: favorite1)
+                            } else {
+                                Rectangle()
+                            }
 
-                        if let favorite4 = entry.favorite4 {
-                            FavoriteWidgetView(favorite: favorite4)
-                        } else {
-                            Rectangle()
+                            if let favorite2 = entry.favorite2 {
+                                FavoriteWidgetView(favorite: favorite2)
+                            } else {
+                                Rectangle()
+                            }
+                        }
+                        HStack(spacing: 0) {
+                            if let favorite3 = entry.favorite3 {
+                                FavoriteWidgetView(favorite: favorite3)
+                            } else {
+                                Rectangle()
+                            }
+
+                            if let favorite4 = entry.favorite4 {
+                                FavoriteWidgetView(favorite: favorite4)
+                            } else {
+                                Rectangle()
+                            }
                         }
                     }
+                default:
+                    EmptyView()
                 }
-            default:
-                EmptyView()
             }
         }
         .clipShape(.rect(cornerRadius: 12))

@@ -43,15 +43,18 @@ struct MoviesAPIClientApp: App {
             }
 
 
-            let schema = Schema(versionedSchema: MoviesSchemaV2.self)
+            let schema = Schema(versionedSchema: MoviesSchemaV3.self)
             let configuration = ModelConfiguration(
                 schema: schema,
-                groupContainer: .identifier(
-                    identifier
-                ),
-                cloudKitDatabase: .none,
+                groupContainer: .identifier(identifier),
+                cloudKitDatabase: .none
             )
-            let container = try ModelContainer(for: schema, configurations: configuration)
+            let container = try ModelContainer(
+                for: schema,
+                migrationPlan: MoviesMigrationPlan.self,
+                configurations: [configuration]
+            )
+
             AppDependencyManager.shared.add(dependency: container)
             self.modelContainer = container
             self.cloudKitSync = .init(

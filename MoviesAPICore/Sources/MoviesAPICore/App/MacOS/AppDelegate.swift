@@ -145,13 +145,17 @@ class AppCoordinator {
                 fatalError("AppGroup Empty")
             }
 
-            let schema = Schema(versionedSchema: MoviesSchemaV2.self)
+            let schema = Schema(versionedSchema: MoviesSchemaV3.self)
             let configuration = ModelConfiguration(
                 schema: schema,
                 groupContainer: .identifier(identifier),
                 cloudKitDatabase: .none
             )
-            return try ModelContainer(for: schema, configurations: [configuration])
+            return try ModelContainer(
+                for: schema,
+                migrationPlan: MoviesMigrationPlan.self,
+                configurations: [configuration]
+            )
         } catch {
             fatalError("Could not create model container: \(error)")
         }

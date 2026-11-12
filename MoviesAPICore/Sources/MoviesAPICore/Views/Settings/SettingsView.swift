@@ -43,6 +43,16 @@ public struct SettingsView: View {
                 Label("Network", systemImage: "network")
             }
 
+#if os(macOS)
+            Section("Widgets") {
+                NavigationLink {
+                    WidgetFavoriteConfigView()
+                } label: {
+                    Label("Configure Favorites", systemImage: "star.fill")
+                }
+            }
+#endif
+
             Section {
                 NavigationLink {
                     SyncView()

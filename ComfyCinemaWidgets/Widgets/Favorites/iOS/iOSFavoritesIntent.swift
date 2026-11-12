@@ -5,6 +5,8 @@
 //  Created by Aryan Rogye on 11/9/26.
 //
 
+#if os(iOS)
+
 import WidgetKit
 import AppIntents
 import MoviesAPIData
@@ -24,6 +26,22 @@ struct FavoritesIntent: WidgetConfigurationIntent {
 
     @Parameter(title: "Favorite Item 4")
     var favorite4: FavoriteSnapshot?
+}
+
+struct FavoriteSnapshot: AppEntity {
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Favorite")
+    static let defaultQuery = FavoritesQuery()
+
+    let favoriteID: Int
+    let name: String
+    let mediaType: String
+    let posterPath: String?
+
+    var id: Int { favoriteID }
+
+    var displayRepresentation: DisplayRepresentation {
+        DisplayRepresentation(title: "\(name)", subtitle: "\(mediaType)")
+    }
 }
 
 struct FavoritesQuery: EntityQuery {
@@ -46,3 +64,5 @@ struct FavoritesQuery: EntityQuery {
         }
     }
 }
+
+#endif

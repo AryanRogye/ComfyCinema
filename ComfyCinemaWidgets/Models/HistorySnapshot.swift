@@ -8,6 +8,7 @@
 import MoviesAPIData
 import Foundation
 
+/// TODO: Move
 struct HistorySnapshot: Sendable {
     let historyId: UUID
     let resultId: Int

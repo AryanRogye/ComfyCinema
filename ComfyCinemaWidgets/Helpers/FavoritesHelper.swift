@@ -10,9 +10,20 @@ import MoviesAPIData
 
 @MainActor
 enum FavoritesHelper: Sendable {
+    #if os(macOS)
+    public static func fetchAllWidgetFavorites(
+        from container: ModelContainer
+    ) throws -> WidgetFavorites? {
+        let context = container.mainContext
+
+        let descriptor = FetchDescriptor<WidgetFavorites>()
+        let favorites = try context.fetch(descriptor).first
+        return favorites
+    }
+    #endif
     public static func fetchAllFavorites(
         from container: ModelContainer
-    ) async throws -> [Favorite] {
+    ) throws -> [Favorite] {
 
         let context = container.mainContext
 
