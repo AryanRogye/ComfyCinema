@@ -11,7 +11,6 @@ import MoviesAPIData
 struct MovieDetailToolbar: ToolbarContent {
 
     @Environment(PlaybackSession.self) var playbackSession
-    @AppStorage("PreferStandardMediaSource") private var preferStandardMediaSource = false
 
     let result: KTSearchResult
     let history: History?
@@ -39,7 +38,6 @@ struct MovieDetailToolbar: ToolbarContent {
 
         ToolbarItemGroup(placement: .primaryAction) {
             Menu {
-                playbackCompatibility
                 Divider()
                 historyId
                 CollectionFavoriteMenu(
@@ -86,13 +84,6 @@ struct MovieDetailToolbar: ToolbarContent {
                 Image(systemName: "chevron.backward")
             }
         }
-    }
-
-    // MARK: - Playback Compatibility
-    @ViewBuilder
-    private var playbackCompatibility: some View {
-        Toggle("Playback Compatibility", isOn: $preferStandardMediaSource)
-        Text("Changing this reloads the player.")
     }
 
     @ViewBuilder

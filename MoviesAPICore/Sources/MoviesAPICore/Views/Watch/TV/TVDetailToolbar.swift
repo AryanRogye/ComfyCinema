@@ -11,7 +11,6 @@ import MoviesAPIData
 struct TVDetailToolbar: ToolbarContent {
 
     @Environment(PlaybackSession.self) var playbackSession
-    @AppStorage("PreferStandardMediaSource") private var preferStandardMediaSource = false
 
     let result: KTSearchResult
     let tvUrl: URL?
@@ -44,7 +43,6 @@ struct TVDetailToolbar: ToolbarContent {
 
         ToolbarItemGroup(placement: .primaryAction) {
             Menu {
-                playbackCompatability
                 Divider()
                 hideSeasonAndEpisodes
                 logsView
@@ -87,14 +85,6 @@ struct TVDetailToolbar: ToolbarContent {
             }
         }
     }
-
-    // MARK: - Playback Compatability
-    @ViewBuilder
-    private var playbackCompatability: some View {
-        Toggle("Playback Compatibility", isOn: $preferStandardMediaSource)
-        Text("Changing this reloads the player.")
-    }
-
 
     // MARK: - Hide Season And Episodes
     @ViewBuilder

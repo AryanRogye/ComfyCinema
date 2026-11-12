@@ -9,44 +9,6 @@ import SwiftUI
 import WebKit
 import ProccesInfo
 
-@Observable
-@MainActor
-final class EmbeddedMovieViewModel {
-    private(set) var error: String?
-    var showError: Bool = false
-    var estimatedProgress: Double = 0
-    var isLoading: Bool = false
-
-#if os(macOS)
-    @ObservationIgnored
-    weak var webView: WKWebView?
-
-    func stopPlayback() {
-        webView?.stopLoading()
-        webView?.loadHTMLString("", baseURL: nil)
-        webView = nil
-    }
-
-    @ObservationIgnored
-    var freezeProcess: () -> Void = {}
-
-    @ObservationIgnored
-    var unfreezeProcess: () -> Void = {}
-#endif
-
-    func handleLoadFailure(_ error: Error) {
-        let error = error as NSError
-        if error.domain == NSURLErrorDomain,
-           error.code == NSURLErrorCancelled {
-            return
-        }
-
-        showError = true
-        self.error = error.localizedDescription
-        return
-    }
-}
-
 struct TimeInfo: Codable {
     var currentTime: Double
     var duration: Double
@@ -126,9 +88,6 @@ private typealias Representable = NSViewRepresentable
 
 /// Bridges a `WKWebView` from `WebViewModel` into SwiftUI.
 struct WebView: Representable {
-
-    @AppStorage("PreferStandardMediaSource") private var preferStandardMediaSource = false
-
     @Bindable var vm: EmbeddedMovieViewModel
     @Bindable var playbackSession: PlaybackSession
     let blockingService: BlockingService
@@ -150,7 +109,7 @@ struct WebView: Representable {
         return webView
     }
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        updatePlaybackCompatibility(in: uiView)
+        attachPlaybackCompatabilityIfNeeded(in: uiView)
     }
 #elseif os(macOS)
     func makeNSView(context: Context) -> NSView {
@@ -174,153 +133,113 @@ struct WebView: Representable {
             return
         }
 
-        updatePlaybackCompatibility(in: webView)
+        attachPlaybackCompatabilityIfNeeded(in: webView)
     }
 #endif
 
+#if os(macOS)
     private func makeWebView(context: Context) -> WKWebView {
 
         if let webView = playbackSession.webView {
             blockingService.attachNetworkFilters(to: webView)
             context.coordinator.attach(to: webView)
-            updatePlaybackCompatibility(in: webView)
+            attachPlaybackCompatabilityIfNeeded(in: webView)
             return webView
         }
 
         let config = WKWebViewConfiguration()
-#if os(iOS)
-        // Live providers render their player inside the page.
-        config.allowsInlineMediaPlayback = allowsInlinePlayback
-        config.allowsPictureInPictureMediaPlayback = true
-        config.preferences.isElementFullscreenEnabled = false
-#else
         config.preferences.isElementFullscreenEnabled = true
-#endif
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
         config.mediaTypesRequiringUserActionForPlayback = []
         config.websiteDataStore = .default()
-#if os(iOS)
-        if allowsInlinePlayback {
-            config.userContentController.addUserScript(WKUserScript(
-                source: Self.liveMediaSourceScript,
-                injectionTime: .atDocumentStart,
-                forMainFrameOnly: false,
-                in: .page
-            ))
-        }
-#endif
-        synchronizePlaybackCompatibility(in: config.userContentController)
         blockingService.attachPopupBlocking(to: config)
 
         let wv = WKWebView(frame: .zero, configuration: config)
-#if DEBUG
+        attachPlaybackCompatabilityIfNeeded(in: wv)
         wv.isInspectable = true
-#endif
         wv.allowsBackForwardNavigationGestures = false
 
-#if os(iOS)
-        wv.isOpaque = true
-        wv.layer.drawsAsynchronously = true
-        wv.layer.shouldRasterize = false
-        wv.scrollView.decelerationRate = .normal
-#elseif os(macOS)
         wv.layer?.drawsAsynchronously = true
         wv.layer?.shouldRasterize = false
-#endif
 
         blockingService.attachNetworkFilters(to: wv)
         context.coordinator.attach(to: wv)
 
-#if os(iOS)
-        playbackSession.webView = wv
-#elseif os(macOS)
         vm.webView = wv
-#endif
         let playbackURL = allowsInlinePlayback ? LiveTVPlaybackURL.resolve(url) : url
         wv.load(playbackURL)
 
         SettingLogs.shared.add("WebView: \(url.absoluteString)")
         return wv
     }
+#elseif os(iOS)
+    private func makeWebView(context: Context) -> WKWebView {
 
-#if os(iOS)
-    /// This live provider's JW player detects only MediaSource on iPhone and
-    /// otherwise bypasses its custom HLS loader. Use the managed implementation
-    /// when standard MSE is absent. Managed playback requires disabling AirPlay
-    /// without an alternative source; scope that change to this provider's videos.
-    private static let liveMediaSourceScript = """
-    (() => {
-        if (location.hostname !== 'dembed.st') return;
-        if (typeof window.MediaSource !== 'undefined' || typeof window.ManagedMediaSource !== 'function') return;
-        Object.defineProperty(window, 'MediaSource', { value: window.ManagedMediaSource, configurable: true });
-        const createElement = Document.prototype.createElement;
-        Document.prototype.createElement = function (...args) {
-            const element = Reflect.apply(createElement, this, args);
-            if (element instanceof HTMLVideoElement) {
-                element.disableRemotePlayback = true;
-                element.playsInline = true;
-            }
-            return element;
-        };
-    })();
-    """
-#endif
+        if let webView = playbackSession.webView {
+            blockingService.attachNetworkFilters(to: webView)
+            context.coordinator.attach(to: webView)
+            attachPlaybackCompatabilityIfNeeded(in: webView)
+            return webView
+        }
 
-    /// Works around slow or stalled seeks in provider players that prefer
-    /// WebKit's ManagedMediaSource over ordinary MediaSource.
-    /// In a standalone MoviesAPI test, seeking Star Wars (1977) to one hour
-    /// remained stuck for over 60 seconds with only the opening video buffered.
-    /// Hiding ManagedMediaSource let the player's HLS.js feature detection fall
-    /// back to ordinary MediaSource; the same seek then completed in 1.38 seconds.
-    /// This changes the player's streaming path while keeping playback in WebKit.
-    /// It does not establish whether the underlying defect is in WebKit or the
-    /// provider's player integration, nor guarantee a fix for startup failures.
-    /// A player's API selection can look like this (simplified):
-    /// ```javascript
-    /// const StreamingAPI = window.ManagedMediaSource ?? window.MediaSource;
-    /// const stream = new StreamingAPI();
-    /// ```
-    /// The precise requirement is to hide ManagedMediaSource before the player
-    /// selects or caches that constructor. Hiding it afterward does not replace
-    /// a cached constructor or an already-created stream. Use .atDocumentStart
-    /// to run before provider initialization, in the .page world so the provider
-    /// sees the change, and in every frame so embedded players see it too.
-    /// The toolbar setting controls this workaround for all providers on both platforms.
-    /// Disable it for providers that need ManagedMediaSource. Changes reload the player.
-    private static let standardMediaSourceScript = """
-    Object.defineProperty(window, "ManagedMediaSource", {
-        value: undefined,
-        configurable: true
-    });
-    """
+        let config = WKWebViewConfiguration()
+        // Live providers render their player inside the page.
+        config.allowsInlineMediaPlayback = allowsInlinePlayback
+        config.allowsPictureInPictureMediaPlayback = true
+        config.preferences.isElementFullscreenEnabled = false
+        config.preferences.javaScriptCanOpenWindowsAutomatically = false
+        config.mediaTypesRequiringUserActionForPlayback = []
+        config.websiteDataStore = .default()
 
-    /// Replace only this workaround's script, preserving popup blocking and watchers.
-    @discardableResult
-    private func synchronizePlaybackCompatibility(in controller: WKUserContentController) -> Bool {
-        // WebKit's bridged array can change when removeAllUserScripts runs.
-        // Materialize an independent snapshot before removing/readding scripts.
-        let scripts = controller.userScripts.map { $0 }
-        let isEnabled = scripts.contains { $0.source == Self.standardMediaSourceScript }
-        guard isEnabled != preferStandardMediaSource else { return false }
-
-        if preferStandardMediaSource {
-            controller.addUserScript(WKUserScript(
-                source: Self.standardMediaSourceScript,
+        /// for live tv only
+        if allowsInlinePlayback {
+            config.userContentController.addUserScript(WKUserScript(
+                source: liveMediaSourceScript,
                 injectionTime: .atDocumentStart,
                 forMainFrameOnly: false,
                 in: .page
             ))
-        } else {
-            controller.removeAllUserScripts()
-            for script in scripts where script.source != Self.standardMediaSourceScript {
-                controller.addUserScript(script)
-            }
         }
-        return true
+        blockingService.attachPopupBlocking(to: config)
+
+        let wv = WKWebView(frame: .zero, configuration: config)
+        attachPlaybackCompatabilityIfNeeded(in: wv)
+        wv.isInspectable = true
+        wv.allowsBackForwardNavigationGestures = false
+
+        wv.isOpaque = true
+        wv.layer.drawsAsynchronously = true
+        wv.layer.shouldRasterize = false
+        wv.scrollView.decelerationRate = .normal
+        blockingService.attachNetworkFilters(to: wv)
+        context.coordinator.attach(to: wv)
+
+        playbackSession.webView = wv
+        let playbackURL = allowsInlinePlayback ? LiveTVPlaybackURL.resolve(url) : url
+        wv.load(playbackURL)
+
+        SettingLogs.shared.add("WebView: \(url.absoluteString)")
+        return wv
+    }
+#endif
+
+    private func doesContainPlaybackCompatabilityScript(in controller: WKUserContentController) -> Bool {
+        // WebKit's bridged array can change when removeAllUserScripts runs.
+        // Materialize an independent snapshot before removing/readding scripts.
+        let scripts = controller.userScripts.map { $0 }
+        let isEnabled = scripts.contains { $0.source == standardMediaSourceScript }
+        return isEnabled
     }
 
-    private func updatePlaybackCompatibility(in webView: WKWebView) {
-        guard synchronizePlaybackCompatibility(in: webView.configuration.userContentController) else { return }
+    private func attachPlaybackCompatabilityIfNeeded(in webView: WKWebView) {
+        let controller = webView.configuration.userContentController
+        guard !doesContainPlaybackCompatabilityScript(in: controller) else { return }
+        controller.addUserScript(WKUserScript(
+            source: standardMediaSourceScript,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: false,
+            in: .page
+        ))
         // Changing the global cannot replace an existing stream; rebuild the page.
         webView.reload()
     }
@@ -398,7 +317,7 @@ struct WebView: Representable {
             webView.uiDelegate = self
             kvoTokens.removeAll()
             startObservation(with: webView)
-            attachWatcher(to: webView)
+            attachScripts(to: webView)
             beginMonitoringPID()
 
 //            findProcessMethods(webView)
@@ -581,3 +500,55 @@ extension WebView {
         view.configuration.userContentController.removeScriptMessageHandler(forName: "videoLogger")
     }
 }
+
+
+#if os(iOS)
+/// This live provider's JW player detects only MediaSource on iPhone and
+/// otherwise bypasses its custom HLS loader. Use the managed implementation
+/// when standard MSE is absent. Managed playback requires disabling AirPlay
+/// without an alternative source; scope that change to this provider's videos.
+private let liveMediaSourceScript = """
+    (() => {
+        if (location.hostname !== 'dembed.st') return;
+        if (typeof window.MediaSource !== 'undefined' || typeof window.ManagedMediaSource !== 'function') return;
+        Object.defineProperty(window, 'MediaSource', { value: window.ManagedMediaSource, configurable: true });
+        const createElement = Document.prototype.createElement;
+        Document.prototype.createElement = function (...args) {
+            const element = Reflect.apply(createElement, this, args);
+            if (element instanceof HTMLVideoElement) {
+                element.disableRemotePlayback = true;
+                element.playsInline = true;
+            }
+            return element;
+        };
+    })();
+    """
+#endif
+
+
+/// Works around slow or stalled seeks in provider players that prefer
+/// WebKit's ManagedMediaSource over ordinary MediaSource.
+/// In a standalone MoviesAPI test, seeking Star Wars (1977) to one hour
+/// remained stuck for over 60 seconds with only the opening video buffered.
+/// Hiding ManagedMediaSource let the player's HLS.js feature detection fall
+/// back to ordinary MediaSource; the same seek then completed in 1.38 seconds.
+/// This changes the player's streaming path while keeping playback in WebKit.
+/// It does not establish whether the underlying defect is in WebKit or the
+/// provider's player integration, nor guarantee a fix for startup failures.
+/// A player's API selection can look like this (simplified):
+/// ```javascript
+/// const StreamingAPI = window.ManagedMediaSource ?? window.MediaSource;
+/// const stream = new StreamingAPI();
+/// ```
+/// The precise requirement is to hide ManagedMediaSource before the player
+/// selects or caches that constructor. Hiding it afterward does not replace
+/// a cached constructor or an already-created stream. Use .atDocumentStart
+/// to run before provider initialization, in the .page world so the provider
+/// sees the change, and in every frame so embedded players see it too.
+/// This workaround applies to all providers on both platforms.
+private let standardMediaSourceScript = """
+    Object.defineProperty(window, "ManagedMediaSource", {
+        value: undefined,
+        configurable: true
+    });
+    """

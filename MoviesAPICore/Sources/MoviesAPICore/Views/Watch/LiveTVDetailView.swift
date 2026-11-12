@@ -22,8 +22,6 @@ struct LiveTVDetailView: View {
     @State private var reloadID = UUID()
     @State var webviewModel: EmbeddedMovieViewModel = .init()
 
-    @AppStorage("PreferStandardMediaSource") private var preferStandardMediaSource = false
-
     var body: some View {
         ZStack {
             if let liveUrl {
@@ -85,19 +83,16 @@ struct LiveTVDetailView: View {
 
             ToolbarItemGroup(placement: .primaryAction) {
 
-                Menu {
-                    Toggle("Playback Compatibility", isOn: $preferStandardMediaSource)
-                    Text("Changing this reloads the player.")
-                    Divider()
 #if os(macOS)
+                Menu {
                     Button("Freeze Proccess") { webviewModel.freezeProcess() }
                     Button("UnFreeze Proccess") { webviewModel.unfreezeProcess() }
-#endif
                 } label: {
                     Image(systemName: "ellipsis")
                 }
                 .menuIndicator(.hidden)
                 .environment(\.menuOrder, .fixed)
+#endif
 
 
                 Menu {

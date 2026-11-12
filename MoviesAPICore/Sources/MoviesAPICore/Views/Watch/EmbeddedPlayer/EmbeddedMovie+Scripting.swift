@@ -20,73 +20,12 @@ extension WebView.Coordinator: WKScriptMessageHandler {
         controller.addUserScript(script)
     }
 
-    internal func attachWatcher(to webView: WKWebView) {
-        guard let monitorUrl = Bundle.module.url(
-            forResource: "monitorIFrame",
-            withExtension: "js"
-        ) else {
-            print("Couldnt find monitorIFrame.js")
-            return
-        }
-        guard let monitorText = try? String(contentsOf: monitorUrl, encoding: .utf8) else {
-            print("Couldnt convert monitorIFrame.js to text")
-            return
-        }
+    internal func attachScripts(to webView: WKWebView) {
+        attachIFrameMonitor(to: webView)
 
-        let monitorScript = WKUserScript(
-            source: monitorText,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: false
-        )
-        addUserScriptIfNeeded(monitorScript, to: webView.configuration.userContentController)
-        webView.configuration.userContentController.removeScriptMessageHandler(forName: "iframeDebug")
-        webView.configuration.userContentController.add(self, name: "iframeDebug")
+        attachIFrameLogger(to: webView)
 
-
-        guard let iFrameLoggerUrl = Bundle.module.url(
-            forResource: "IFrameLogger",
-            withExtension: "js"
-        ) else {
-            print("Couldnt Find IFrameLogger.js")
-            return
-        }
-        guard let iFrameLoggerText = try? String(contentsOf: iFrameLoggerUrl, encoding: .utf8) else {
-            print("Couldnt convert IFrameLogger.js to text")
-            return
-        }
-
-        let loggerScript = WKUserScript(
-            source: iFrameLoggerText,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: false
-        )
-
-        addUserScriptIfNeeded(loggerScript, to: webView.configuration.userContentController)
-        webView.configuration.userContentController.removeScriptMessageHandler(forName: "iframeLog")
-        webView.configuration.userContentController.add(self, name: "iframeLog")
-
-        guard let videoLoggerUrl = Bundle.module.url(
-            forResource: "VideoLogger",
-            withExtension: "js"
-        ) else {
-            print("Couldnt Find VideoLogger.js")
-            return
-        }
-        guard let videoLoggerText = try? String(contentsOf: videoLoggerUrl, encoding: .utf8) else {
-            print("Couldnt convert VideoLogger.js to text")
-            return
-        }
-
-        let videoLoggerScript = WKUserScript(
-            source: videoLoggerText,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: false,
-            in: .page
-        )
-
-        addUserScriptIfNeeded(videoLoggerScript, to: webView.configuration.userContentController)
-        webView.configuration.userContentController.removeScriptMessageHandler(forName: "videoLogger")
-        webView.configuration.userContentController.add(self, name: "videoLogger")
+        attachVideoLogger(to: webView)
     }
 
     func userContentController(
@@ -174,5 +113,79 @@ extension WebView.Coordinator: WKScriptMessageHandler {
         }
 
         return pretty
+    }
+}
+
+extension WebView.Coordinator {
+    private func attachIFrameMonitor(to webView: WKWebView) {
+        guard let monitorUrl = Bundle.module.url(
+            forResource: "monitorIFrame",
+            withExtension: "js"
+        ) else {
+            print("Couldnt find monitorIFrame.js")
+            return
+        }
+        guard let monitorText = try? String(contentsOf: monitorUrl, encoding: .utf8) else {
+            print("Couldnt convert monitorIFrame.js to text")
+            return
+        }
+
+        let monitorScript = WKUserScript(
+            source: monitorText,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: false
+        )
+        addUserScriptIfNeeded(monitorScript, to: webView.configuration.userContentController)
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "iframeDebug")
+        webView.configuration.userContentController.add(self, name: "iframeDebug")
+    }
+
+    private func attachIFrameLogger(to webView: WKWebView) {
+        guard let iFrameLoggerUrl = Bundle.module.url(
+            forResource: "IFrameLogger",
+            withExtension: "js"
+        ) else {
+            print("Couldnt Find IFrameLogger.js")
+            return
+        }
+        guard let iFrameLoggerText = try? String(contentsOf: iFrameLoggerUrl, encoding: .utf8) else {
+            print("Couldnt convert IFrameLogger.js to text")
+            return
+        }
+
+        let loggerScript = WKUserScript(
+            source: iFrameLoggerText,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: false
+        )
+
+        addUserScriptIfNeeded(loggerScript, to: webView.configuration.userContentController)
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "iframeLog")
+        webView.configuration.userContentController.add(self, name: "iframeLog")
+    }
+
+    private func attachVideoLogger(to webView: WKWebView) {
+        guard let videoLoggerUrl = Bundle.module.url(
+            forResource: "VideoLogger",
+            withExtension: "js"
+        ) else {
+            print("Couldnt Find VideoLogger.js")
+            return
+        }
+        guard let videoLoggerText = try? String(contentsOf: videoLoggerUrl, encoding: .utf8) else {
+            print("Couldnt convert VideoLogger.js to text")
+            return
+        }
+
+        let videoLoggerScript = WKUserScript(
+            source: videoLoggerText,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: false,
+            in: .page
+        )
+
+        addUserScriptIfNeeded(videoLoggerScript, to: webView.configuration.userContentController)
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "videoLogger")
+        webView.configuration.userContentController.add(self, name: "videoLogger")
     }
 }
