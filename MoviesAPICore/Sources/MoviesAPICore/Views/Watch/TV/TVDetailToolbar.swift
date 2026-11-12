@@ -26,7 +26,6 @@ struct TVDetailToolbar: ToolbarContent {
     @Binding var reloadID: UUID
     @Binding var hideSeasonsAndEpisodes: Bool
     @Bindable var webViewModel: EmbeddedMovieViewModel
-    let menubarController: TVDetailMenubarController
 #endif
     let onSaveCurrentPlaybackPosition: () -> Void
     let onDismiss: () -> Void
@@ -71,7 +70,6 @@ struct TVDetailToolbar: ToolbarContent {
             Button {
 #if os(macOS)
                 webViewModel.stopPlayback()
-                menubarController.removeMenubarItems()
 #endif
                 onSaveCurrentPlaybackPosition()
                 if playbackSession.isPlaying(result) {

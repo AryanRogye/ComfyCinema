@@ -45,10 +45,6 @@ public struct TVDetailView: View {
         self._selectedEpisodeNumber = .init(initialValue: episodeNumber)
     }
 
-#if os(macOS)
-    @State fileprivate var menubarController = TVDetailMenubarController()
-#endif
-
     @State private var error: String?
     @State private var showError: Bool = false
 
@@ -177,7 +173,6 @@ public struct TVDetailView: View {
         .onDisappear {
 #if os(macOS)
             webviewModel.stopPlayback()
-            menubarController.removeMenubarItems()
 #endif
             saveCurrentPlaybackPosition()
         }
@@ -212,7 +207,6 @@ public struct TVDetailView: View {
                 reloadID: $reloadID,
                 hideSeasonsAndEpisodes: $hideSeasonsAndEpisodes,
                 webViewModel: webviewModel,
-                menubarController: menubarController,
                 onSaveCurrentPlaybackPosition: saveCurrentPlaybackPosition,
                 onDismiss: {
                     cloudKitSyncService.syncSaveToCloud()
@@ -284,17 +278,6 @@ public struct TVDetailView: View {
                 reloadID = UUID()
                 loadTVShow(season: selectedSeasonNumber, episode: Int(selectedEpisode.episodeNumber))
             }
-        }
-        .onAppear {
-#if os(macOS)
-            menubarController.assignLogs(
-                iFrame: $iFrameLogs,
-                videoFrame: $videoFrameLogs,
-                navigation: $navigationLogs
-            )
-            menubarController.assignWindowContainer(windowContainer)
-            menubarController.attachMenubarItems()
-#endif
         }
         /// Attach history if we came including the tvUrl being nil and the currentHistory not being set
         .task {
