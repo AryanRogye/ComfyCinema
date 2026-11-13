@@ -8,7 +8,31 @@
 import CloudKit
 import MoviesAPIData
 
-enum CloudHistoryCreator {
+enum CloudRecordResolver {}
+
+// MARK: - `CKRecord` To Object
+extension CloudRecordResolver {
+    public static func deletedHistory(from record: CKRecord) -> DeletedHistory? {
+        guard record.recordType == "DeletedHistory",
+              let resultId = record["resultId"] as? Int,
+              let mediaTypeRaw = record["mediaType"] as? String,
+              let mediaType = HistoryMediaType(rawValue: mediaTypeRaw),
+              let deletedAt = record["deletedAt"] as? Date
+                else {
+            return nil
+        }
+
+        let season = record["season"] as? Int
+        let episode = record["episode"] as? Int
+
+        return DeletedHistory(
+            resultId: resultId,
+            mediaType: mediaType,
+            season: season,
+            episode: episode,
+            deletedAt: deletedAt
+        )
+    }
 
     /// Function Creates a `History` from a `CKRecord`
     public static func history(from record: CKRecord) -> History? {
@@ -45,25 +69,41 @@ enum CloudHistoryCreator {
             updatedAt: record["updatedAt"] as? Date
         )
     }
+}
+
+// MARK: - `CKRecord` Creation
+
+extension CloudRecordResolver {
+
+    public static func createHistoryDeletion(basedOn history: DeletedHistory) async throws -> CKRecord {
+        let recordName = try CloudIdentifierCreator.createIdentifierToAvoidClashes(
+            base: "deletion-",
+            resultId: history.resultId,
+            mediaType: history.mediaType,
+            season: history.season,
+            episode: history.episode
+        )
+        let record = CKRecord(
+            recordType: "DeletedHistory",
+            recordID: CKRecord.ID(recordName: recordName)
+        )
+        record["resultId"] = history.resultId
+        record["mediaType"] = history.mediaType.rawValue
+        record["season"] = history.season
+        record["episode"] = history.episode
+        record["deletedAt"] = history.deletedAt
+        return record
+    }
 
     /// Function created a `CKRecord` from a `History`
     public static func createHistoryRecord(basedOn history: History) async throws -> CKRecord {
-
-        /// Avoid duplicate
-        let recordName: String
-
-        switch history.mediaType {
-        case .movie:
-            recordName = "movie-\(history.resultId)"
-
-        case .episode:
-            guard let season = history.season,
-                  let episode = history.episode else {
-                throw CocoaError(.validationMissingMandatoryProperty)
-            }
-
-            recordName = "episode-\(history.resultId)-s\(season)-e\(episode)"
-        }
+        let recordName = try CloudIdentifierCreator.createIdentifierToAvoidClashes(
+            base: "",
+            resultId: history.resultId,
+            mediaType: history.mediaType,
+            season: history.season,
+            episode: history.episode
+        )
 
         let record = CKRecord(
             recordType: "SyncedHistory",
@@ -83,4 +123,5 @@ enum CloudHistoryCreator {
 
         return record
     }
+
 }

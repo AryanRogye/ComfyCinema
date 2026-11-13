@@ -46,22 +46,49 @@ public final class CloudKitManager {
         self.container = CKContainer(identifier: identifier)
         self.database = container.privateCloudDatabase
     }
+}
+
+// MARK: - History iCloud
+extension CloudKitManager {
+
+    /// Called when created history so we can remove from the iCloud Records if it exists
+    public func removeHistoryFromDeletedIfNeeded(_ history: History) async throws {
+        let deletedHistory = DeletedHistory(history: history)
+        let deleted = try await CloudRecordResolver.createHistoryDeletion(basedOn: deletedHistory)
+        try await database.deleteRecord(withID: deleted.recordID)
+    }
+
+    /// Called when history is deleted
+    public func markHistoryAsDeleted(_ history: History) async throws {
+        let deletedHistory = DeletedHistory(history: history)
+        let deleted = try await CloudRecordResolver.createHistoryDeletion(basedOn: deletedHistory)
+        let _ = try await database.modifyRecords(
+            saving: [deleted],
+            deleting: [],
+            savePolicy: .ifServerRecordUnchanged,
+            atomically: false
+        )
+    }
 
     public func resolveHistory(from ctx: ModelContext) async throws -> [History] {
         defer { resolveStatus = nil }
         let currentHistory = try extractHistory(from: ctx)
-
         resolveStatus = "Gathered Current History: \(currentHistory.count)"
+
         let cloudHistory = try await fetchAllHistoryRecords()
         resolveStatus = "Gathered Cloud History: \(cloudHistory.count)"
 
-        let mergedHistory = CloudKitResolver.resolve(
+        let deletedHistory = try await fetchAllDeletedRecords()
+        resolveStatus = "Gathered Deleted Cloud History: \(deletedHistory.count)"
+
+        let mergedHistory = CloudHistoryResolver.resolve(
             from: currentHistory,
-            with: cloudHistory
+            with: cloudHistory,
+            deleted: deletedHistory
         )
         resolveStatus = "Merged History: \(mergedHistory.count)"
 
-        let recordsToSave = try await CloudKitResolver.recordsToSave(
+        let recordsToSave = try await CloudHistoryResolver.recordsToSave(
             merged: mergedHistory,
             existing: cloudHistory
         )
@@ -110,9 +137,10 @@ public final class CloudKitManager {
 
         /// if the server won a conflict, we need to apply its winning version locally too.
         /// Returning your original mergedHistory would return data from before the conflict was resolved.
-        return CloudKitResolver.resolve(
+        return CloudHistoryResolver.resolve(
             from: currentHistory,
-            with: latestCloudRecords
+            with: latestCloudRecords,
+            deleted: deletedHistory
         )
     }
 
@@ -151,6 +179,7 @@ public final class CloudKitManager {
             )
         }
     }
+
 }
 
 // MARK: - SwiftData retrieval
@@ -170,17 +199,31 @@ extension CloudKitManager {
 // MARK: - Fetch From iCloud
 extension CloudKitManager {
 
-    /// Get all `[CKRecords]` for history
+    @concurrent
+    public func fetchAllDeletedRecords() async throws -> [CKRecord] {
+        let query = CKQuery(
+            recordType: "DeletedHistory",
+            predicate: NSPredicate(value: true)
+        )
+
+        return try await fetchAllRecords(matching: query)
+    }
+
     @concurrent
     public func fetchAllHistoryRecords() async throws -> [CKRecord] {
-
         let query = CKQuery(
             recordType: "SyncedHistory",
             predicate: NSPredicate(value: true)
         )
 
+        return try await fetchAllRecords(matching: query)
+    }
+
+    @concurrent
+    private func fetchAllRecords(
+        matching query: CKQuery
+    ) async throws -> [CKRecord] {
         var allRecords: [CKRecord] = []
-        var cursor: CKQueryOperation.Cursor?
 
         let firstPage = try await database.records(
             matching: query,
@@ -191,7 +234,7 @@ extension CloudKitManager {
             allRecords.append(try result.get())
         }
 
-        cursor = firstPage.queryCursor
+        var cursor = firstPage.queryCursor
 
         while let currentCursor = cursor {
             let page = try await database.records(

@@ -8,20 +8,22 @@
 import CloudKit
 import MoviesAPIData
 
-enum CloudKitResolver {
+enum CloudHistoryResolver {
 
     /// Function resolves current history from records
-    /// stored in iCloud
+    /// stored in iCloud making sure to avoid the deleted records
     public static func resolve(
         from history: [History],
-        with records: [CKRecord]
+        with records: [CKRecord],
+        deleted: [CKRecord] = []
     ) -> [History] {
 
-        var updatedHistory: [History] = []
-
-        var storedHistory = records.compactMap {
-            CloudHistoryCreator.history(from: $0)
+        /// Convert records to `[History]`
+        var storedHistory: [History] = records.compactMap {
+            CloudRecordResolver.history(from: $0)
         }
+
+        var updatedHistory: [History] = []
 
         for history in history {
             /// Check to see if the storedHistory contains the same resultId and the mediaType
@@ -61,6 +63,29 @@ enum CloudKitResolver {
             updatedHistory.append(history)
         }
 
+        for delete in deleted {
+            guard let deletedHistory = CloudRecordResolver.deletedHistory(from: delete) else { continue }
+            switch deletedHistory.mediaType {
+            case .episode:
+                if let history = updatedHistory.first(where: {
+                    $0.resultId == deletedHistory.resultId &&
+                    $0.mediaType == deletedHistory.mediaType &&
+                    $0.season == deletedHistory.season &&
+                    $0.episode == deletedHistory.episode
+                }) {
+                    if history.syncDate <= deletedHistory.deletedAt {
+                        updatedHistory.removeAll(where: { $0 == history })
+                    }
+                }
+            case .movie:
+                if let history = updatedHistory.first(where: { $0.resultId == deletedHistory.resultId && $0.mediaType == deletedHistory.mediaType }) {
+                    if history.syncDate <= deletedHistory.deletedAt {
+                        updatedHistory.removeAll(where: { $0 == history })
+                    }
+                }
+            }
+        }
+
         return updatedHistory
     }
 
@@ -76,7 +101,7 @@ enum CloudKitResolver {
         for history in merged {
             /// see if history exists in stored iCloud history
             let existingRecord = existing.first { record in
-                guard let stored = CloudHistoryCreator.history(from: record) else {
+                guard let stored = CloudRecordResolver.history(from: record) else {
                     return false
                 }
 
@@ -85,7 +110,7 @@ enum CloudKitResolver {
 
             if let existingRecord {
                 /// Create a `History` based off stored
-                guard let stored = CloudHistoryCreator.history(from: existingRecord) else {
+                guard let stored = CloudRecordResolver.history(from: existingRecord) else {
                     continue
                 }
 
@@ -104,7 +129,7 @@ enum CloudKitResolver {
 
             } else {
                 // No corresponding CloudKit record exists.
-                let record = try await CloudHistoryCreator.createHistoryRecord(
+                let record = try await CloudRecordResolver.createHistoryRecord(
                     basedOn: history
                 )
 

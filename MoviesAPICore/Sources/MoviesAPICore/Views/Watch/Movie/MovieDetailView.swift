@@ -263,6 +263,7 @@ public struct MovieDetailView: View {
                 history.watchedAt = .now
                 history.updatedAt = history.watchedAt
                 currentHistory = history
+                cloudKitSyncService.syncSaveToCloud()
             } else {
                 let history = History(
                     resultId: Int(result.id),
@@ -273,13 +274,12 @@ public struct MovieDetailView: View {
 
                 currentHistory = history
                 modelContext.insert(history)
+                cloudKitSyncService.addToHistoryThenSync(history)
             }
 
             playbackSession.startMovie(result: result, url: url)
-
             movieUrl = url
             hasLoadedMovie = true
-            cloudKitSyncService.syncSaveToCloud()
         } catch {
             self.error = error.localizedDescription
             self.showError = true

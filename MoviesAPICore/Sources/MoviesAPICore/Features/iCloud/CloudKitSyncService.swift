@@ -17,6 +17,7 @@ public final class CloudKitSyncService {
     private let cloudKitManager: CloudKitManager
 
     private var isSyncing: Bool = false
+    private var cloudQueue = TaskQueue()
 
     var resolveStatus: String? {
         cloudKitManager.resolveStatus
@@ -38,15 +39,52 @@ public final class CloudKitSyncService {
 
     var pendingSyncs: Int = 0
 
-    func syncSaveToCloud() {
+    func addToHistoryThenSync(_ history: History) {
+        guard enabledCloudSave else { return }
         Task {
-            do {
-                try await saveToCloud()
-            } catch {
-                // Log or expose the failure.
+            cloudQueue.enqueue {
+                do {
+                    try await self.cloudKitManager.removeHistoryFromDeletedIfNeeded(history)
+                } catch {
+                    /// ignore error since
+                }
+            }
+            cloudQueue.enqueue {
+                do {
+                    try await self.saveToCloud()
+                } catch {
+                    /// ignore error
+                }
             }
         }
     }
+
+    func didJustDeleteHistory(_ history: History) {
+        guard enabledCloudSave else { return }
+        Task {
+            cloudQueue.enqueue {
+                do {
+                    try await self.cloudKitManager.markHistoryAsDeleted(history)
+                } catch {
+                    /// ignore error
+                }
+            }
+        }
+    }
+
+    func syncSaveToCloud() {
+        guard enabledCloudSave else { return }
+        Task {
+            cloudQueue.enqueue {
+                do {
+                    try await self.saveToCloud()
+                } catch {
+                    /// ignore error
+                }
+            }
+        }
+    }
+
     func saveToCloud() async throws {
         guard enabledCloudSave else { return }
 
@@ -62,13 +100,48 @@ public final class CloudKitSyncService {
             pendingSyncs = 0
 
             let merged = try await cloudKitManager.resolveHistory(from: ctx)
+            let deleted: [DeletedHistory] = try await cloudKitManager.fetchAllDeletedRecords().compactMap {
+                return CloudRecordResolver.deletedHistory(from: $0)
+            }
+
             try reconcileLocalHistory(merged, in: ctx)
+            try removeFromHistoryDeleted(deleted, in: ctx)
 
 #if os(iOS)
             SettingLogs.shared.add("Synced to iCloud")
 #endif
         } while pendingSyncs > 0 && enabledCloudSave
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    func removeFromHistoryDeleted(
+        _ deleted: [DeletedHistory],
+        in ctx: ModelContext
+    ) throws {
+
+        let history = try ctx.fetch(FetchDescriptor<History>())
+        for deletedHistory in deleted {
+            switch deletedHistory.mediaType {
+            case .episode:
+                if let history = history.first(where: {
+                    $0.resultId == deletedHistory.resultId &&
+                    $0.mediaType == deletedHistory.mediaType &&
+                    $0.season == deletedHistory.season &&
+                    $0.episode == deletedHistory.episode
+                }) {
+                    if history.syncDate <= deletedHistory.deletedAt {
+                        ctx.delete(history)
+                    }
+                }
+            case .movie:
+                if let history = history.first(where: { $0.resultId == deletedHistory.resultId && $0.mediaType == deletedHistory.mediaType }) {
+                    if history.syncDate <= deletedHistory.deletedAt {
+                        ctx.delete(history)
+                    }
+                }
+            }
+        }
+        try ctx.save()
     }
 
     @MainActor

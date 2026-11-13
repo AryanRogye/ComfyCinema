@@ -15,6 +15,7 @@ public struct HistoryView: View {
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(BlockingService.self) var blockingService
     @Environment(PlaybackSession.self) var playbackSession
+    @Environment(CloudKitSyncService.self) var cloudKitSyncService
 
     @Environment(\.modelContext) var modelContext
 
@@ -83,7 +84,9 @@ public struct HistoryView: View {
                             }
                             .buttonStyle(HistoryButton())
                             .contextMenu {
+                                /// TODO: Here
                                 Button(role: .destructive) {
+                                    cloudKitSyncService.didJustDeleteHistory(item)
                                     modelContext.delete(item)
                                 } label: {
                                     Label(
@@ -205,12 +208,6 @@ public struct HistoryView: View {
                 self.error = error.localizedDescription
                 showError = true
             }
-        }
-    }
-
-    private func delete(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(history[index])
         }
     }
 }

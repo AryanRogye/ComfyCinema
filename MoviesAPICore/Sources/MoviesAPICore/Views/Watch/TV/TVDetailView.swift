@@ -362,6 +362,7 @@ public struct TVDetailView: View {
             history.watchedAt = .now
             history.updatedAt = history.watchedAt
             currentHistory = history
+            cloudKitSyncService.syncSaveToCloud()
         } else {
             let history = History(
                 resultId: Int(result.id),
@@ -373,8 +374,8 @@ public struct TVDetailView: View {
             )
             currentHistory = history
             modelContext.insert(history)
+            cloudKitSyncService.addToHistoryThenSync(history)
         }
-        cloudKitSyncService.syncSaveToCloud()
     }
 
     /// Save current playback for the history item
