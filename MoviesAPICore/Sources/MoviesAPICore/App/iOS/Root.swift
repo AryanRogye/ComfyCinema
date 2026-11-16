@@ -30,6 +30,7 @@ public struct Root: View {
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
+    @State private var remoteClient = RemoteClient()
 
     @State private var homePath: [PlaybackRoute] = []
     @State private var libraryPath: [PlaybackRoute] = []
@@ -111,6 +112,7 @@ public struct Root: View {
                 .environment(tmdbManager)
                 .environment(liveTVManager)
                 .environment(blockingService)
+                .environment(remoteClient)
                 .environment(cloudKitSync)
                 .environment(playbackSession)
                 .environment(defaultManager)

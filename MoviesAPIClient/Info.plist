@@ -15,6 +15,14 @@
     <key>AppGroup</key>
     <string>$(AppGroup)</string>
 
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>Discover and control ComfyCinema on your Mac.</string>
+
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_comfycinema._tcp</string>
+    </array>
+
     <!-- URL Type -->
     <key>CFBundleURLTypes</key>
     <array>

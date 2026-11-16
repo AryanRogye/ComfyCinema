@@ -25,6 +25,7 @@ struct MacOSRoot: View {
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
+    @State private var remoteServer = RemoteServer()
 
     @State private var selectedTab: MacOSTab = .home
 

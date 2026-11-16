@@ -21,6 +21,10 @@ let package = Package(
             from: "9.0.9"
         ),
         .package(
+            url: "https://github.com/hummingbird-project/hummingbird.git",
+            from: "2.0.0"
+        ),
+        .package(
             path: "../MoviesAPIData"
         )
     ],
@@ -38,7 +42,8 @@ let package = Package(
                 "SharedLogic",
                 "ProccesInfo",
                 .product(name: "Defaults", package: "Defaults"),
-                .product(name: "MoviesAPIData", package: "MoviesAPIData")
+                .product(name: "MoviesAPIData", package: "MoviesAPIData"),
+                .product(name: "Hummingbird", package: "hummingbird"),
             ],
             resources: [
                 .process("Features/WebKit/NetworkFiltering/NetworkBlockingRules.json"),

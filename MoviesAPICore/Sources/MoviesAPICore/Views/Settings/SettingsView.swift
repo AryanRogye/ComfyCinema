@@ -39,6 +39,13 @@ public struct SettingsView: View {
                 } else {
                     ProgressView("Preparing Blocking")
                 }
+#if os(iOS)
+                NavigationLink {
+                    RemoteDevicesView()
+                } label: {
+                    Text("View Devices To Connect To")
+                }
+#endif
             } header: {
                 Label("Network", systemImage: "network")
             }
