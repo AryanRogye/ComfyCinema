@@ -26,6 +26,7 @@ public struct Root: View {
 
     @Bindable var cloudKitSync: CloudKitSyncService
     @State private var tmdbManager: TMDBManager?
+    @State private var aniListManager = AniListManager()
     @State private var liveTVManager: LiveTVManager?
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
@@ -41,6 +42,8 @@ public struct Root: View {
     @State private var error: String?
     @State private var showError: Bool = false
     @State private var intentTriggeredResult: KTSearchResult?
+
+    @State private var enableAnimeSearch: Bool = false
 
     public init(appRouter: AppRouter, cloudKitSync: CloudKitSyncService) {
         self.appRouter = appRouter
@@ -93,7 +96,7 @@ public struct Root: View {
 
                     Tab(value: .search, role: .search) {
                         NavigationStack(path: $searchPath) {
-                            SearchTab()
+                            SearchTab(enableAnimeSearch: $enableAnimeSearch)
                                 .navigationDestination(for: PlaybackRoute.self) { _ in
                                     PlaybackDestination()
                                 }
@@ -109,6 +112,7 @@ public struct Root: View {
                 }
                 .tabBarMinimizeBehavior(.onScrollDown)
                 .environment(tmdbManager)
+                .environment(aniListManager)
                 .environment(liveTVManager)
                 .environment(blockingService)
                 .environment(cloudKitSync)
@@ -120,7 +124,7 @@ public struct Root: View {
                         isSearchTabSelected: appRouter.selectedTab == .search,
                         searchText: $searchText
                     ) {
-                        search(using: tmdbManager)
+                        search()
                     }
                 )
                 .sheet(item: $intentTriggeredResult) { search in
@@ -202,23 +206,38 @@ public struct Root: View {
         }
     }
 
-    private func search(using manager: TMDBManager) {
+    private func search() {
         guard !isSearching else { return }
-
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+
         guard !query.isEmpty else {
-            manager.clearSearchResults()
+            tmdbManager?.clearSearchResults()
+            aniListManager.clearSearchResults()
             return
         }
 
-        isSearching = true
-        Task {
-            defer { isSearching = false }
-            do {
-                try await manager.search(query)
-            } catch {
-                self.error = error.localizedDescription
-                self.showError = true
+        if enableAnimeSearch {
+            isSearching = true
+            Task {
+                defer { isSearching = false }
+                do {
+                    try await aniListManager.search(query)
+                } catch {
+                    self.error = error.localizedDescription
+                    self.showError = true
+                }
+            }
+        } else {
+            guard let manager = tmdbManager else { return }
+            isSearching = true
+            Task {
+                defer { isSearching = false }
+                do {
+                    try await manager.search(query)
+                } catch {
+                    self.error = error.localizedDescription
+                    self.showError = true
+                }
             }
         }
     }
@@ -236,6 +255,7 @@ private struct SearchTabModifier: ViewModifier {
         if isSearchTabSelected {
             content
                 .searchable(text: $searchText, prompt: "Search movies, TV, and people")
+                .searchPresentationToolbarBehavior(.avoidHidingContent)
                 .tabViewSearchActivation(.searchTabSelection)
                 .onSubmit(of: .search, submit)
         } else {

@@ -21,6 +21,7 @@ struct MacOSRoot: View {
     @Bindable var appRouter: AppRouter
     @Bindable var cloudKitSync: CloudKitSyncService
     @State private var tmdbManager: TMDBManager?
+    @State private var aniListManager = AniListManager()
     @State private var liveTVManager: LiveTVManager?
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
@@ -32,6 +33,7 @@ struct MacOSRoot: View {
     @State private var showError: Bool = false
 
     @State private var path = NavigationPath()
+    @State private var enableAnimeSearch: Bool = false
     @State private var navigationID = UUID()
     @State private var intentTriggeredResult: KTSearchResult?
 
@@ -86,8 +88,11 @@ struct MacOSRoot: View {
                             case .searchResults:
                                 ScrollView {
                                     SearchResultsView(
-                                        searchResults: tmdbManager.searchResults
+                                        enableAnimeSearch: $enableAnimeSearch,
+                                        searchResults: tmdbManager.searchResults,
+                                        animeSearchResults: aniListManager.searchResults
                                     )
+                                    .padding(.top, 50)
                                 }
                             }
                         }

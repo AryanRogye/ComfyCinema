@@ -7,6 +7,46 @@
 
 import SwiftUI
 
+public struct AnimeWatchDetailView: View {
+
+    let result: Anime
+    var restoredPlayback: PlaybackSession.Playback?
+
+    public init(result: Anime, restoredPlayback: PlaybackSession.Playback? = nil) {
+        self.result = result
+        self.restoredPlayback = restoredPlayback
+    }
+
+    public var body: some View {
+        switch (result.format) {
+        case "TV":
+            AnimeTVDetailView(result: result)
+        case "MOVIE":
+            Text("Movie Detail View")
+        default:
+            Text("Not Yet Supported")
+        }
+//        switch result.mediaType {
+//        case .movie:
+//            MovieDetailView(
+//                displayServer: displayServerBinding,
+//                result: result,
+//                restoredURL: restoredPlayback?.movieURL(for: result)
+//            )
+//        case .tv:
+//            TVDetailView(
+//                displayServer: displayServerBinding,
+//                result: result,
+//                restoredPlayback: restoredPlayback?.tvPlayback(for: result)
+//            )
+//        case .person:
+//            Text("Not Yet Supported")
+//        default:
+//            Text("Unkown Media Type")
+//        }
+    }
+}
+
 public struct WatchDetailView: View {
 
     let result: KTSearchResult
