@@ -94,3 +94,15 @@ input { min-width: 0; flex: 1; }
 .picker-row { display: block; width: 100%; border: 1px solid #52617a; border-radius: 9px; padding: 13px; margin: 8px 0; background: #2b3545; color: #fff; text-align: left; }
 .error { color: #ff9c9c; }
 @media (max-width: 900px) { .sidebar { flex-basis: 155px; } .content { padding: 25px; } .hero-content { max-width: 95%; } }
+
+.channel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; margin-top: 24px; }
+.channel-card { background: #1c2431; color: #fff; border: 2px solid #353e4b; border-radius: 14px; padding: 16px; min-height: 170px; }
+.channel-card img, .channel-placeholder { display: block; width: 100%; height: 100px; object-fit: contain; margin-bottom: 12px; }
+.channel-placeholder { line-height: 100px; color: #a6afbd; letter-spacing: .2em; }
+.channel-card strong { display: block; font-size: 17px; }
+.channel-card:focus { background: #324862; border-color: #fff; }
+.episode-still { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
+.history-stats { display: flex; gap: 20px; flex-wrap: wrap; background: #171c25; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+.history-stats strong { font-size: 30px; margin-right: 8px; }
+.history-stats p { flex-basis: 100%; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }

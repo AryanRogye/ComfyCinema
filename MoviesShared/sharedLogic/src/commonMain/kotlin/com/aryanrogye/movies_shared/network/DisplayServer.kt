@@ -12,6 +12,8 @@ enum class KTDisplayServer(val rawValue: String) {
 
     VID_SPARK("VidSpark"),
 
+    CDN_VID_SPARK("cdn.VidSpark"),
+
     VID_LINK("VidLink"),
 
     CINE_SRC("CineSrc"),
@@ -27,6 +29,7 @@ enum class KTDisplayServer(val rawValue: String) {
                 VID_SRC -> "https://vidsrc.sh/embed"
                 RIVE_STREAM -> "https://www.rivestream.app/embed/agg"
                 VID_SPARK -> "https://vidspark.to"
+                CDN_VID_SPARK -> "https://cdn.vidspark.to"
                 VID_LINK -> "https://vidlink.pro"
                 CINE_SRC -> "https://cinesrc.st/embed"
                 OneOneOneMovies -> "https://111movies.net"

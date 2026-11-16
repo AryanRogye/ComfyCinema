@@ -8,6 +8,11 @@
 import SwiftUI
 import SwiftData
 
+private enum HomeOption: String, CaseIterable {
+    case moviesAndTVShows = "Discover"
+    case liveTV = "Live TV"
+}
+
 public struct Home: View {
 
     @Environment(TMDBManager.self) var tmdbManager
@@ -18,169 +23,65 @@ public struct Home: View {
 
     public init() {}
 
-    var filteredResults: [KTTrendingResult] {
-        switch selectedFilter {
-        case .all:
-            tmdbManager.trendingResults
-        case .tv:
-            tmdbManager.trendingResults.filter { result in
-                result.mediaType == .tv
-            }
-        case .movies:
-            tmdbManager.trendingResults.filter { result in
-                result.mediaType == .movie
-            }
-        }
-    }
 
-    @AppStorage("home.selectedFilter")
-    private var selectedFilter: LibraryFilter = .all
-
-    @AppStorage("home.trendingExpanded")
-    private var trendingExpanded = true
-
-    @AppStorage("home.nowPlayingMoviesExpanded")
-    private var nowPlayingMoviesExpanded = true
-
-    @AppStorage("home.popularTVExpanded")
-    private var popularTVExpanded = true
-
-    @AppStorage("home.popularMoviesExpanded")
-    private var popularMoviesExpanded = true
-
-    @AppStorage("home.topRatedTVExpanded")
-    private var topRatedTVExpanded = true
-
-    @AppStorage("home.topRatedMoviesExpanded")
-    private var topRatedMoviesExpanded = true
+    @AppStorage("home.homeOption")
+    private var homeOption: HomeOption = .moviesAndTVShows
 
     public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                DisclosureGroup(isExpanded: $trendingExpanded) {
-                    HomeListView(
-                        contents: filteredResults,
-                        error: $error,
-                        showError: $showError
-                    )
-                } label: {
-                    Text("Trending Today")
-                        .font(.title2.bold())
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                }
-
-                if selectedFilter == .movies || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $nowPlayingMoviesExpanded) {
-                        HomeListView(
-                            contents: tmdbManager.nowPlayingMovies,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Now Playing Movies")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
-                }
-
-                if selectedFilter == .tv || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $popularTVExpanded) {
-                        HomeListView(
-                            contents: tmdbManager.popularTV,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Popular TV Shows")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
-                }
-
-                if selectedFilter == .movies || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $popularMoviesExpanded) {
-                        HomeListView(
-                            contents: tmdbManager.popularMovies,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Popular Movies")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
-                }
-
-                if selectedFilter == .tv || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $topRatedTVExpanded) {
-                        HomeListView(
-                            contents: tmdbManager.topRatedTV,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Top Rated TV Shows")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
-                }
-
-                if selectedFilter == .movies || selectedFilter == .all {
-                    DisclosureGroup(isExpanded: $topRatedMoviesExpanded) {
-                        HomeListView(
-                            contents: tmdbManager.topRatedMovies,
-                            error: $error,
-                            showError: $showError
-                        )
-                    } label: {
-                        Text("Top Rated Movies")
-                            .font(.title2.bold())
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                    }
-                }
+        Group {
+            switch homeOption {
+            case .moviesAndTVShows:
+                MoviesAndTVShowsView(
+                    error: $error,
+                    showError: $showError
+                )
+                .ignoresSafeArea(edges: .top)
+            case .liveTV:
+                LiveTVView(
+                    error: $error,
+                    showError: $showError
+                )
             }
-            .padding(.bottom)
         }
-        .navigationTitle("Home")
         .alert(isPresented: $showError) {
             Alert(
                 title: Text("Error"),
                 message: Text("\(error, default: "Unknown Error")")
             )
         }
+#if os(macOS)
+        .navigationTitle("Home")
+#endif
+        .toolbarBackground(.hidden, for: .automatic)
+        .scrollEdgeEffectStyle(.soft, for: .top)
         .toolbar {
+#if os(iOS)
+            ToolbarItem(placement: .topBarLeading) {
+                Text("Home")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .fixedSize()
+                    .frame(minWidth: 100, alignment: .leading)
+            }
+            .sharedBackgroundVisibility(.hidden)
+#endif
 
 #if os(macOS)
             ToolbarSpacer(.flexible)
 #endif
-
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Picker("Filter", selection: $selectedFilter) {
-                        ForEach(LibraryFilter.allCases, id: \.self) { filter in
-                            Text(filter.rawValue).tag(filter)
-                        }
+            ToolbarItemGroup(placement: .primaryAction) {
+                Picker("", selection: $homeOption) {
+                    ForEach(HomeOption.allCases, id: \.self) { option in
+                        Text(option.rawValue)
+                            .tag(option)
+                            .foregroundStyle(.yellow)
                     }
-                } label: {
-                    Image(systemName: "line.horizontal.3.decrease")
                 }
+                .pickerStyle(.menu)
+                .tint(.yellow)
             }
         }
         .task {
-//            do {
-//                try modelContext.delete(model: Collection.self)
-//                try modelContext.delete(model: CollectionItem.self)
-//                try modelContext.save()
-//                print("Deleted Models")
-//            } catch {
-//                print("Failed to delete all YourModel objects: \(error)")
-//            }
             do {
                 try await tmdbManager.trending()
                 try? await Task.sleep(for: .seconds(1))

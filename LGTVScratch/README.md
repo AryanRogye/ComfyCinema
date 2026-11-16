@@ -1,6 +1,6 @@
 # Movies for LG webOS TV
 
-This standalone webOS TV app follows the Android/Fire TV client: six discovery sections, movie and TV search, favorites, collections with optional PINs, watch history, detail pages, season and episode selection, and the same nine display-server URL patterns. It is written as a packaged web app with no build dependencies.
+This standalone webOS TV app includes six discovery sections, movie and TV search, favorites, collections with optional PINs, watch history and counts, movie and TV recommendations, title metadata, episode artwork and details, season and episode selection, the same nine display-server URL patterns, and Live TV with four playback servers. It is written as a packaged web app with no build dependencies.
 
 ## Build and install
 
@@ -37,3 +37,23 @@ LG's [web engine documentation](https://webostv.developer.lge.com/develop/specif
 - `config.example.js`: template for the optional, Git-ignored `config.local.js`
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+## October 27 parity update (0.2.0)
+
+Reviewed changes from the last LG commit, `9ee5d46` (October 1), through `f688ba7`.
+
+- Added Live TV category browsing, category search, channel logos, reload, and DLive Stream / Cast / Watch and DEmbed server selection. Live TV works without a TMDB token.
+- The LG catalog omits the Adult category and every channel flagged `isAdult`, including channels in other categories. The TMDB adult setting never enables adult live channels. The loader also applies these exclusions at runtime.
+- Added More Like This for movies and TV, title genres/status/rating/runtime and TV counts, plus episode stills, air dates, and runtime.
+- Added movie, episode, and unique-show history counts and the five most watched shows by recorded episodes. These count entries opened for playback. Cross-origin provider frames cannot supply reliable watch duration or resume positions, so the Apple client's hours-watched metric is unavailable here.
+- Kept platform-specific window management, playback compatibility hooks, and WebKit blocking in the Apple client; webOS cannot use those APIs. LG retains its TV focus styling and remote controls.
+
+`LiveTV.json` is generated from `MoviesAPIClient/LiveTV.json`. Deployment regenerates it before packaging. To refresh it manually and run the LG checks:
+
+```sh
+node LGTVScratch/scripts/sync-live-tv.js
+node --test LGTVScratch/tests/app.test.js
+node --check LGTVScratch/app.js
+```
+
+Keep the generated LG catalog committed so simulator launches also have channel data. Provider playback, logo availability, and remote behavior still require validation on the target TV.

@@ -7,12 +7,15 @@
 
 import SwiftUI
 import SwiftData
+import MoviesAPIData
 
 public struct HistoryView: View {
 
+    @Environment(AppRouter.self) var appRouter
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(BlockingService.self) var blockingService
     @Environment(PlaybackSession.self) var playbackSession
+    @Environment(CloudKitSyncService.self) var cloudKitSyncService
 
     @Environment(\.modelContext) var modelContext
 
@@ -50,21 +53,40 @@ public struct HistoryView: View {
                 emptyView
             } else {
                 ScrollView {
-                    ForEach(history, id: \.id) { item in
-                        HistoryRow(history: item)
-                            .onTapGesture {
+                    LazyVStack {
+
+#if os(macOS)
+                        HistoryStatsView(history: history)
+#elseif os(iOS)
+                        NavigationLink {
+                            HistoryStatsScreen(history: history)
+                        } label: {
+                            HistoryStatsSummaryRow(history: history)
+                        }
+                        .buttonStyle(.plain) // otherwise the whole label gets tinted blue
+                        .padding(.horizontal)
+#endif
+
+                        Text("History")
+                            .font(.title3.weight(.bold))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+
+                        ForEach(history, id: \.id) { item in
+                            Button {
                                 playbackSession.stop()
                                 resolve(item)
+                            } label: {
+                                HistoryRow(
+                                    history: item,
+                                    isResolving: resolvingHistory == item
+                                )
                             }
-                            .overlay {
-                                if resolvingHistory == item {
-                                    ProgressView()
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        .background(.black.opacity(0.1))
-                                }
-                            }
+                            .buttonStyle(HistoryButton())
                             .contextMenu {
+                                /// TODO: Here
                                 Button(role: .destructive) {
+                                    cloudKitSyncService.didJustDeleteHistory(item)
                                     modelContext.delete(item)
                                 } label: {
                                     Label(
@@ -73,6 +95,7 @@ public struct HistoryView: View {
                                     )
                                 }
                             }
+                        }
                     }
                 }
                 .alert(isPresented: $showError) {
@@ -111,10 +134,33 @@ public struct HistoryView: View {
                     self.searchResult = nil
                     self.goToDetail = false
                     self.resolvingHistory = nil
+                    if let h = appRouter.selectedHistory, !isResolving {
+                        resolve(h)
+                        appRouter.selectedHistory = nil
+                    } else if let id = appRouter.clickedWidgetWithResultID, !isResolving {
+                        /// we wanna find the history in current
+                        if let h = history.first(where: { $0.id.uuidString == id }) {
+                            resolve(h)
+                            appRouter.clickedWidgetWithResultID = nil
+                        }
+                    }
                 }
                 .onDisappear {
                     resolveTask?.cancel()
                     resolveTask = nil
+                }
+                .onChange(of: appRouter.selectedHistory) {
+                    if let h = appRouter.selectedHistory, !isResolving {
+                        resolve(h)
+                        appRouter.selectedHistory = nil
+                    }
+                }
+                .onChange(of: appRouter.clickedWidgetWithResultID) {
+                    guard let id = appRouter.clickedWidgetWithResultID else { return }
+                    if !isResolving, let h = history.first(where: { $0.id.uuidString == id }) {
+                        resolve(h)
+                        appRouter.clickedWidgetWithResultID = nil
+                    }
                 }
             }
         }
@@ -164,10 +210,63 @@ public struct HistoryView: View {
             }
         }
     }
+}
 
-    private func delete(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(history[index])
-        }
+
+private struct HistoryButton: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.easeInOut(duration: 0.18), value: configuration.isPressed)
     }
 }
+
+#if os(iOS)
+private struct HistoryStatsSummaryRow: View {
+    let history: [History]
+
+    var body: some View {
+        let stats = HistoryStats(from: history)
+        let hours = stats.totalSeconds / 3600
+
+        HStack(spacing: 14) {
+            Image(systemName: "chart.bar.xaxis")
+                .font(.system(size: 16, weight: .semibold))
+                .frame(width: 36, height: 36)
+                .background(Color.purple.opacity(0.2), in: Circle())
+                .foregroundStyle(.purple)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Your Stats")
+                    .font(.headline)
+                Text("\(hours.formatted(.number.precision(.fractionLength(0...1)))) hrs · \(stats.movieCount) movies · \(stats.episodeCount) episodes")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color.primary.opacity(0.06))
+        )
+    }
+}
+
+private struct HistoryStatsScreen: View {
+    let history: [History]
+
+    var body: some View {
+        ScrollView {
+            HistoryStatsView(history: history)
+        }
+        .navigationTitle("Stats")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+#endif

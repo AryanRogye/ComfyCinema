@@ -7,12 +7,23 @@
 //
 
 import SwiftUI
+import SwiftData
+import Defaults
+import MoviesAPIData
 
 struct MacOSRoot: View {
 
+    @Query var history: [History]
+
+    @Environment(\.modelContext) private var ctx
+
     @Bindable var windowContainer: WindowCoordinatorContainer
+    @Bindable var appRouter: AppRouter
+    @Bindable var cloudKitSync: CloudKitSyncService
     @State private var tmdbManager: TMDBManager?
     @State private var aniListManager = AniListManager()
+    @State private var liveTVManager: LiveTVManager?
+    @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
 
@@ -23,17 +34,28 @@ struct MacOSRoot: View {
 
     @State private var path = NavigationPath()
     @State private var enableAnimeSearch: Bool = false
+    @State private var navigationID = UUID()
+    @State private var intentTriggeredResult: KTSearchResult?
+
+    @Default(.hasShownCloudSavePrompt)
+    private var hasShownCloudSavePrompt
 
     var body: some View {
         ZStack {
-            if let tmdbManager {
+            if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
                 VisualEffectView()
 
                 HStack(spacing: 0) {
-                    MacOSRootSidebar(selectedTab: $selectedTab, path: $path)
+                    MacOSRootSidebar(selectedTab: $selectedTab, path: $path) { tab in
+                        path = NavigationPath()
+                        selectedTab = tab
+                        // Reset Boolean-driven destinations as well as value-based routes.
+                        navigationID = UUID()
+                    }
                         .environment(tmdbManager)
                         .environment(blockingService)
                         .environment(playbackSession)
+                        .environment(defaultManager)
 
                     Divider()
 
@@ -75,27 +97,83 @@ struct MacOSRoot: View {
                             }
                         }
                     }
+                    .id(navigationID)
                     .environment(windowContainer)
                     .environment(tmdbManager)
+                    .environment(liveTVManager)
                     .environment(blockingService)
+                    .environment(cloudKitSync)
                     .environment(playbackSession)
+                    .environment(defaultManager)
+                    .environment(appRouter)
+                    .sheet(item: $intentTriggeredResult) { result in
+                        NavigationStack {
+                            WatchDetailView(result: result)
+                        }
+                        .environment(windowContainer)
+                        .environment(tmdbManager)
+                        .environment(liveTVManager)
+                        .environment(cloudKitSync)
+                        .environment(blockingService)
+                        .environment(playbackSession)
+                        .environment(defaultManager)
+                        .environment(appRouter)
+                    }
                 }
+            } else if !hasShownCloudSavePrompt {
+                CloudSavePrompt(cloudKitSync: cloudKitSync)
             } else {
                 ProgressView()
-                    .task {
-                        do {
-                            let manager = try TMDBManager()
-                            self.tmdbManager = manager
-                        } catch {
-                            self.error = error.localizedDescription
-                            self.showError = true
-                        }
-                    }
             }
+        }
+        .alert(isPresented: $showError) {
+            Alert(
+                title: Text("Error"),
+                message: Text("\(error, default: "Unknown Error")")
+            )
         }
         .background(.clear)
         .ignoresSafeArea(edges: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onChange(of: appRouter.searchTriggered, initial: true) { _, result in
+            if let result {
+                intentTriggeredResult = result
+                appRouter.searchTriggered = nil
+            }
+        }
+        .task {
+            do {
+                let manager = try TMDBManager(defaultManager: defaultManager)
+                let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
+
+                self.tmdbManager = manager
+                self.liveTVManager = liveTVManager
+
+                try await cloudKitSync.saveToCloud()
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
+            }
+        }
+        .onChange(of: appRouter.selectedHistory, initial: true) { _, history in
+            if history != nil {
+                selectedTab = .history
+                path = NavigationPath()
+                navigationID = UUID()
+            }
+        }
+        .onChange(of: appRouter.clickedWidgetWithResultID, initial: true) { _, id in
+            guard id != nil, selectedTab != .history else { return }
+            selectedTab = .history
+            path = NavigationPath()
+            navigationID = UUID()
+        }
+        .onChange(of: appRouter.clickedWidgetWithFavoriteID, initial: true) { _, id in
+            guard id != nil, selectedTab != .library else { return }
+            selectedTab = .library
+            path = NavigationPath()
+            navigationID = UUID()
+        }
     }
 }
 

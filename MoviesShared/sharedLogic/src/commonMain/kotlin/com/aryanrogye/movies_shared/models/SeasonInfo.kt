@@ -22,5 +22,16 @@ data class KTEpisode(
     val seasonNumber: Int,
     val airDate: String? = null,
     val runtime: Int? = null,
-    val stillPath: String? = null
+    val stillPath: String? = null,
+    val guestStars: List<KTGuestStar> = emptyList()
+)
+
+@Serializable
+data class KTGuestStar(
+    val id: Int,
+    val name: String,
+    val character: String,
+    val creditId: String,
+    val order: Int,
+    val profilePath: String? = null
 )

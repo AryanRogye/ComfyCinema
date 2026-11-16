@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import MoviesAPIData
 
 public enum LibraryFilter: String, CaseIterable {
     case all = "All"

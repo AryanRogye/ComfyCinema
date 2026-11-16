@@ -23,9 +23,15 @@
     ['CineSrc', 'https://cinesrc.st/embed'],
     ['111movies', 'https://111movies.net']
   ];
+  const LIVE_SERVERS = [
+    ['DLive Stream', 'https://dlive.sx/stream/stream-'],
+    ['DLive Cast', 'https://dlive.sx/cast/stream-'],
+    ['DLive Watch', 'https://dlive.sx/watch/stream'],
+    ['DEmbed', 'https://dembed.st/premiumtv/daddy.php?id=']
+  ];
   const STORE = 'movies.lg.v1';
   const empty = { token: window.LG_TMDB_TOKEN || '', adult: false, server: 'MoviesAPI', homeFilter: 'All',
-    expanded: {}, favorites: [], history: [], collections: [] };
+    liveServer: 'DLive Stream', expanded: {}, favorites: [], history: [], collections: [] };
   let saved;
   try { saved = JSON.parse(localStorage.getItem(STORE) || '{}'); } catch (_) { saved = {}; }
   const data = Object.assign({}, empty, saved);
@@ -33,7 +39,7 @@
   const state = { tab: 'Home', screen: 'main', returnScreen: 'main', returnTab: 'Home',
     collectionId: null, item: null, detail: null, season: null, episodes: [], episode: null,
     player: false, sections: {}, searchQuery: '', searchResults: [], searching: false,
-    libraryFilter: 'All', loading: false, notice: '', unlocked: {}, modal: null };
+    liveSections: [], liveSection: '', liveQuery: '', liveLoading: false, liveError: '', channel: null, recommendations: [], recommendationError: '', detailVersion: 0, seasonVersion: 0, libraryFilter: 'All', loading: false, notice: '', unlocked: {}, modal: null };
   const app = document.getElementById('app');
   const dialogRoot = document.getElementById('dialog-root');
   let modalReturnFocus = null;
@@ -62,7 +68,7 @@
       <span class="poster-name">${esc(title(item))}</span></button>`;
   }
   function findItem(value) {
-    const items = [].concat(...Object.values(state.sections).map(s => s.items || []), state.searchResults, data.favorites, data.history, state.detail ? [state.detail] : []);
+    const items = [].concat(...Object.values(state.sections).map(s => s.items || []), state.searchResults, state.recommendations, data.favorites, data.history, state.detail ? [state.detail] : []);
     return items.find(item => key(item) === value);
   }
   async function request(path, params) {
@@ -123,11 +129,16 @@
     if (!item) return;
     state.returnScreen = fromCollection ? 'collection' : 'main';
     state.returnTab = state.tab;
+    const version = ++state.detailVersion;
+    state.recommendations = []; state.recommendationError = '';
     state.loading = true; render();
     try {
-      state.detail = await resolveItem(item);
+      const resolved = await resolveItem(item);
+      if (version !== state.detailVersion) return;
+      state.detail = resolved;
       state.screen = 'detail'; state.player = false; state.episode = null;
       state.season = null; state.episodes = [];
+      loadRecommendations(state.detail, version);
       if (type(state.detail) === 'tv') {
         const seasons = state.detail.seasons || [];
         const firstRegular = seasons.find(s => s.season_number > 0);
@@ -140,13 +151,71 @@
     state.loading = false; render();
   }
   async function loadSeason(number, priorEpisode) {
+    const version = ++state.seasonVersion;
+    const detailVersion = state.detailVersion;
+    const detailId = state.detail.id;
     state.season = Number(number); state.episode = null; state.episodes = []; render();
     try {
       const result = await request('/tv/' + state.detail.id + '/season/' + state.season);
+      if (version !== state.seasonVersion || detailVersion !== state.detailVersion || detailId !== state.detail.id) return;
       state.episodes = result.episodes || [];
       if (priorEpisode != null) state.episode = state.episodes.find(e => e.episode_number === Number(priorEpisode)) || null;
     } catch (error) { state.notice = error.message; }
     render();
+  }
+  async function loadRecommendations(item, version) {
+    if (!['movie', 'tv'].includes(type(item))) return;
+    try {
+      const result = await request('/' + type(item) + '/' + item.id + '/recommendations', { page: 1 });
+      if (version !== state.detailVersion) return;
+      state.recommendations = (result.results || []).map(raw => normalize(raw, type(item))).filter(allowed);
+    } catch (error) {
+      if (version !== state.detailVersion) return;
+      state.recommendationError = error.message;
+    }
+    if (state.screen === 'detail' && !state.player) render(true);
+  }
+  function recommendations() {
+    if (!['movie', 'tv'].includes(type(state.detail))) return '';
+    return `<section><h2>More Like This</h2>${state.recommendationError ? `<p class="muted">${esc(state.recommendationError)}</p>` : state.recommendations.length ? `<div class="poster-grid">${state.recommendations.map(item => card(item)).join('')}</div>` : '<p class="muted">No recommendations available.</p>'}</section>`;
+  }
+  function metadata(item) {
+    const parts = [(item.genres || []).map(g => g.name).join(', '), item.runtime ? item.runtime + ' min' : '', item.status || '', item.vote_average ? 'Rating ' + item.vote_average.toFixed(1) + '/10' : '', item.number_of_seasons ? item.number_of_seasons + ' seasons · ' + item.number_of_episodes + ' episodes' : ''].filter(Boolean);
+    return `<p class="muted">${parts.map(esc).join(' · ')}</p>`;
+  }
+  function historyStats() {
+    const movies = data.history.filter(i => i.season == null).length;
+    const episodes = data.history.filter(i => i.season != null);
+    const shows = new Map();
+    episodes.forEach(i => { const entry = shows.get(i.id) || { name: title(i), count: 0 }; entry.count++; shows.set(i.id, entry); });
+    const top = Array.from(shows.values()).sort((a, b) => b.count - a.count).slice(0, 5);
+    return `<section class="history-stats"><div><strong>${movies}</strong> Movies</div><div><strong>${episodes.length}</strong> Episodes</div><div><strong>${shows.size}</strong> Shows</div>${top.length ? `<p>Top Shows: ${top.map(i => esc(i.name) + ' (' + i.count + ')').join(' · ')}</p>` : ''}<p class="muted">Titles opened for playback. Watch duration is unavailable from embedded providers.</p></section>`;
+  }
+  async function loadLive() {
+    if (state.liveLoading) return;
+    state.liveLoading = true; state.liveError = ''; render();
+    try {
+      const response = await fetch('LiveTV.json');
+      if (!response.ok) throw new Error('Unable to load Live TV channels.');
+      const catalog = await response.json();
+      state.liveSections = catalog.LiveTV.filter(s => s.name.trim().toLowerCase() !== 'adult')
+        .map(s => ({ name: s.name, channels: s.channels.filter(c => !c.isAdult) })).filter(s => s.channels.length);
+      if (!state.liveSections.some(s => s.name === state.liveSection)) state.liveSection = state.liveSections.length ? state.liveSections[0].name : '';
+    } catch (error) { state.liveError = error.message; }
+    state.liveLoading = false;
+    if (state.screen === 'main' && state.tab === 'Live TV') render(true);
+  }
+  function livePage() {
+    const section = state.liveSections.find(s => s.name === state.liveSection);
+    const channels = section ? section.channels.filter(c => c.name.toLowerCase().includes(state.liveQuery.toLowerCase())) : [];
+    return `<div class="page-heading"><h1>Live TV</h1></div><form id="live-search-form" class="search-form"><input name="query" aria-label="Search channels in this category" placeholder="Search this category" value="${attr(state.liveQuery)}"><button class="pill primary">Search</button></form><div class="chip-row">${state.liveSections.map(s => btn(s.name, 'live-section', s.name, s.name === state.liveSection ? 'selected' : '')).join('')}</div>${state.liveLoading ? '<p class="muted">Loading channels…</p>' : state.liveError ? `<p class="error">${esc(state.liveError)}</p>${btn('Retry', 'live-retry')}` : `<section class="channel-grid">${channels.map(c => `<button class="channel-card" data-action="live-channel" data-value="${c.id}">${/^https?:\/\//.test(c.logo) ? `<img src="${attr(c.logo)}" alt="" loading="lazy">` : '<span class="channel-placeholder">LIVE</span>'}<strong>${esc(c.name)}</strong></button>`).join('') || '<p class="muted">No channels found.</p>'}</section>`}`;
+  }
+  function liveUrl() {
+    const server = LIVE_SERVERS.find(s => s[0] === data.liveServer) || LIVE_SERVERS[0];
+    return server[1] + state.channel.id + (server[0] === 'DEmbed' ? '' : '.php');
+  }
+  function livePlayer() {
+    return `<div class="player"><div class="player-toolbar">${btn('‹ Live TV', 'back')}${btn('↻ Reload', 'live-reload')}<strong>${esc(state.channel.name)}</strong><small>Use Magic Remote pointer inside the player</small></div><div class="player-source-row">${LIVE_SERVERS.map(([name]) => btn(name, 'live-server', name, data.liveServer === name ? 'selected' : '')).join('')}</div><iframe id="live-frame" title="${attr(state.channel.name)} live player" src="${attr(liveUrl())}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
   }
   function favorite(item) { return data.favorites.some(f => key(f) === key(item)); }
   function toggleFavorite(item) {
@@ -155,7 +224,7 @@
   }
   function summary(item) {
     return { id: item.id, media_type: type(item), title: title(item), poster_path: item.poster_path || null,
-      release_date: item.release_date || null, first_air_date: item.first_air_date || null };
+      adult: Boolean(item.adult), release_date: item.release_date || null, first_air_date: item.first_air_date || null };
   }
   function recordWatch(item, season, episode) {
     const watched = Object.assign(summary(item), { season: season == null ? null : season,
@@ -179,8 +248,8 @@
     return `<div class="server-picker" aria-label="Playback server">${SERVERS.map(([name]) => btn(name, 'server', name, data.server === name ? 'selected' : '')).join('')}</div>`;
   }
   function nav() {
-    return `<aside class="sidebar"><div class="brand">MOVIES<span>LG TV</span></div><nav aria-label="Main menu">${['Home','Library','History','Settings','Search'].map((tab, i) =>
-      `<button class="nav-item ${state.tab === tab ? 'selected' : ''}" data-action="tab" data-value="${tab}"><span class="nav-icon">${['⌂','▤','↺','⚙','⌕'][i]}</span>${tab}</button>`).join('')}</nav></aside>`;
+    return `<aside class="sidebar"><div class="brand">MOVIES<span>LG TV</span></div><nav aria-label="Main menu">${['Home','Live TV','Library','History','Settings','Search'].map((tab, i) =>
+      `<button class="nav-item ${state.tab === tab ? 'selected' : ''}" data-action="tab" data-value="${tab}"><span class="nav-icon">${['⌂','▣','▤','↺','⚙','⌕'][i]}</span>${tab}</button>`).join('')}</nav></aside>`;
   }
   function filters(selected, action) {
     return '<div class="filter-group">' + ['All', 'TV', 'Movies'].map(v => btn(v, action, v, selected === v ? 'selected' : '')).join('') + '</div>';
@@ -205,7 +274,7 @@
       <section><h2>Collections</h2>${data.collections.length ? `<div class="poster-grid">${data.collections.map(c => `<button class="poster-card" data-action="open-collection" data-value="${attr(c.id)}"><span class="poster-image collection-cover">${c.hideCover || !c.items.length ? '▤' : poster(c.items[0])}</span><span class="poster-name">${esc(c.name)} ${c.pinHash ? '🔒' : ''}</span></button>`).join('')}</div>` : '<p class="muted">Create a collection to organize movies and shows.</p>'}</section>`;
   }
   function history() {
-    return `<div class="page-heading"><h1>History</h1></div>${data.history.length ? `<div class="list">${data.history.map((item, index) => `<div class="list-row"><button class="row-main" data-action="history-detail" data-value="${index}">${poster(item, 'w185')}<span><strong>${esc(title(item))}</strong><small>${item.season == null ? 'Movie' : 'Season ' + item.season + ' · Episode ' + item.episode} · ${new Date(item.watchedAt).toLocaleDateString()}</small></span></button>${btn('Remove','remove-history',index,'small')}</div>`).join('')}</div>` : '<div class="empty"><h2>No Watch History</h2><p>Movies and episodes you watch will show up here.</p></div>'}`;
+    return `<div class="page-heading"><h1>History</h1></div>${historyStats()}${data.history.length ? `<div class="list">${data.history.map((item, index) => `<div class="list-row"><button class="row-main" data-action="history-detail" data-value="${index}">${poster(item, 'w185')}<span><strong>${esc(title(item))}</strong><small>${item.season == null ? 'Movie' : 'Season ' + item.season + ' · Episode ' + item.episode} · ${new Date(item.watchedAt).toLocaleDateString()}</small></span></button>${btn('Remove','remove-history',index,'small')}</div>`).join('')}</div>` : '<div class="empty"><h2>No Watch History</h2><p>Movies and episodes you watch will show up here.</p></div>'}`;
   }
   function searchPage() {
     return `<div class="page-heading"><h1>Search</h1></div><form id="search-form" class="search-form"><input name="query" aria-label="Search movies and TV" placeholder="Search movies and TV shows" value="${attr(state.searchQuery)}"><button class="pill primary">Search</button></form>
@@ -226,7 +295,7 @@
     return `<div class="detail"><div class="toolbar">${btn('‹ Back','back')}${type(item) === 'person' ? '' : btn(favorite(item) ? '★ Favorited' : '☆ Favorite','favorite',key(item), favorite(item) ? 'selected' : '') + btn('▤ Collections','collection-picker',key(item))}<span class="toolbar-spacer"></span>${type(item) === 'person' ? '' : `<span class="muted">Server</span>${serverPicker()}`}</div>
       <div class="hero" style="${image(item.backdrop_path || item.poster_path, 'original') ? `background-image:linear-gradient(90deg,#11151e 10%,rgba(17,21,30,.75) 55%,rgba(17,21,30,.2)),url('${attr(image(item.backdrop_path || item.poster_path, 'original'))}')` : ''}">
         <div class="hero-content"><span class="eyebrow">${tv ? 'TV SHOW' : type(item) === 'person' ? 'PERSON' : 'MOVIE'} ${esc(year(item))}</span><h1>${esc(title(item))}</h1><p>${esc(item.overview || (type(item) === 'person' ? 'People pages are not available yet.' : 'No overview available.'))}</p>${tv || type(item) === 'person' ? '' : btn('▶ Play Movie','play','','primary')}</div></div>
-      ${tv ? `<section><h2>Seasons</h2><div class="chip-row">${(item.seasons || []).map(s => btn('Season ' + s.season_number,'season',s.season_number, state.season === s.season_number ? 'selected' : '')).join('')}</div><h2>Episodes</h2>${state.episodes.length ? `<div class="episode-grid">${state.episodes.map(e => `<button class="episode" data-action="episode" data-value="${e.episode_number}"><span>EPISODE ${e.episode_number}</span><strong>${esc(e.name || 'Episode ' + e.episode_number)}</strong><small>${esc(e.overview || 'Select to watch')}</small></button>`).join('')}</div>` : '<p class="muted">No episodes available for this season.</p>'}</section>` : ''}</div>`;
+      ${metadata(item)}${tv ? `<section><h2>Seasons</h2><div class="chip-row">${(item.seasons || []).map(s => btn('Season ' + s.season_number,'season',s.season_number, state.season === s.season_number ? 'selected' : '')).join('')}</div><h2>Episodes</h2>${state.episodes.length ? `<div class="episode-grid">${state.episodes.map(e => `<button class="episode" data-action="episode" data-value="${e.episode_number}">${image(e.still_path, 'w300') ? `<img class="episode-still" src="${attr(image(e.still_path, 'w300'))}" alt="" loading="lazy">` : ''}<span>EPISODE ${e.episode_number} · ${esc(e.air_date || '')}${e.runtime ? ' · ' + e.runtime + ' min' : ''}</span><strong>${esc(e.name || 'Episode ' + e.episode_number)}</strong><small>${esc(e.overview || 'Select to watch')}</small></button>`).join('')}</div>` : '<p class="muted">No episodes available for this season.</p>'}</section>` : ''}${recommendations()}</div>`;
   }
   function player() {
     const item = state.detail;
@@ -242,8 +311,8 @@
   }
   function render(keepFocus) {
     const active = keepFocus && document.activeElement && document.activeElement.dataset ? [document.activeElement.dataset.action, document.activeElement.dataset.value] : null;
-    app.innerHTML = state.screen === 'main' ? nav() + `<main class="content">${state.loading ? '<p class="loading">Loading…</p>' : ''}${state.notice ? `<div class="notice">${esc(state.notice)} ${btn('Dismiss','dismiss','','small')}</div>` : ''}${({Home:home,Library:library,History:history,Settings:settings,Search:searchPage})[state.tab]()}</main>` :
-      `<main class="full-content">${state.loading ? '<p class="loading">Loading…</p>' : ''}${state.notice ? `<div class="notice">${esc(state.notice)} ${btn('Dismiss','dismiss','','small')}</div>` : ''}${state.screen === 'detail' ? detail() : collectionPage()}</main>`;
+    app.innerHTML = state.screen === 'main' ? nav() + `<main class="content">${state.loading ? '<p class="loading">Loading…</p>' : ''}${state.notice ? `<div class="notice">${esc(state.notice)} ${btn('Dismiss','dismiss','','small')}</div>` : ''}${({Home:home,'Live TV':livePage,Library:library,History:history,Settings:settings,Search:searchPage})[state.tab]()}</main>` :
+      `<main class="full-content">${state.loading ? '<p class="loading">Loading…</p>' : ''}${state.notice ? `<div class="notice">${esc(state.notice)} ${btn('Dismiss','dismiss','','small')}</div>` : ''}${state.screen === 'live' ? livePlayer() : state.screen === 'detail' ? detail() : collectionPage()}</main>`;
     if (active) {
       const target = Array.from(app.querySelectorAll('[data-action]')).find(el => el.dataset.action === active[0] && el.dataset.value === active[1]);
       if (target) { target.focus({ preventScroll: true }); return; }
@@ -304,7 +373,16 @@
   function handleAction(action, value) {
     const item = findItem(value);
     switch (action) {
-      case 'tab': state.screen = 'main'; state.tab = value; state.notice = ''; render(); if (value === 'Home') loadHome(); break;
+      case 'tab': state.screen = 'main'; state.tab = value; state.notice = ''; render(); if (value === 'Home') loadHome(); if (value === 'Live TV' && !state.liveSections.length) loadLive(); break;
+      case 'live-section': state.liveSection = value; render(true); break;
+      case 'live-retry': loadLive(); break;
+      case 'live-channel': {
+        const channel = [].concat(...state.liveSections.map(s => s.channels)).find(c => c.id === Number(value));
+        if (channel) { state.channel = channel; state.screen = 'live'; render(); }
+        break;
+      }
+      case 'live-server': data.liveServer = value; persist(); render(true); break;
+      case 'live-reload': { const frame = document.getElementById('live-frame'); if (frame) frame.src = liveUrl(); break; }
       case 'home-filter': data.homeFilter = value; persist(); render(true); break;
       case 'library-filter': state.libraryFilter = value; render(true); break;
       case 'expand': data.expanded[value] = data.expanded[value] === false; persist(); render(true); break;
@@ -344,9 +422,10 @@
   }
   function back() {
     if (state.modal) return closeModal();
+    if (state.screen === 'live') { state.screen = 'main'; state.tab = 'Live TV'; state.channel = null; render(); return; }
     if (state.screen === 'detail') {
       if (state.player) { state.player = false; return render(); }
-      state.screen = state.returnScreen; state.tab = state.returnTab; state.detail = null; render(); return;
+      state.screen = state.returnScreen; state.tab = state.returnTab; state.detail = null; ++state.detailVersion; ++state.seasonVersion; render(); return;
     }
     if (state.screen === 'collection') { delete state.unlocked[state.collectionId]; state.screen = 'main'; state.tab = 'Library'; render(); return; }
     if (state.tab !== 'Home') { state.tab = 'Home'; render(); return; }
@@ -357,6 +436,7 @@
   dialogRoot.addEventListener('click', event => { const target = event.target.closest('[data-action]'); if (target) handleAction(target.dataset.action, target.dataset.value); });
   document.addEventListener('submit', event => {
     event.preventDefault();
+    if (event.target.id === 'live-search-form') { state.liveQuery = event.target.elements.query.value.trim(); render(); }
     if (event.target.id === 'search-form') search(event.target.elements.query.value);
     if (event.target.id === 'token-form') { data.token = event.target.elements.token.value.trim(); persist(); notice('TMDB token saved on this TV.'); loadHome(true); }
     if (event.target.id === 'modal-form' && typeof state.modal === 'function') state.modal(event.target);

@@ -10,6 +10,41 @@ import SharedLogic
 
 public final class TMDBClientPreview: TMDBClientProviding {
 
+    public func recommendationsForMovie(id: Int32, token: String, page: Int32) async throws -> KTMovieListResponse {
+        await movieResponse(page: page)
+    }
+
+    public func recommendationsForTV(id: Int32, token: String, page: Int32) async throws -> KTTVListResponse {
+        await tvResponse(page: page)
+    }
+
+
+    public func ratingsAndReviewsForMovie(id: Int32, token: String) async throws -> KTRatingsAndReviews {
+        KTRatingsAndReviews(id: id, voteAverage: 8.2, voteCount: 250,
+                            reviews: try await reviewsForMovie(id: id, token: token, page: 1))
+    }
+
+    public func reviewsForMovie(id: Int32, token: String, page: Int32) async throws -> KTReviewResponse {
+        KTReviewResponse(page: page, results: [
+            KTReview(id: "preview-review", author: "Preview reviewer",
+                     content: "An entertaining watch with a memorable cast.",
+                     authorDetails: KTReviewAuthor(rating: KotlinDouble(double: 8)))
+        ], totalPages: 1, totalResults: 1)
+    }
+
+    public func ratingsAndReviewsForTV(id: Int32, token: String) async throws -> KTRatingsAndReviews {
+        KTRatingsAndReviews(id: id, voteAverage: 8.2, voteCount: 250,
+                            reviews: try await reviewsForTV(id: id, token: token, page: 1))
+    }
+
+    public func reviewsForTV(id: Int32, token: String, page: Int32) async throws -> KTReviewResponse {
+        KTReviewResponse(page: page, results: [
+            KTReview(id: "preview-review", author: "Preview reviewer",
+                     content: "An entertaining watch with a memorable cast.",
+                     authorDetails: KTReviewAuthor(rating: KotlinDouble(double: 8)))
+        ], totalPages: 1, totalResults: 1)
+    }
+
     public init() {}
 
     public func infoOnTV(id: Int32, token: String) async throws -> KTTVShow {
@@ -34,7 +69,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
                 seasonNumber: seasonNumber,
                 airDate: "2012-02-27",
                 runtime: KotlinInt(int: 24),
-                stillPath: nil
+                stillPath: nil,
+                guestStars: [],
             )
         }
 
@@ -108,9 +144,11 @@ public final class TMDBClientPreview: TMDBClientProviding {
             posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
             mediaType: .tv,
             genreIds: [],
+            genreType: [],
             popularity: 100,
             voteAverage: 8.0,
-            voteCount: 500
+            voteCount: 500,
+            heroPosterPath: nil
         )
 
         return KTTrendingResponse(page: 1, results: [result], totalPages: 1, totalResults: 1)
@@ -138,7 +176,7 @@ public final class TMDBClientPreview: TMDBClientProviding {
     @MainActor
     private static let movies = [
         KTMovieListResult(
-            adult: false, backdropPath: nil, genreIds: [], id: 969681,
+            adult: false, backdropPath: nil, genreIds: [], genres: [], id: 969681,
             originalLanguage: "en", originalTitle: "Preview Movie",
             overview: "A mock movie used by SwiftUI previews.", popularity: 100,
             posterPath: nil, releaseDate: "2026-07-31", title: "Preview Movie",
@@ -150,7 +188,7 @@ public final class TMDBClientPreview: TMDBClientProviding {
     private static let tvShows = [
         KTTVListResult(
             backdropPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg", firstAirDate: "2012-02-27",
-            genreIds: [], id: 38867, name: "Lab Rats", originCountry: ["US"],
+            genreIds: [], genres: [], id: 38867, name: "Lab Rats", originCountry: ["US"],
             originalLanguage: "en", originalName: "Lab Rats",
             overview: "A mock TV result used by SwiftUI previews.", popularity: 100,
             posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg", voteAverage: 8.0, voteCount: 500

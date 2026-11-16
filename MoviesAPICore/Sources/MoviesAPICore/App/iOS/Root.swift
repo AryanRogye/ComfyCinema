@@ -5,8 +5,13 @@
 //  Created by Aryan Rogye on 9/14/26.
 //
 
+#if os(iOS)
+
 import SwiftUI
 import WebKit
+import SwiftData
+import Defaults
+import MoviesAPIData
 
 public struct Root: View {
 
@@ -14,12 +19,19 @@ public struct Root: View {
         case player(UUID)
     }
 
+    @Bindable var appRouter: AppRouter
+    @Query var history: [History]
+
+    @Environment(\.modelContext) private var ctx
+
+    @Bindable var cloudKitSync: CloudKitSyncService
     @State private var tmdbManager: TMDBManager?
     @State private var aniListManager = AniListManager()
+    @State private var liveTVManager: LiveTVManager?
+    @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
 
-    @State private var selectedTab: TabID = .home
     @State private var homePath: [PlaybackRoute] = []
     @State private var libraryPath: [PlaybackRoute] = []
     @State private var historyPath: [PlaybackRoute] = []
@@ -29,15 +41,22 @@ public struct Root: View {
     @State private var isSearching = false
     @State private var error: String?
     @State private var showError: Bool = false
+    @State private var intentTriggeredResult: KTSearchResult?
 
     @State private var enableAnimeSearch: Bool = false
 
-    public init() {}
+    public init(appRouter: AppRouter, cloudKitSync: CloudKitSyncService) {
+        self.appRouter = appRouter
+        self.cloudKitSync = cloudKitSync
+    }
+
+    @Default(.hasShownCloudSavePrompt)
+    private var hasShownCloudSavePrompt
 
     public var body: some View {
-        VStack {
-            if let tmdbManager {
-                TabView(selection: $selectedTab) {
+        ZStack {
+            if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
+                TabView(selection: $appRouter.selectedTab) {
 
                     Tab("Home", systemImage: "house", value: .home) {
                         NavigationStack(path: $homePath) {
@@ -86,26 +105,58 @@ public struct Root: View {
                 }
                 .tint(.yellow)
                 .onChange(of: playbackSession.activationID) {
-                    playbackSession.sourceTab = selectedTab
+                    playbackSession.sourceTab = appRouter.selectedTab
                 }
-#if os(iOS)
                 .tabViewBottomAccessory(isEnabled: playbackSession.isActive) {
                     PlaybackPlayerView(returnToPlayback: returnToPlayback)
                 }
                 .tabBarMinimizeBehavior(.onScrollDown)
-#endif
                 .environment(tmdbManager)
                 .environment(aniListManager)
+                .environment(liveTVManager)
                 .environment(blockingService)
+                .environment(cloudKitSync)
                 .environment(playbackSession)
+                .environment(defaultManager)
+                .environment(appRouter)
                 .modifier(
                     SearchTabModifier(
-                        isSearchTabSelected: selectedTab == .search,
+                        isSearchTabSelected: appRouter.selectedTab == .search,
                         searchText: $searchText
                     ) {
                         search()
                     }
                 )
+                .sheet(item: $intentTriggeredResult) { search in
+                    NavigationStack {
+                        WatchDetailView(result: search)
+                            .environment(tmdbManager)
+                            .environment(liveTVManager)
+                            .environment(cloudKitSync)
+                            .environment(blockingService)
+                            .environment(playbackSession)
+                            .environment(defaultManager)
+                            .environment(appRouter)
+                    }
+                }
+            } else if !hasShownCloudSavePrompt {
+                CloudSavePrompt(cloudKitSync: cloudKitSync)
+            } else {
+                ProgressView()
+            }
+        }
+        /// Checking if app was triggered by intent
+        .onAppear {
+            if let searchTriggered = appRouter.searchTriggered {
+                intentTriggeredResult = searchTriggered
+                SettingLogs.shared.add("Using SearchTriggered From Intent To Open: \(searchTriggered)")
+            }
+        }
+        /// Intent Triggered Search
+        .onChange(of: appRouter.searchTriggered) { _, newValue in
+            if let newValue {
+                intentTriggeredResult = newValue
+                SettingLogs.shared.add("Using SearchTriggered From Intent To Open: \(newValue)")
             }
         }
         .alert(isPresented: $showError) {
@@ -116,8 +167,13 @@ public struct Root: View {
         }
         .task {
             do {
-                let manager = try TMDBManager()
+                let manager = try TMDBManager(defaultManager: defaultManager)
+                let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
+
                 self.tmdbManager = manager
+                self.liveTVManager = liveTVManager
+
+                try await self.cloudKitSync.saveToCloud()
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true
@@ -128,7 +184,7 @@ public struct Root: View {
     private func returnToPlayback() {
         guard let sourceTab = playbackSession.sourceTab else { return }
 
-        selectedTab = sourceTab
+        appRouter.selectedTab = sourceTab
         let route = PlaybackRoute.player(playbackSession.activationID)
 
         func append(_ route: PlaybackRoute, to path: inout [PlaybackRoute]) {
@@ -209,5 +265,17 @@ private struct SearchTabModifier: ViewModifier {
 }
 
 #Preview {
-    Root()
+    let schema = Schema(versionedSchema: MoviesSchemaV2.self)
+    let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
+    let container = try! ModelContainer(for: schema, configurations: configuration)
+
+    Root(
+        appRouter: AppRouter(),
+        cloudKitSync: CloudKitSyncService(
+            modelContainer: container,
+            cloudKitManager: try! CloudKitManager()
+        )
+    )
+    .modelContainer(container)
 }
+#endif

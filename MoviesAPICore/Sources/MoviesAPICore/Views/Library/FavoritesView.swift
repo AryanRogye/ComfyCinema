@@ -7,10 +7,12 @@
 
 import SwiftUI
 import SwiftData
+import MoviesAPIData
 
 struct FavoritesView: View {
 
     @Environment(\.modelContext) var modelContext
+    @Environment(AppRouter.self) var appRouter
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(PlaybackSession.self) var playbackSession
     @Query var favorites: [Favorite]
@@ -94,6 +96,22 @@ struct FavoritesView: View {
         .navigationDestination(isPresented: $goToDetail) {
             if let searchResult {
                 WatchDetailView(result: searchResult)
+            }
+        }
+        .onAppear {
+            if let id = appRouter.clickedWidgetWithFavoriteID, !isResolving {
+                if let favorite = favorites.first(where: { $0.id == id }) {
+                    resolve(favorite)
+                    self.appRouter.clickedWidgetWithFavoriteID = nil
+                }
+            }
+        }
+        .onChange(of: appRouter.clickedWidgetWithFavoriteID) {
+            if let id = appRouter.clickedWidgetWithFavoriteID, !isResolving {
+                if let favorite = favorites.first(where: { $0.id == id }) {
+                    resolve(favorite)
+                    self.appRouter.clickedWidgetWithFavoriteID = nil
+                }
             }
         }
         .onDisappear {

@@ -42,10 +42,15 @@ kotlin {
         }
     }
 
-    macosArm64().binaries.framework {
-        baseName = "SharedLogic"
-        isStatic = true
-        sharedLogicXCFramework.add(this)
+    listOf(
+        macosArm64(),
+        macosX64(),
+    ).forEach { macosTarget ->
+        macosTarget.binaries.framework {
+            baseName = "SharedLogic"
+            isStatic = true
+            sharedLogicXCFramework.add(this)
+        }
     }
 
     android {

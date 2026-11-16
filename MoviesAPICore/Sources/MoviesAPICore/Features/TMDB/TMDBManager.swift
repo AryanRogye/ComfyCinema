@@ -27,6 +27,7 @@ enum TMDBError: LocalizedError {
 public final class TMDBManager {
 
     private let tmdbClient: TMDBClientProviding
+    private let defaultManager: DefaultManager
     private let token: String
 
     private var fullTrendingResults: [KTTrendingResult] = []
@@ -59,15 +60,18 @@ public final class TMDBManager {
     public private(set) var topRatedTV: [KTTVListResult] = []
     public private(set) var searchResults: [KTSearchResult] = []
 
-    public var includeAdult: Bool = Defaults[.includeAdult] {
-        didSet {
-            Defaults[.includeAdult] = includeAdult
-        }
+    var includeAdult: Bool {
+        defaultManager.includeAdult
     }
 
-    public init(tmdbClient: TMDBClientProviding = TMDBClient(), token tokenOverride: String? = nil) throws {
+    public init(
+        tmdbClient: TMDBClientProviding = TMDBClient(),
+        defaultManager: DefaultManager,
+        token tokenOverride: String? = nil
+    ) throws {
         if let tokenOverride {
             self.tmdbClient = tmdbClient
+            self.defaultManager = defaultManager
             self.token = tokenOverride
             return
         }
@@ -81,6 +85,7 @@ public final class TMDBManager {
             throw TMDBError.tokenEmpty
         }
 
+        self.defaultManager = defaultManager
         self.tmdbClient = tmdbClient
         self.token = token
     }
@@ -157,8 +162,32 @@ public final class TMDBManager {
         )
     }
 
+    public func ratingsAndReviewsForMovie(for id: Int32) async throws -> KTRatingsAndReviews {
+        try await tmdbClient.ratingsAndReviewsForMovie(id: id, token: token)
+    }
+
+    public func reviewsForMovie(for id: Int32, page: Int32) async throws -> KTReviewResponse {
+        try await tmdbClient.reviewsForMovie(id: id, token: token, page: page)
+    }
+
+    public func ratingsAndReviewsForTV(for id: Int32) async throws -> KTRatingsAndReviews {
+        try await tmdbClient.ratingsAndReviewsForTV(id: id, token: token)
+    }
+
+    public func reviewsForTV(for id: Int32, page: Int32) async throws -> KTReviewResponse {
+        try await tmdbClient.reviewsForTV(id: id, token: token, page: page)
+    }
+
     public func infoOnTV(for id: Int) async throws -> KTTVShow {
         return try await tmdbClient.infoOnTV(id: Int32(id), token: token)
+    }
+
+    public func recommendationsForMovie(for id: Int32, page: Int32 = 1) async throws -> KTMovieListResponse {
+        return try await tmdbClient.recommendationsForMovie(id: id, token: token, page: page)
+    }
+
+    public func recommendationsForTV(for id: Int32) async throws -> KTTVListResponse {
+        return try await tmdbClient.recommendationsForTV(id: id, token: token, page: 1)
     }
 
     /// Function to search for tv,movie,person

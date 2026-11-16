@@ -14,6 +14,7 @@ struct MacOSRootSidebar: View {
 
     @Binding var selectedTab: MacOSTab
     @Binding var path: NavigationPath
+    var onSelectTab: (MacOSTab) -> Void
 
     @State private var search: String = ""
     @State private var hasInteractedWithSearch: Bool = false
@@ -59,8 +60,7 @@ struct MacOSRootSidebar: View {
             ComfyScrollView(noPadding: true, spacing: 8) {
                 ForEach(MacOSTab.allCases, id: \.self) { tab in
                     Button {
-                        path.removeLast(path.count)
-                        selectedTab = tab
+                        onSelectTab(tab)
                     } label: {
                         SidebarRowView(
                             tab: tab,
@@ -78,7 +78,6 @@ struct MacOSRootSidebar: View {
                     }
                     .buttonStyle(SidebarButtonStyle())
                     .animation(.snappy, value: selectedTab)
-                    .allowsHitTesting(selectedTab != tab)
                 }
             }
         }

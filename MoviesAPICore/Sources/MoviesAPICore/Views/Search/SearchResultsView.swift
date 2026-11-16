@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import MoviesAPIData
 
 struct SearchResultsView: View {
 
@@ -130,6 +131,7 @@ struct SearchResultsView: View {
                 do {
                     tmdbManager = try .init(
                         tmdbClient: TMDBClientPreview(),
+                        defaultManager: DefaultManager(),
                         token: "preview"
                     )
                 } catch {
