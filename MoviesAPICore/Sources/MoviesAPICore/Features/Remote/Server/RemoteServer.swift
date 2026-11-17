@@ -34,6 +34,7 @@ final class RemoteServer: NSObject, NetServiceDelegate {
 
         discoveryService.delegate = self
         discoveryService.publish()
+        startServer()
     }
 
     func netServiceDidPublish(_ sender: NetService) {

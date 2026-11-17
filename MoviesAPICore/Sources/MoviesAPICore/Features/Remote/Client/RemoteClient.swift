@@ -9,57 +9,78 @@
 
 import Foundation
 
-@Observable
-@MainActor
-final class RemoteClient: NSObject, NetServiceBrowserDelegate {
-    private let browser = NetServiceBrowser()
+struct ConnectedServer {
+    let server: ResolvedServer
+    let url: URL
+}
 
-    var discoveredDevices: [NetService] = []
+enum RemoteClientError: LocalizedError {
+    case cantMakeHealthRequest
 
-    override init() {
-        super.init()
-        browser.delegate = self
-        startSearching()
-    }
-
-    func startSearching() {
-        browser.searchForServices(
-            ofType: "_comfycinema._tcp.",
-            inDomain: "local."
-        )
-    }
-
-    func netServiceBrowserWillSearch(_ browser: NetServiceBrowser) {
-        print("Browser: will search")
-    }
-
-    func netServiceBrowser(
-        _ browser: NetServiceBrowser,
-        didNotSearch errorDict: [String : NSNumber]
-    ) {
-        /// -72008 = local network permission denied / missing NSBonjourServices
-        print("Browser: DID NOT SEARCH:", errorDict)
-    }
-
-    func netServiceBrowser(
-        _ browser: NetServiceBrowser,
-        didFind service: NetService,
-        moreComing: Bool
-    ) {
-        discoveredDevices.append(service)
-        print("Found:", service.name)
-    }
-
-    func netServiceBrowser(
-        _ browser: NetServiceBrowser,
-        didRemove service: NetService,
-        moreComing: Bool
-    ) {
-        discoveredDevices.removeAll {
-            $0 == service
+    var errorDescription: String? {
+        switch self {
+        case .cantMakeHealthRequest:
+            "Cant Make Health Request"
         }
     }
+}
 
+@Observable
+@MainActor
+final class RemoteClient {
+    let remoteServerResolver = RemoteServerResolver()
+
+    private(set) var connectedServer: ConnectedServer?
+    private(set) var error: Error?
+    private let clientQueue = TaskQueue()
+
+    var discoveredDevices: [ResolvedServer] {
+        remoteServerResolver.discoveredDevices
+    }
+
+    public func connect(to server: ResolvedServer) throws {
+        guard let hostname = server.hostname,
+              let port = server.port,
+              let url = URL(string: "http://\(hostname):\(port)/")
+        else {
+            throw URLError(.badURL)
+        }
+
+        connectedServer = ConnectedServer(server: server, url: url)
+        sendHealthRequest()
+    }
+
+    public func sendHealthRequest() {
+        guard let connectedServer else {
+            self.error = RemoteClientError.cantMakeHealthRequest
+            return
+        }
+        let healthUrl = connectedServer.url.appending(path: "health")
+
+        print("1. Enqueuing:", healthUrl)
+
+        Task {
+            print("2. Queue started")
+
+            do {
+                let (data, response) = try await URLSession.shared.data(from: healthUrl)
+
+                print("3. Received response:", response)
+
+                guard let response = response as? HTTPURLResponse,
+                      response.statusCode == 200
+                        else {
+                    throw URLError(.badServerResponse)
+                }
+
+                print(String(decoding: data, as: UTF8.self))
+            } catch {
+                print("Request failed:", error)
+                /// error here, TODO: Figure out how to send this back
+                self.error = error
+            }
+        }
+    }
 }
 
 #endif
