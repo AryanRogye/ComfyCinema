@@ -53,6 +53,7 @@ let package = Package(
                 .process("Views/Watch/monitorIFrame.js"),
                 .process("Views/Watch/IFrameLogger.js"),
                 .process("Views/Watch/VideoLogger.js"),
+                .process("Views/Watch/FrameActions.js"),
             ],
             swiftSettings: [
                 .defaultIsolation(nil)

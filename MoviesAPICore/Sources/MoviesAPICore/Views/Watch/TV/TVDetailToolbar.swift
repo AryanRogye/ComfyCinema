@@ -22,6 +22,9 @@ struct TVDetailToolbar: ToolbarContent {
     @Binding var displayServer: KTDisplayServer
     @Binding var timeInfo: TimeInfo?
     @Binding var lastProgressSaveAt: Date?
+#if os(iOS)
+    @Binding var showRemoteSheet: Bool
+#endif
 #if os(macOS)
     @Binding var reloadID: UUID
     @Binding var hideSeasonsAndEpisodes: Bool
@@ -39,6 +42,13 @@ struct TVDetailToolbar: ToolbarContent {
 #endif
 
         ToolbarItemGroup(placement: .primaryAction) {
+#if os(iOS)
+            Button {
+                showRemoteSheet = true
+            } label: {
+                Image(systemName: "appletvremote.gen4")
+            }
+#endif
             Menu {
                 Divider()
                 hideSeasonAndEpisodes

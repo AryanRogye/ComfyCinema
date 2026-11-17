@@ -13,13 +13,14 @@ import MoviesAPIData
 public struct TVDetailView: View {
 
 #if os(macOS)
-    @Environment(WindowCoordinatorContainer.self) var windowContainer
+    @Environment(WindowCoordinatorContainer.self) private var windowContainer
+    @Environment(RemoteServer.self) private var remoteServer
 #endif
-    @Environment(TMDBManager.self) var tmdbManager
-    @Environment(PlaybackSession.self) var playbackSession
-    @Environment(CloudKitSyncService.self) var cloudKitSyncService
-    @Environment(\.modelContext) var modelContext
-    @Environment(\.dismiss) var dismiss
+    @Environment(TMDBManager.self) private var tmdbManager
+    @Environment(PlaybackSession.self) private var playbackSession
+    @Environment(CloudKitSyncService.self) private var cloudKitSyncService
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
 
     @Query var history: [History]
@@ -38,7 +39,7 @@ public struct TVDetailView: View {
         self._selectedEpisode = .init(initialValue: restoredPlayback?.episode)
         self._tvUrl = .init(initialValue: restoredPlayback?.url)
     }
-    public init(displayServer: Binding<KTDisplayServer>, result: KTSearchResult, seasonNumber: Int, episodeNumber: Int) {
+    public init(displayServer: Binding<KTDisplayServer>, result: KTSearchResult, seasonNumber: Int?, episodeNumber: Int?) {
         self._displayServer = displayServer
         self.result = result
         self._selectedSeasonNumber = .init(initialValue: seasonNumber)
@@ -75,6 +76,9 @@ public struct TVDetailView: View {
     @State private var showCreateCollection: Bool = false
     @State private var collectionName: String = ""
     @State private var collectionResultToAdd: KTSearchResult?
+#if os(iOS)
+    @State private var showRemoteSheet = false
+#endif
 
     @State private var currentHistory: History?
 
@@ -173,6 +177,10 @@ public struct TVDetailView: View {
         .onDisappear {
 #if os(macOS)
             webviewModel.stopPlayback()
+            remoteServer.onPlay = nil
+            remoteServer.onPause = nil
+            remoteServer.onEnterFullscreen = nil
+            remoteServer.onExitFullscreen = nil
 #endif
             saveCurrentPlaybackPosition()
         }
@@ -181,6 +189,15 @@ public struct TVDetailView: View {
             collectionName: $collectionName,
             collectionResultToAdd: $collectionResultToAdd
         ))
+#if os(iOS)
+        .sheet(isPresented: $showRemoteSheet) {
+            RemoteClientSheet(
+                result: result,
+                season: seasonInfo.map { Int($0.seasonNumber) },
+                episode: selectedEpisode.map { Int($0.episodeNumber) }
+            )
+        }
+#endif
         .sheet(isPresented: $showingLogs) {
             NavigationStack {
                 IFrameLogsView(
@@ -226,6 +243,7 @@ public struct TVDetailView: View {
                 displayServer: $displayServer,
                 timeInfo: $timeInfo,
                 lastProgressSaveAt: $lastProgressSaveAt,
+                showRemoteSheet: $showRemoteSheet,
                 onSaveCurrentPlaybackPosition: saveCurrentPlaybackPosition,
                 onDismiss: {
                     cloudKitSyncService.syncSaveToCloud()
@@ -279,6 +297,57 @@ public struct TVDetailView: View {
                 loadTVShow(season: selectedSeasonNumber, episode: Int(selectedEpisode.episodeNumber))
             }
         }
+#if os(macOS)
+        .onChange(of: webviewModel.webView, initial: true) { _, webView in
+            guard let webView else {
+                remoteServer.onPlay = nil
+                remoteServer.onPause = nil
+                remoteServer.onEnterFullscreen = nil
+                remoteServer.onExitFullscreen = nil
+                return
+            }
+            remoteServer.onPlay = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "play",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+            remoteServer.onPause = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "pause",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+            remoteServer.onEnterFullscreen = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "enterFullscreen",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+            remoteServer.onExitFullscreen = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "exitFullscreen",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+        }
+#endif
         /// Attach history if we came including the tvUrl being nil and the currentHistory not being set
         .task {
             if tvUrl != nil,

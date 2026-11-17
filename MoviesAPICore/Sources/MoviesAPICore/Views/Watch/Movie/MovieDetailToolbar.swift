@@ -19,6 +19,9 @@ struct MovieDetailToolbar: ToolbarContent {
     @Binding var collectionName: String
     @Binding var collectionResultToAdd: KTSearchResult?
     @Binding var displayServer: KTDisplayServer
+#if os(iOS)
+    @Binding var showRemoteSheet: Bool
+#endif
 #if os(macOS)
     @Binding var window: NSWindow?
     @Binding var reloadID: UUID
@@ -37,6 +40,13 @@ struct MovieDetailToolbar: ToolbarContent {
 #endif
 
         ToolbarItemGroup(placement: .primaryAction) {
+#if os(iOS)
+            Button {
+                showRemoteSheet = true
+            } label: {
+                Image(systemName: "appletvremote.gen4")
+            }
+#endif
             Menu {
                 Divider()
                 historyId

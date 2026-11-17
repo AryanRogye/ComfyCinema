@@ -20,12 +20,12 @@ struct MacOSRoot: View {
     @Bindable var windowContainer: WindowCoordinatorContainer
     @Bindable var appRouter: AppRouter
     @Bindable var cloudKitSync: CloudKitSyncService
+    @Bindable var remoteServer: RemoteServer
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
     @State private var defaultManager = DefaultManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
-    @State private var remoteServer = RemoteServer()
 
     @State private var selectedTab: MacOSTab = .home
 
@@ -38,6 +38,9 @@ struct MacOSRoot: View {
 
     @Default(.hasShownCloudSavePrompt)
     private var hasShownCloudSavePrompt
+
+    @AppStorage("home.homeOption")
+    private var homeOption: HomeOption = .moviesAndTVShows
 
     var body: some View {
         ZStack {
@@ -102,6 +105,7 @@ struct MacOSRoot: View {
                     .environment(playbackSession)
                     .environment(defaultManager)
                     .environment(appRouter)
+                    .environment(remoteServer)
                     .sheet(item: $intentTriggeredResult) { result in
                         NavigationStack {
                             WatchDetailView(result: result)
@@ -149,6 +153,22 @@ struct MacOSRoot: View {
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true
+            }
+        }
+        .onChange(of: appRouter.remoteRequest, initial: true) { _, request in
+            if request != nil {
+                var modifiedPath = false
+                if selectedTab != .home {
+                    selectedTab = .home
+                    modifiedPath = true
+                }
+                if homeOption != .moviesAndTVShows {
+                    homeOption = .moviesAndTVShows
+                }
+                if modifiedPath {
+                    path = NavigationPath()
+                    navigationID = UUID()
+                }
             }
         }
         .onChange(of: appRouter.selectedHistory, initial: true) { _, history in

@@ -132,6 +132,7 @@ class AppCoordinator {
     let windowContainer = WindowCoordinatorContainer()
     let cloudKitSync: CloudKitSyncService
     let appRouter = AppRouter()
+    let remoteServer = RemoteServer()
 
     private let modelContainer: ModelContainer = {
         do {
@@ -174,7 +175,7 @@ class AppCoordinator {
     let appID = UUID().uuidString
 
     public func openApp() {
-
+        assignClosuresIfNeeded()
         let targetScreen = AppCoordinator.screenUnderMouse() ?? NSScreen.main
 
         let size: NSSize
@@ -187,9 +188,14 @@ class AppCoordinator {
         let window = windowContainer.windowCoordinator.showWindow(
             id: appID,
             title: "ComfyCinema",
-            content: MacOSRoot(windowContainer: windowContainer, appRouter: appRouter, cloudKitSync: cloudKitSync)
-                .modelContainer(modelContainer)
-                .preferredColorScheme(.dark),
+            content: MacOSRoot(
+                windowContainer: windowContainer,
+                appRouter: appRouter,
+                cloudKitSync: cloudKitSync,
+                remoteServer: remoteServer
+            )
+            .modelContainer(modelContainer)
+            .preferredColorScheme(.dark),
             size: size,
             isMiniaturizable: true,
             alwaysActiveFocusedLook: true
@@ -212,6 +218,13 @@ class AppCoordinator {
         let loc = NSEvent.mouseLocation
         return NSScreen.screens.first {
             NSMouseInRect(loc, $0.frame, false)
+        }
+    }
+
+    private func assignClosuresIfNeeded() {
+        remoteServer.onRemotePlay = { [weak self] request in
+            guard let self else { return }
+            appRouter.remoteRequest = request
         }
     }
 }

@@ -12,6 +12,10 @@ import MoviesAPIData
 
 public struct MovieDetailView: View {
 
+#if os(macOS)
+    @Environment(RemoteServer.self) private var remoteServer
+#endif
+
     @Environment(\.modelContext) var modelContext
     @Environment(PlaybackSession.self) var playbackSession
     @Environment(CloudKitSyncService.self) var cloudKitSyncService
@@ -42,6 +46,9 @@ public struct MovieDetailView: View {
     @State private var showCreateCollection: Bool = false
     @State private var collectionName: String = ""
     @State private var collectionResultToAdd: KTSearchResult?
+#if os(iOS)
+    @State private var showRemoteSheet = false
+#endif
 
     @State var webviewModel: EmbeddedMovieViewModel = .init()
     @State private var screenshotter = EmbeddedMovieScreenshoter()
@@ -194,6 +201,11 @@ public struct MovieDetailView: View {
                 loadMovie()
             }
         }
+#if os(iOS)
+        .sheet(isPresented: $showRemoteSheet) {
+            RemoteClientSheet(result: result)
+        }
+#endif
         .toolbar{
             #if os(macOS)
             MovieDetailToolbar(
@@ -222,6 +234,7 @@ public struct MovieDetailView: View {
                 collectionName: $collectionName,
                 collectionResultToAdd: $collectionResultToAdd,
                 displayServer: $displayServer,
+                showRemoteSheet: $showRemoteSheet,
                 screenshotter: screenshotter,
                 onDismiss: {
                     cloudKitSyncService.syncSaveToCloud()
@@ -241,10 +254,65 @@ public struct MovieDetailView: View {
             collectionName: $collectionName,
             collectionResultToAdd: $collectionResultToAdd
         ))
+#if os(macOS)
+        .onChange(of: webviewModel.webView, initial: true) { _, webView in
+            guard let webView else {
+                remoteServer.onPlay = nil
+                remoteServer.onPause = nil
+                remoteServer.onEnterFullscreen = nil
+                remoteServer.onExitFullscreen = nil
+                return
+            }
+            remoteServer.onPlay = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "play",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+            remoteServer.onPause = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "pause",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+            remoteServer.onEnterFullscreen = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "enterFullscreen",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+            remoteServer.onExitFullscreen = {
+                let _ = try await webView.callAsyncJavaScript(
+                    "return window.comfyFrameAction(action)",
+                    arguments: [
+                        "action": "exitFullscreen",
+                    ],
+                    in: nil,
+                    contentWorld: .page
+                )
+            }
+        }
+#endif
         .onDisappear {
             screenshotter.stop()
 #if os(macOS)
             webviewModel.stopPlayback()
+            remoteServer.onPlay = nil
+            remoteServer.onPause = nil
+            remoteServer.onEnterFullscreen = nil
+            remoteServer.onExitFullscreen = nil
 #endif
         }
     }

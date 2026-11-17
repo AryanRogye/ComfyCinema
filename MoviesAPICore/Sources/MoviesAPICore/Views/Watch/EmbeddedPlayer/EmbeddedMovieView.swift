@@ -134,19 +134,12 @@ struct WebView: Representable {
         }
 
         attachPlaybackCompatabilityIfNeeded(in: webView)
+        attachFrameActions(in: webView)
     }
 #endif
 
 #if os(macOS)
     private func makeWebView(context: Context) -> WKWebView {
-
-        if let webView = playbackSession.webView {
-            blockingService.attachNetworkFilters(to: webView)
-            context.coordinator.attach(to: webView)
-            attachPlaybackCompatabilityIfNeeded(in: webView)
-            return webView
-        }
-
         let config = WKWebViewConfiguration()
         config.preferences.isElementFullscreenEnabled = true
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
@@ -156,6 +149,7 @@ struct WebView: Representable {
 
         let wv = WKWebView(frame: .zero, configuration: config)
         attachPlaybackCompatabilityIfNeeded(in: wv)
+        attachFrameActions(in: wv)
         wv.isInspectable = true
         wv.allowsBackForwardNavigationGestures = false
 
@@ -231,6 +225,12 @@ struct WebView: Representable {
         return isEnabled
     }
 
+    private func doesContainFrameActions(in controller: WKUserContentController, script: String) -> Bool {
+        let scripts = controller.userScripts.map { $0 }
+        let isEnabled = scripts.contains { $0.source == script }
+        return isEnabled
+    }
+
     private func attachPlaybackCompatabilityIfNeeded(in webView: WKWebView) {
         let controller = webView.configuration.userContentController
         guard !doesContainPlaybackCompatabilityScript(in: controller) else { return }
@@ -242,6 +242,26 @@ struct WebView: Representable {
         ))
         // Changing the global cannot replace an existing stream; rebuild the page.
         webView.reload()
+    }
+
+    private func attachFrameActions(in webView: WKWebView) {
+        let controller = webView.configuration.userContentController
+        guard let url = Bundle.module.url(
+            forResource: "FrameActions",
+            withExtension: "js"
+        ) else {
+            fatalError("FrameActions.js doesnt exist in the Bundle")
+        }
+
+        if let js = try? String(contentsOf: url, encoding: .utf8) {
+            guard !doesContainFrameActions(in: controller, script: js) else { return }
+            controller.addUserScript(WKUserScript(
+                source: js,
+                injectionTime: .atDocumentStart,
+                forMainFrameOnly: true,
+                in: .page
+            ))
+        }
     }
 
     func makeCoordinator() -> Coordinator {

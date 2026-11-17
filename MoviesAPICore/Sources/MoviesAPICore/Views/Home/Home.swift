@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-private enum HomeOption: String, CaseIterable {
+enum HomeOption: String, CaseIterable {
     case moviesAndTVShows = "Discover"
     case liveTV = "Live TV"
 }
@@ -17,6 +17,7 @@ public struct Home: View {
 
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(\.modelContext) var modelContext
+    @Environment(AppRouter.self) var appRouter
 
     @State private var error: String?
     @State private var showError: Bool = false

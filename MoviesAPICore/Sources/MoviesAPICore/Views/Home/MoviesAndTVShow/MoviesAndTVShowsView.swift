@@ -11,11 +11,21 @@ import SwiftData
 struct MoviesAndTVShowsView: View {
 
     @Environment(TMDBManager.self) var tmdbManager
+    @Environment(AppRouter.self) var appRouter
+    @Environment(BlockingService.self) var blockingService
     @Binding var error: String?
     @Binding var showError: Bool
 
     @AppStorage("home.selectedFilter")
     private var selectedFilter: LibraryFilter = .all
+
+    @State private var isResolving: Bool = false
+    @State private var resolveTask: Task<Void, Never>?
+    @State private var resolvingRequest: PlayRequest?
+    @State private var searchResult: KTSearchResult?
+    @State private var season: Int?
+    @State private var episode: Int?
+    @State private var goToDetail: Bool = false
 
     var filteredResults: [KTTrendingResult] {
         switch selectedFilter {
@@ -30,6 +40,19 @@ struct MoviesAndTVShowsView: View {
                 result.mediaType == .movie
             }
         }
+    }
+
+    @AppStorage("DisplayServer") private var displayServerRawValue = KTDisplayServer.moviesApi.rawValue
+
+    private var displayServer: KTDisplayServer {
+        KTDisplayServer.entries.first { $0.rawValue == displayServerRawValue } ?? .moviesApi
+    }
+
+    private var displayServerBinding: Binding<KTDisplayServer> {
+        Binding(
+            get: { displayServer },
+            set: { displayServerRawValue = $0.rawValue }
+        )
     }
 
     var body: some View {
@@ -92,6 +115,36 @@ struct MoviesAndTVShowsView: View {
             }
             .padding(.bottom)
         }
+        .navigationDestination(isPresented: $goToDetail, destination: {
+            if let searchResult {
+                switch searchResult.mediaType {
+                case .tv:
+                    TVDetailView(
+                        displayServer: displayServerBinding,
+                        result: searchResult,
+                        seasonNumber: season,
+                        episodeNumber: episode
+                    )
+                    .environment(tmdbManager)
+                    .environment(blockingService)
+                case .movie:
+                    MovieDetailView(
+                        displayServer: displayServerBinding,
+                        result: searchResult
+                    )
+                    .environment(tmdbManager)
+                    .environment(blockingService)
+                default:
+                    EmptyView()
+                }
+            }
+        })
+        .onChange(of: appRouter.remoteRequest, initial: true) { _, request in
+            if let request {
+                resolve(request)
+                appRouter.remoteRequest = nil
+            }
+        }
         .toolbar {
 
 #if os(macOS)
@@ -110,6 +163,39 @@ struct MoviesAndTVShowsView: View {
             }
         }
     }
+
+    private func resolve(_ remoteRequest: PlayRequest) {
+        if isResolving { return }
+        resolveTask = Task {
+
+            self.resolvingRequest = remoteRequest
+            isResolving = true
+            defer {
+                isResolving = false
+                resolvingRequest = nil
+            }
+
+            do {
+                try await tmdbManager.search(remoteRequest.name)
+                if !tmdbManager.searchResults.isEmpty {
+                    if let result = tmdbManager.searchResults.first(where: { remoteRequest.matches($0) }) {
+                        self.searchResult = result
+                        if let season = remoteRequest.season, let episode = remoteRequest.episode {
+                            self.season = season
+                            self.episode = episode
+                        }
+                        self.goToDetail = true
+                    }
+                    /// Clear once we finish
+                    tmdbManager.clearSearchResults()
+                }
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
+            }
+        }
+    }
+
 }
 
 private struct MoviesAndTVShowLabelView<Media: MediaListItem>: View {

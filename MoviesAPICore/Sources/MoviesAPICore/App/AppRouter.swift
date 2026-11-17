@@ -15,6 +15,7 @@ public final class AppRouter {
     public var selectedTab: TabID = .home
     /// Used for history intent
     var selectedHistory: History?
+    var remoteRequest: PlayRequest?
 
     var searchTriggered: KTSearchResult? = nil
 

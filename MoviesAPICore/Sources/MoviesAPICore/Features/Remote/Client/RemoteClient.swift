@@ -16,11 +16,26 @@ struct ConnectedServer {
 
 enum RemoteClientError: LocalizedError {
     case cantMakeHealthRequest
+    case cantMakePlayRequest
+    case wrongPlayRequestArgument
+    case playRequestFailed(Int)
+    case cantMakePlayerAction
+    case playerActionFailed(Int)
 
     var errorDescription: String? {
         switch self {
         case .cantMakeHealthRequest:
             "Cant Make Health Request"
+        case .cantMakePlayRequest:
+            "Cant Make Play Request"
+        case .wrongPlayRequestArgument:
+            "Wrong Play Request Argument"
+        case .playRequestFailed(let status):
+            "Play request failed (HTTP \(status))."
+        case .cantMakePlayerAction:
+            "Connect to a remote device first."
+        case .playerActionFailed(let status):
+            "Player action failed (HTTP \(status))."
         }
     }
 }
@@ -48,6 +63,80 @@ final class RemoteClient {
 
         connectedServer = ConnectedServer(server: server, url: url)
         sendHealthRequest()
+    }
+
+    public func sendPause() async throws {
+        try await sendPlayerAction(path: "remote/pause")
+    }
+
+    public func sendPlay() async throws {
+        try await sendPlayerAction(path: "remote/player/play")
+    }
+
+    public func sendFullscreen() async throws {
+        try await sendPlayerAction(path: "remote/player/fullscreen/enter")
+    }
+
+    public func sendExitFullscreen() async throws {
+        try await sendPlayerAction(path: "remote/player/fullscreen/exit")
+    }
+
+    private func sendPlayerAction(path: String) async throws {
+        guard let connectedServer else {
+            throw RemoteClientError.cantMakePlayerAction
+        }
+        var request = URLRequest(url: connectedServer.url.appending(path: path))
+        request.httpMethod = "POST"
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let response = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard (200..<300).contains(response.statusCode) else {
+            throw RemoteClientError.playerActionFailed(response.statusCode)
+        }
+    }
+
+    public func sendPlayRequest(
+        id: Int,
+        name: String,
+        mediaType: KTMediaType,
+        season: Int? = nil,
+        episode: Int? = nil
+    ) async throws {
+        guard let connectedServer else {
+            throw RemoteClientError.cantMakePlayRequest
+        }
+
+        let mtype: PlayRequest.MediaType
+        switch mediaType {
+        case .movie:
+            mtype = .movie
+        case .tv:
+            mtype = .tv
+        default:
+            throw RemoteClientError.wrongPlayRequestArgument
+        }
+
+        let request = PlayRequest(
+            id: id,
+            name: name,
+            mediaType: mtype,
+            season: season,
+            episode: episode
+        )
+
+        var urlRequest = URLRequest(url: connectedServer.url.appending(path: "remote/play"))
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(request)
+
+        let (_, response) = try await URLSession.shared.data(for: urlRequest)
+        guard let response = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard (200..<300).contains(response.statusCode) else {
+            throw RemoteClientError.playRequestFailed(response.statusCode)
+        }
     }
 
     public func sendHealthRequest() {
