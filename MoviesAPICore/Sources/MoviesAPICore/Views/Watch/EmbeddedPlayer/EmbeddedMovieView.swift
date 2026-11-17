@@ -258,7 +258,7 @@ struct WebView: Representable {
             controller.addUserScript(WKUserScript(
                 source: js,
                 injectionTime: .atDocumentStart,
-                forMainFrameOnly: true,
+                forMainFrameOnly: false,
                 in: .page
             ))
         }
