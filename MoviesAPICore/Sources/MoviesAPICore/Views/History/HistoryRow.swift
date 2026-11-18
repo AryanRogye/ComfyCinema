@@ -78,7 +78,7 @@ struct HistoryRow: View {
         }
         .padding(4)
         .background(.quaternary.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .clipShape(RoundedRectangle(cornerRadius: 9))
         .contentShape(Rectangle())
         .padding(.horizontal, 16)
         .overlay {
