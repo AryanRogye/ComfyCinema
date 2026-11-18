@@ -14,6 +14,12 @@ struct ConnectedServer {
     let url: URL
 }
 
+struct StoredServer: Codable {
+    let name: String
+    let hostname: String
+    let port: Int
+}
+
 enum RemoteClientError: LocalizedError {
     case cantMakeHealthRequest
     case cantMakePlayRequest
@@ -47,10 +53,18 @@ final class RemoteClient {
 
     private(set) var connectedServer: ConnectedServer?
     private(set) var error: Error?
-    private let clientQueue = TaskQueue()
 
     var discoveredDevices: [ResolvedServer] {
-        remoteServerResolver.discoveredDevices
+        return remoteServerResolver.discoveredDevices
+    }
+
+    private var alwaysConnect: StoredServer?
+
+    static let alwaysConnectKey = "alwaysConnectResolvedServer"
+
+    init() {
+        setAlwaysConnect()
+        observeDevices()
     }
 
     public func connect(to server: ResolvedServer) throws {
@@ -64,6 +78,58 @@ final class RemoteClient {
         connectedServer = ConnectedServer(server: server, url: url)
         sendHealthRequest()
     }
+
+    public func setAlwaysConnect(to server: ResolvedServer) {
+        guard let hostname = server.hostname else { return }
+        guard let port = server.port else { return }
+        let storedServer = StoredServer(
+            name: server.service.name,
+            hostname: hostname,
+            port: port
+        )
+
+        guard let data = try? JSONEncoder().encode(storedServer) else {
+            return
+        }
+
+        UserDefaults.standard.set(data, forKey: Self.alwaysConnectKey)
+        setAlwaysConnect()
+    }
+
+    private func setAlwaysConnect() {
+        guard let data = UserDefaults.standard.data(
+            forKey: Self.alwaysConnectKey
+        ) else {
+            return
+        }
+
+        alwaysConnect = try? JSONDecoder().decode(StoredServer.self, from: data)
+    }
+}
+
+extension RemoteClient {
+    public func observeDevices() {
+        withObservationTracking {
+            _ = remoteServerResolver.discoveredDevices
+        } onChange: { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                if let alwaysConnect = self.alwaysConnect {
+                    for device in self.discoveredDevices {
+                        if device.matches(with: alwaysConnect) {
+                            try? self.connect(to: device)
+                            break
+                        }
+                    }
+                }
+                self.observeDevices()
+            }
+        }
+
+    }
+}
+
+extension RemoteClient {
 
     public func sendPause() async throws {
         try await sendPlayerAction(path: "remote/pause")

@@ -8,6 +8,29 @@
 #if os(iOS)
 import SwiftUI
 
+// MARK: - Helpers
+
+private extension View {
+    /// Flat, solid card used by every section.
+    func remoteSurface(padding: CGFloat = 16) -> some View {
+        self
+            .padding(padding)
+            .frame(maxWidth: .infinity)
+            .background(Color(white: 0.11), in: .rect(cornerRadius: 20, style: .continuous))
+    }
+}
+
+private struct RemotePressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+// MARK: - View
+
 struct RemoteClientView: View {
 
     /// Parameters
@@ -24,241 +47,34 @@ struct RemoteClientView: View {
     @State private var sent = false
 
     @State private var seconds: String = ""
+    @FocusState private var isSeekFocused: Bool
 
     /// Volume Related
     @State private var currentVolume: Float?
     @State private var volumeTask: Task<Void, Never>?
+
+    private let secondaryText = Color.white.opacity(0.6)
+    private let controlFill = Color.white.opacity(0.07)
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 12) {
-
                 if let error {
-                    Text(error)
-                        .foregroundStyle(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(8)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background {
-                            RoundedRectangle(cornerRadius: 28)
-                                .fill(Color(white: 0.12))
-                        }
+                    errorBanner(error)
                 }
+
                 if let connectedServer = remoteClient.connectedServer {
-                    /// Top Row
-                    HStack(alignment: .center) {
-                        Image("MacBookPro", bundle: .module)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 110, height: 50)
-
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(connectedServer.server.hostname ?? "Unknown")
-                                .font(
-                                    .system(
-                                        size: 16,
-                                        weight: .semibold,
-                                        design: .rounded
-                                    )
-                                )
-                                .foregroundStyle(.white)
-
-                            HStack {
-                                Circle()
-                                    .fill(Color(red: 0.2, green: 1.0, blue: 0.4))
-                                    .frame(width: 7, height: 7)
-                                    .shadow(color: .green.opacity(0.6), radius: 5)
-
-                                Text("Connected")
-                                    .font(
-                                        .system(
-                                            size: 14,
-                                            weight: .medium,
-                                            design: .rounded
-                                        )
-                                    )
-                                    .foregroundStyle(.white.opacity(0.6))
-
-                                Spacer()
-                            }
+                    VStack(spacing: 12) {
+                        deviceHeader(connectedServer)
+                        playbackControls
+                        seekRow
+                        if result != nil {
+                            playRequestRow
                         }
-                    }
-                    .padding(8)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .background {
-                        RoundedRectangle(cornerRadius: 28)
-                            .fill(Color(white: 0.12))
-                    }
-
-                    VStack(spacing: 22) {
-                        HStack(spacing: 14) {
-                            remoteButton("gobackward.10") {
-                                /// Back 10 seconds
-                                sendAction { try await remoteClient.backwardTenSeconds() }
-                            }
-
-                            remoteButton(
-                                "play.fill",
-                                size: 34,
-                                highlighted: true
-                            ) {
-                                /// Play
-                                sendAction { try await remoteClient.sendPlay() }
-                            }
-
-                            remoteButton("goforward.10") {
-                                /// Forward 10 seconds
-                                sendAction { try await remoteClient.forwardTenSeconds() }
-                            }
-                        }
-
-                        Rectangle()
-                            .fill(.white.opacity(0.12))
-                            .frame(height: 1)
-
-                        HStack(spacing: 14) {
-                            remoteButton("pause.fill") {
-                                /// Pause
-                                sendAction { try await remoteClient.sendPause() }
-                            }
-
-                            remoteButton(
-                                "arrow.up.left.and.arrow.down.right",
-                                size: 25
-                            ) {
-                                /// Enter fullscreen
-                                sendAction { try await remoteClient.sendFullscreen() }
-                            }
-
-                            remoteButton(
-                                "arrow.down.right.and.arrow.up.left",
-                                size: 25
-                            ) {
-                                /// Exit fullscreen
-                                sendAction { try await remoteClient.sendExitFullscreen() }
-                            }
-                        }
-                    }
-                    .padding(20)
-                    .frame(maxWidth: .infinity)
-
-                    HStack(alignment: .center) {
-                        Image(systemName: "clock")
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-
-                        Text("Seek to Time")
-                            .foregroundStyle(.white)
-                            .fontWeight(.medium)
-
-                        Spacer()
-
-                        TextField(
-                            "mm:ss",
-                            text: $seconds,
-                            prompt: Text("mm:ss")
-                                .foregroundStyle(.gray.opacity(0.4))
-                        )
-                        .foregroundStyle(.white)
-                        .keyboardType(.numbersAndPunctuation)
-                        .submitLabel(.go)
-                        .onSubmit(seek)
-                        .textFieldStyle(.plain)
-                        .multilineTextAlignment(.center)
-                        .padding(6)
-                        .frame(width: 100)
-                        .background(
-                            .blue.mix(with: .black, by: 0.9),
-                            in: .rect(cornerRadius: 12)
-                        )
-                        Button(action: seek) {
-                            Text("Go")
-                                .fontWeight(.bold)
-                                .foregroundStyle(.black)
-                                .padding(6)
-                                .padding(.horizontal, 4)
-                                .background(
-                                    .yellow,
-                                    in: .rect(cornerRadius: 12)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(Self.parseTime(seconds) == nil)
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity)
-                    .background {
-                        RoundedRectangle(cornerRadius: 28)
-                            .fill(Color(white: 0.12))
-                    }
-
-                    if let result {
-                        Button {
-                            sendAction {
-                                try await remoteClient.sendPlayRequest(
-                                    id: Int(result.id),
-                                    name: result.name ?? result.title ?? "",
-                                    mediaType: result.mediaType,
-                                    season: season,
-                                    episode: episode
-                                )
-                                sent = true
-                            }
-                        } label: {
-                            HStack(alignment: .center) {
-                                Image(systemName: "airplayvideo")
-                                    .foregroundStyle(.yellow)
-                                    .fontWeight(.bold)
-
-                                Text("Send Play Request")
-                                    .foregroundStyle(.white)
-                                    .fontWeight(.medium)
-
-                                Spacer()
-
-                                Image(systemName: "chevron.right")
-                                    .foregroundStyle(.gray)
-                                    .fontWeight(.bold)
-                            }
-                            .padding(12)
-                            .frame(maxWidth: .infinity)
-                            .background {
-                                RoundedRectangle(cornerRadius: 28)
-                                    .fill(Color(white: 0.12))
-                            }
-                            .contentShape(.rect)
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    VStack {
-                        if let currentVolume {
-                            Slider(
-                                value: Binding(
-                                    get: { currentVolume },
-                                    set: { self.currentVolume = $0 }
-                                ),
-                                in: 0...1,
-                                step: 0.1,
-                                onEditingChanged: { isEditing in
-                                    if !isEditing {
-                                        // User finished dragging
-                                        // Send volume to remote server
-                                        volumeTask?.cancel()
-                                        volumeTask = Task {
-                                            do {
-                                                try await remoteClient.setVolume(to: currentVolume)
-                                            } catch {
-                                                self.error = error.localizedDescription
-                                            }
-                                        }
-                                    }
-                                }
-                            )
+                        if currentVolume != nil {
+                            volumeRow
                         }
                     }
                     .onAppear {
@@ -271,81 +87,297 @@ struct RemoteClientView: View {
                         }
                     }
                 } else {
-                    VStack(spacing: 14) {
-                        Image(systemName: "wifi.slash")
-                            .font(.system(size: 34, weight: .semibold))
-                            .foregroundStyle(.yellow)
-                            .frame(width: 76, height: 76)
-                            .background(
-                                .yellow.opacity(0.12),
-                                in: .rect(cornerRadius: 22)
-                            )
-
-                        Text("No Server Connected")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white)
-
-                        Text("Open Settings and pick a device to start controlling playback.")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.6))
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(24)
-                    .frame(maxWidth: .infinity)
-                    .background {
-                        RoundedRectangle(cornerRadius: 28)
-                            .fill(Color(white: 0.12))
-                    }
+                    emptyState
                 }
             }
             .disabled(isSending)
             .padding()
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .top
-            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
+        .animation(.default, value: error)
+        .animation(.default, value: currentVolume == nil)
     }
 
-    private func remoteButton(
+    // MARK: Sections
+
+    private func deviceHeader(_ connected: ConnectedServer) -> some View {
+        HStack(spacing: 14) {
+            Image("MacBookPro", bundle: .module)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 76, height: 48)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(connected.server.service.name)
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 7, height: 7)
+                    Text("Connected")
+                        .font(.subheadline)
+                        .foregroundStyle(secondaryText)
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .remoteSurface()
+    }
+
+    private var playbackControls: some View {
+        VStack(spacing: 14) {
+            HStack(spacing: 10) {
+                skipButton("gobackward.10", label: "Back 10 seconds") {
+                    run { try await remoteClient.backwardTenSeconds() }
+                }
+
+                Button {
+                    run { try await remoteClient.sendPlay() }
+                } label: {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 64)
+                        .background(Color.yellow, in: .rect(cornerRadius: 16, style: .continuous))
+                }
+                .buttonStyle(RemotePressStyle())
+                .accessibilityLabel("Play")
+
+                skipButton("goforward.10", label: "Forward 10 seconds") {
+                    run { try await remoteClient.forwardTenSeconds() }
+                }
+            }
+
+            Divider().overlay(Color.white.opacity(0.1))
+
+            HStack(spacing: 10) {
+                secondaryButton("pause.fill", title: "Pause") {
+                    run { try await remoteClient.sendPause() }
+                }
+                secondaryButton("arrow.up.left.and.arrow.down.right", title: "Fullscreen") {
+                    run { try await remoteClient.sendFullscreen() }
+                }
+                secondaryButton("arrow.down.right.and.arrow.up.left", title: "Exit") {
+                    run { try await remoteClient.sendExitFullscreen() }
+                }
+            }
+        }
+        .remoteSurface()
+    }
+
+    private var seekRow: some View {
+        let isValid = Self.parseTime(seconds) != nil
+
+        return HStack(spacing: 10) {
+            Image(systemName: "clock")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(secondaryText)
+
+            Text("Seek to")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white)
+
+            Spacer()
+
+            TextField(
+                "",
+                text: $seconds,
+                prompt: Text("0:00").foregroundStyle(.white.opacity(0.3))
+            )
+            .focused($isSeekFocused)
+            .font(.system(.body, design: .rounded).monospacedDigit())
+            .foregroundStyle(.white)
+            .keyboardType(.numbersAndPunctuation)
+            .submitLabel(.go)
+            .onSubmit(seek)
+            .multilineTextAlignment(.center)
+            .frame(width: 96)
+            .padding(.vertical, 8)
+            .background(controlFill, in: .rect(cornerRadius: 10, style: .continuous))
+
+            Button(action: seek) {
+                Text("Go")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.yellow, in: .rect(cornerRadius: 10, style: .continuous))
+            }
+            .buttonStyle(RemotePressStyle())
+            .disabled(!isValid)
+            .opacity(isValid ? 1 : 0.35)
+        }
+        .remoteSurface(padding: 12)
+    }
+
+    private var playRequestRow: some View {
+        Button {
+            guard let result else { return }
+            run {
+                try await remoteClient.sendPlayRequest(
+                    id: Int(result.id),
+                    name: result.name ?? result.title ?? "",
+                    mediaType: result.mediaType,
+                    season: season,
+                    episode: episode
+                )
+                sent = true
+                Task {
+                    try? await Task.sleep(for: .seconds(2))
+                    sent = false
+                }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: sent ? "checkmark.circle.fill" : "airplayvideo")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(sent ? Color.green : Color.yellow)
+                    .frame(width: 24)
+
+                Text(sent ? "Request Sent" : "Send Play Request")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.white)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.35))
+            }
+            .remoteSurface(padding: 14)
+            .contentShape(.rect)
+        }
+        .buttonStyle(RemotePressStyle())
+    }
+
+    private var volumeRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "speaker.fill")
+                .font(.footnote)
+                .foregroundStyle(secondaryText)
+
+            Slider(
+                value: Binding(
+                    get: { currentVolume ?? 0 },
+                    set: { currentVolume = $0 }
+                ),
+                in: 0...1,
+                step: 0.1,
+                onEditingChanged: { isEditing in
+                    guard !isEditing, let volume = currentVolume else { return }
+                    // User finished dragging: send volume to the remote server.
+                    volumeTask?.cancel()
+                    volumeTask = Task {
+                        do {
+                            try await remoteClient.setVolume(to: volume)
+                        } catch {
+                            self.error = error.localizedDescription
+                        }
+                    }
+                }
+            )
+            .tint(.yellow)
+
+            Image(systemName: "speaker.wave.3.fill")
+                .font(.footnote)
+                .foregroundStyle(secondaryText)
+        }
+        .remoteSurface(padding: 14)
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 28, weight: .medium))
+                .foregroundStyle(secondaryText)
+                .padding(.bottom, 4)
+
+            Text("No Server Connected")
+                .font(.headline)
+                .foregroundStyle(.white)
+
+            Text("Open Settings and pick a device to control playback.")
+                .font(.footnote)
+                .foregroundStyle(secondaryText)
+                .multilineTextAlignment(.center)
+        }
+        .remoteSurface(padding: 28)
+    }
+
+    private func errorBanner(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.red)
+
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button {
+                error = nil
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.5))
+            }
+            .accessibilityLabel("Dismiss error")
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity)
+        .background(Color.red.opacity(0.14), in: .rect(cornerRadius: 16, style: .continuous))
+    }
+
+    // MARK: Buttons
+
+    private func skipButton(
         _ symbol: String,
-        size: CGFloat = 28,
-        highlighted: Bool = false,
+        label: String,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: size, weight: .semibold))
-                .foregroundStyle(highlighted ? .black : .white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 76)
-                .background {
-                    if highlighted {
-                        RoundedRectangle(cornerRadius: 22)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        .yellow.mix(with: .white, by: 0.35),
-                                        .yellow
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    } else {
-                        RoundedRectangle(cornerRadius: 22)
-                            .fill(.white.opacity(0.06))
-                    }
-                }
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 76, height: 64)
+                .background(controlFill, in: .rect(cornerRadius: 16, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(RemotePressStyle())
+        .accessibilityLabel(label)
     }
+
+    private func secondaryButton(
+        _ symbol: String,
+        title: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: symbol)
+                    .font(.system(size: 18, weight: .semibold))
+                Text(title)
+                    .font(.caption.weight(.medium))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(controlFill, in: .rect(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(RemotePressStyle())
+    }
+
+    // MARK: Actions
 
     private func seek() {
         // Invalid input does nothing.
         guard let time = Self.parseTime(seconds) else { return }
-        sendAction { try await remoteClient.seek(to: time) }
+        isSeekFocused = false
+        run { try await remoteClient.seek(to: time) }
     }
 
     /// Accepts plain seconds ("90", "75.5") or clock style ("1:30", "1:02:03").
@@ -362,6 +394,12 @@ struct RemoteClientView: View {
         return total
     }
 
+    /// Light haptic, then send.
+    private func run(_ action: @escaping @MainActor () async throws -> Void) {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        sendAction(action)
+    }
+
     private func sendAction(_ action: @escaping @MainActor () async throws -> Void) {
         isSending = true
         error = nil
@@ -375,7 +413,6 @@ struct RemoteClientView: View {
             }
         }
     }
-
 }
 
 #endif

@@ -108,7 +108,6 @@ public struct Root: View {
                                 .navigationDestination(for: PlaybackRoute.self) { _ in
                                     PlaybackDestination()
                                 }
-                                .toolbar(.hidden, for: .tabBar)
                         }
                     }
                 }

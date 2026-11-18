@@ -19,6 +19,12 @@ struct ResolvedServer: Hashable, Identifiable {
         return nil
     }
     var port: Int? { service.port }
+
+    public func matches(with stored: StoredServer) -> Bool {
+        return service.name == stored.name &&
+        hostname == stored.hostname &&
+        port == stored.port
+    }
 }
 
 @Observable
@@ -40,24 +46,14 @@ final class RemoteServerResolver: NSObject, @MainActor NetServiceBrowserDelegate
             inDomain: "local."
         )
     }
-
-    func netServiceBrowserWillSearch(_ browser: NetServiceBrowser) {
-        print("Browser: will search")
-    }
-
-    func netServiceDidResolveAddress(_ sender: NetService) {
-        print("Resolved:", sender.name)
-        print("Hostname:", sender.hostName ?? "Unknown")
-        print("Port:", sender.port)
-    }
-
-    func netServiceBrowser(
-        _ browser: NetServiceBrowser,
-        didNotSearch errorDict: [String : NSNumber]
-    ) {
-        /// -72008 = local network permission denied / missing NSBonjourServices
-        print("Browser: DID NOT SEARCH:", errorDict)
-    }
+//
+//    func netServiceBrowser(
+//        _ browser: NetServiceBrowser,
+//        didNotSearch errorDict: [String : NSNumber]
+//    ) {
+//        /// -72008 = local network permission denied / missing NSBonjourServices
+//        print("Browser: DID NOT SEARCH:", errorDict)
+//    }
 
     func netServiceBrowser(
         _ browser: NetServiceBrowser,

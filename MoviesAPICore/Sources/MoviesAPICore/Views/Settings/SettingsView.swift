@@ -39,13 +39,7 @@ public struct SettingsView: View {
                 } else {
                     ProgressView("Preparing Blocking")
                 }
-#if os(iOS)
-                NavigationLink {
-                    RemoteDevicesView()
-                } label: {
-                    Text("View Devices To Connect To")
-                }
-#elseif os(macOS)
+#if os(macOS)
                 NavigationLink {
                     RemoteServerView()
                 } label: {
