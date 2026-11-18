@@ -25,9 +25,7 @@ struct HistoryRow: View {
             artwork
 
             VStack(alignment: .leading, spacing: 5) {
-                Text(history.name)
-                    .font(.headline)
-                    .lineLimit(1)
+                name
 
                 HStack(spacing: 5) {
                     mediaDescription
@@ -35,48 +33,54 @@ struct HistoryRow: View {
                     Text("•")
 
                     TimelineView(.periodic(from: .now, by: 1)) { context in
+
                         let seconds = max(0, Int(context.date.timeIntervalSince(history.watchedAt)))
                         let minutes = seconds / 60
                         let hours = minutes / 60
-                        let days = hours / 24
+
+                        let calendar = Calendar.current
+
+                        let days = calendar.dateComponents(
+                            [.day],
+                            from: calendar.startOfDay(for: history.watchedAt),
+                            to: calendar.startOfDay(for: context.date)
+                        ).day ?? 0
 
                         Group {
-                            if seconds < 60 {
-                                Text("\(seconds)s ago")
-                            } else if minutes < 60 {
-                                Text("\(minutes)m ago")
-                            } else if hours < 24 {
-                                Text("\(hours)h ago")
-                            } else {
+                            if days >= 1 {
                                 Text("\(days)d ago")
+                            } else if hours >= 1 {
+                                Text("\(hours)h ago")
+                            } else if minutes >= 1 {
+                                Text("\(minutes)m ago")
+                            } else {
+                                Text("\(seconds)s ago")
                             }
                         }
                         .contentTransition(.numericText())
                         .animation(.snappy, value: seconds)
                     }
+
+                    if let lastStoppedAt = history.lastStoppedAt {
+
+                        Text("•")
+
+                        Text(durationFormatter.string(from: lastStoppedAt) ?? "")
+                    }
                 }
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-
-                if let lastStoppedAt = history.lastStoppedAt {
-                    Text(durationFormatter.string(from: lastStoppedAt) ?? "")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
             }
 
             Spacer(minLength: 8)
 
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.tertiary)
+            playButton
         }
-        .padding(12)
+        .padding(4)
         .background(.quaternary.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .contentShape(Rectangle())
         .padding(.horizontal, 16)
-        .padding(.vertical, 4)
         .overlay {
             if isResolving {
                 ProgressView()
@@ -86,6 +90,13 @@ struct HistoryRow: View {
         }
     }
 
+    private var name: some View {
+        Text(history.name)
+            .font(.headline)
+            .lineLimit(1)
+    }
+
+    // MARK: - Artwork
     private var artwork: some View {
         Group {
             if let posterPath = history.posterPath,
@@ -129,5 +140,13 @@ struct HistoryRow: View {
         } else {
             Text("Movie")
         }
+    }
+
+    // MARK: - Play Button
+    private var playButton: some View {
+        Image(systemName: "play.fill")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.white)
+            .frame(width: 44, height: 44)
     }
 }

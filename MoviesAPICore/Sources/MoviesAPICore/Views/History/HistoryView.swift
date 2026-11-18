@@ -32,6 +32,16 @@ public struct HistoryView: View {
     @State private var error: String?
     @State private var showError: Bool = false
 
+    @State private var searchHistory: String = ""
+
+    var filteredHistory: [History] {
+        if searchHistory.isEmpty {
+            history
+        } else {
+            FilterEngine.filter(searchResult: searchHistory, history: history)
+        }
+    }
+
     public init() {}
 
     @AppStorage("DisplayServer") private var displayServerRawValue = KTDisplayServer.moviesApi.rawValue
@@ -54,25 +64,20 @@ public struct HistoryView: View {
             } else {
                 ScrollView {
                     LazyVStack {
-
 #if os(macOS)
                         HistoryStatsView(history: history)
-#elseif os(iOS)
-                        NavigationLink {
-                            HistoryStatsScreen(history: history)
-                        } label: {
-                            HistoryStatsSummaryRow(history: history)
-                        }
-                        .buttonStyle(.plain) // otherwise the whole label gets tinted blue
-                        .padding(.horizontal)
 #endif
+
+                        /// search view
+                        historySearchView
 
                         Text("History")
                             .font(.title3.weight(.bold))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
+                            .padding(.top, 6)
 
-                        ForEach(history, id: \.id) { item in
+                        ForEach(filteredHistory, id: \.id) { item in
                             Button {
                                 playbackSession.stop()
                                 resolve(item)
@@ -98,6 +103,7 @@ public struct HistoryView: View {
                         }
                     }
                 }
+                .scrollDismissesKeyboard(.immediately)
                 .alert(isPresented: $showError) {
                     Alert(
                         title: Text("Error"),
@@ -168,8 +174,24 @@ public struct HistoryView: View {
         .toolbar {
 #if os(macOS)
             ToolbarSpacer(.flexible)
+#elseif os(iOS)
+            ToolbarItemGroup(placement: .primaryAction) {
+                NavigationLink {
+                    HistoryStatsScreen(history: history)
+                } label: {
+                    Image(systemName: "chart.bar.xaxis")
+                }
+            }
 #endif
         }
+    }
+
+    private var historySearchView: some View {
+        TextField("Search History", text: $searchHistory)
+            .textFieldStyle(.plain)
+            .padding(12)
+            .glassEffect(.regular, in: .capsule)
+            .padding(.horizontal)
     }
 
     private var emptyView: some View {
@@ -222,41 +244,6 @@ private struct HistoryButton: ButtonStyle {
 }
 
 #if os(iOS)
-private struct HistoryStatsSummaryRow: View {
-    let history: [History]
-
-    var body: some View {
-        let stats = HistoryStats(from: history)
-        let hours = stats.totalSeconds / 3600
-
-        HStack(spacing: 14) {
-            Image(systemName: "chart.bar.xaxis")
-                .font(.system(size: 16, weight: .semibold))
-                .frame(width: 36, height: 36)
-                .background(Color.purple.opacity(0.2), in: Circle())
-                .foregroundStyle(.purple)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Your Stats")
-                    .font(.headline)
-                Text("\(hours.formatted(.number.precision(.fractionLength(0...1)))) hrs · \(stats.movieCount) movies · \(stats.episodeCount) episodes")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(.tertiary)
-        }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.primary.opacity(0.06))
-        )
-    }
-}
 
 private struct HistoryStatsScreen: View {
     let history: [History]
