@@ -150,12 +150,45 @@
     // Probe only: reports whether this frame has a video.
     async function hasVideo() { return findVideo() ? { handled: true, ok: true } : { handled: false }; }
 
-    const ACTIONS = { play, pause, enterFullscreen, exitFullscreen, hasVideo };
+    // Moves the playhead to `target` seconds. Returns false if the video can't be seeked there.
+    function seekTo(video, target) {
+        const d = video.duration;
+        if (!Number.isFinite(target) || target < 0) return false;
+        if (Number.isFinite(d) && target > d) return false;
+        video.currentTime = target;
+        return true;
+    }
 
-    async function runLocal(action) {
+    async function skip(delta) {
+        const video = findVideo();
+        if (!video) return { handled: false };
+        const d = video.duration;
+        let target = video.currentTime + delta;
+        target = Math.max(0, Number.isFinite(d) ? Math.min(target, d) : target);
+        return seekTo(video, target) ? { handled: true, ok: true }
+                                     : { handled: true, ok: false, error: 'Could not skip' };
+    }
+
+    const skipForward  = () => skip(10);
+    const skipBackward = () => skip(-10);
+
+    // arg: time in seconds (number or numeric string). Invalid times do nothing.
+    async function seek(arg) {
+        const video = findVideo();
+        if (!video) return { handled: false };
+        const raw = typeof arg === 'string' ? arg.trim() : arg;
+        const seconds = (raw === '' || raw === null || raw === undefined) ? NaN : Number(raw);
+        return seekTo(video, seconds) ? { handled: true, ok: true }
+                                      : { handled: true, ok: false, error: 'Invalid seek time' };
+    }
+
+    const ACTIONS = { play, pause, enterFullscreen, exitFullscreen, hasVideo,
+                      skipForward, skipBackward, seek };
+
+    async function runLocal(action, arg) {
         const fn = ACTIONS[action];
         if (!fn) return { handled: true, ok: false, error: 'Unknown action' };
-        try { return await fn(); }
+        try { return await fn(arg); }
         catch (e) { return { handled: true, ok: false, error: String(e?.message || e) }; }
     }
 
@@ -164,7 +197,7 @@
     let nextId = 0;
 
     // Runs the action here and in every nested frame. Resolves with the best result.
-    function runEverywhere(action, deadline) {
+    function runEverywhere(action, deadline, arg) {
         return new Promise(resolve => {
             const id = `${Date.now()}-${Math.random()}-${nextId++}`;
             const iframes = Array.from(document.querySelectorAll('iframe')).filter(f => f.contentWindow);
@@ -200,10 +233,10 @@
 
             window.addEventListener('message', onMessage);
             for (const w of frames) {
-                try { w.postMessage({ [TAG]: true, id, action, deadline }, '*'); }
+                try { w.postMessage({ [TAG]: true, id, action, arg, deadline }, '*'); }
                 catch { pending--; }
             }
-            runLocal(action).then(settle);
+            runLocal(action, arg).then(settle);
             setTimeout(finish, Math.max(300, deadline - Date.now()));
         });
     }
@@ -211,7 +244,7 @@
     window.addEventListener('message', async e => {
         const d = e.data;
         if (!d || !d[TAG] || !e.source) return;
-        const result = await runEverywhere(d.action, d.deadline - 100);
+        const result = await runEverywhere(d.action, d.deadline - 100, d.arg);
         const { handled, ok, error } = result;
         try { e.source.postMessage({ [REPLY]: true, id: d.id, result: { handled, ok, error } }, '*'); } catch {}
     });
@@ -234,13 +267,13 @@
     }
 
     // Entry point used by the native side (main frame).
-    window.comfyFrameAction = async function(action) {
+    window.comfyFrameAction = async function(action, arg) {
         if (!ACTIONS[action]) return { ok: false, error: 'Unknown action' };
         if (action === 'enterFullscreen') {
             const r = await enterFullscreenFromTop();
             if (r) return r;
         }
-        const result = await runEverywhere(action, Date.now() + 6000);
+        const result = await runEverywhere(action, Date.now() + 6000, arg);
         if (!result.handled) return { ok: false, error: 'No video found in any frame' };
         return result.ok ? { ok: true } : { ok: false, error: result.error || 'Action failed' };
     };

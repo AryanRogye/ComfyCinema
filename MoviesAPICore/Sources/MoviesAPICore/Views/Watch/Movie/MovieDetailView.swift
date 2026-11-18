@@ -266,62 +266,17 @@ public struct MovieDetailView: View {
 #if os(macOS)
         .onChange(of: webviewModel.webView, initial: true) { _, webView in
             guard let webView else {
-                remoteServer.onPlay = nil
-                remoteServer.onPause = nil
-                remoteServer.onEnterFullscreen = nil
-                remoteServer.onExitFullscreen = nil
+                remoteServer.clearClosures()
                 return
             }
-            remoteServer.onPlay = {
-                let _ = try await webView.callAsyncJavaScript(
-                    "return window.comfyFrameAction(action)",
-                    arguments: [
-                        "action": "play",
-                    ],
-                    in: nil,
-                    contentWorld: .page
-                )
-            }
-            remoteServer.onPause = {
-                let _ = try await webView.callAsyncJavaScript(
-                    "return window.comfyFrameAction(action)",
-                    arguments: [
-                        "action": "pause",
-                    ],
-                    in: nil,
-                    contentWorld: .page
-                )
-            }
-            remoteServer.onEnterFullscreen = {
-                let _ = try await webView.callAsyncJavaScript(
-                    "return window.comfyFrameAction(action)",
-                    arguments: [
-                        "action": "enterFullscreen",
-                    ],
-                    in: nil,
-                    contentWorld: .page
-                )
-            }
-            remoteServer.onExitFullscreen = {
-                let _ = try await webView.callAsyncJavaScript(
-                    "return window.comfyFrameAction(action)",
-                    arguments: [
-                        "action": "exitFullscreen",
-                    ],
-                    in: nil,
-                    contentWorld: .page
-                )
-            }
+            remoteServer.attachWebViewFunctions(webView)
         }
 #endif
         .onDisappear {
             screenshotter.stop()
 #if os(macOS)
             webviewModel.stopPlayback()
-            remoteServer.onPlay = nil
-            remoteServer.onPause = nil
-            remoteServer.onEnterFullscreen = nil
-            remoteServer.onExitFullscreen = nil
+            remoteServer.clearClosures()
 #endif
         }
     }

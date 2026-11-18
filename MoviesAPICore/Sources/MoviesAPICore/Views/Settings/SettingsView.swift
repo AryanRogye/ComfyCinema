@@ -45,6 +45,12 @@ public struct SettingsView: View {
                 } label: {
                     Text("View Devices To Connect To")
                 }
+#elseif os(macOS)
+                NavigationLink {
+                    RemoteServerView()
+                } label: {
+                    Text("Remote Control")
+                }
 #endif
             } header: {
                 Label("Network", systemImage: "network")

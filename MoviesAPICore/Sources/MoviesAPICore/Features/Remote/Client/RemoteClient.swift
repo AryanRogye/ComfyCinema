@@ -81,6 +81,33 @@ final class RemoteClient {
         try await sendPlayerAction(path: "remote/player/fullscreen/exit")
     }
 
+    public func forwardTenSeconds() async throws {
+        try await sendPlayerAction(path: "remote/player/forwardTenSeconds")
+    }
+
+    public func backwardTenSeconds() async throws {
+        try await sendPlayerAction(path: "remote/player/backwardTenSeconds")
+    }
+
+    public func seek(to time: Double) async throws {
+        guard let connectedServer else {
+            throw RemoteClientError.cantMakePlayerAction
+        }
+
+        var urlRequest = URLRequest(url: connectedServer.url.appending(path: "remote/player/seek"))
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(time)
+
+        let (_, response) = try await URLSession.shared.data(for: urlRequest)
+        guard let response = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard (200..<300).contains(response.statusCode) else {
+            throw RemoteClientError.playRequestFailed(response.statusCode)
+        }
+    }
+
     private func sendPlayerAction(path: String) async throws {
         guard let connectedServer else {
             throw RemoteClientError.cantMakePlayerAction

@@ -54,6 +54,7 @@ let package = Package(
                 .process("Views/Watch/IFrameLogger.js"),
                 .process("Views/Watch/VideoLogger.js"),
                 .process("Views/Watch/FrameActions.js"),
+                .process("Media.xcassets"),
             ],
             swiftSettings: [
                 .defaultIsolation(nil)
