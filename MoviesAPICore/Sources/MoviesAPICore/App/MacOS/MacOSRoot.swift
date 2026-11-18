@@ -156,19 +156,20 @@ struct MacOSRoot: View {
             }
         }
         .onChange(of: appRouter.remoteRequest, initial: true) { _, request in
-            if request != nil {
-                var modifiedPath = false
-                if selectedTab != .home {
-                    selectedTab = .home
-                    modifiedPath = true
-                }
-                if homeOption != .moviesAndTVShows {
-                    homeOption = .moviesAndTVShows
-                }
-                if modifiedPath {
-                    path = NavigationPath()
-                    navigationID = UUID()
-                }
+            guard let request else { return }
+            appRouter.remoteRequest = nil
+
+            if selectedTab != .home { selectedTab = .home }
+            if homeOption != .moviesAndTVShows { homeOption = .moviesAndTVShows }
+
+            // Always pop back to the home root, even when already deep in the stack.
+            path = NavigationPath()
+            navigationID = UUID()
+
+            // Hand the request over only after the rebuilt stack exists, so the home view
+            // that consumes it isn't torn down by the reset above.
+            Task { @MainActor in
+                appRouter.routedRemoteRequest = request
             }
         }
         .onChange(of: appRouter.selectedHistory, initial: true) { _, history in

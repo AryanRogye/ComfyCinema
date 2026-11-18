@@ -41,14 +41,17 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationShouldTerminate(
         _ sender: NSApplication
     ) -> NSApplication.TerminateReply {
-        Task {
+        appCoordinator?.remoteServer.stopServer { [weak self] in
+            guard let self else {
+                sender.reply(toApplicationShouldTerminate: true)
+                return
+            }
             do {
                 try await appCoordinator?.cloudKitSync.saveToCloud()
+                sender.reply(toApplicationShouldTerminate: true)
             } catch {
                 print("CloudKit sync failed during termination:", error)
             }
-
-            sender.reply(toApplicationShouldTerminate: true)
         }
 
         return .terminateLater

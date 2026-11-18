@@ -13,6 +13,7 @@ struct MoviesAndTVShowsView: View {
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(AppRouter.self) var appRouter
     @Environment(BlockingService.self) var blockingService
+    @Environment(CloudKitSyncService.self) var cloudKitSync
     @Binding var error: String?
     @Binding var showError: Bool
 
@@ -130,19 +131,21 @@ struct MoviesAndTVShowsView: View {
                 case .movie:
                     MovieDetailView(
                         displayServer: displayServerBinding,
-                        result: searchResult
+                        result: searchResult,
+                        loadingMovie: true
                     )
                     .environment(tmdbManager)
                     .environment(blockingService)
+                    .environment(cloudKitSync)
                 default:
                     EmptyView()
                 }
             }
         })
-        .onChange(of: appRouter.remoteRequest, initial: true) { _, request in
+        .onChange(of: appRouter.routedRemoteRequest, initial: true) { _, request in
             if let request {
                 resolve(request)
-                appRouter.remoteRequest = nil
+                appRouter.routedRemoteRequest = nil
             }
         }
         .toolbar {

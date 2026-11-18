@@ -147,7 +147,7 @@ final class RemoteServer: NSObject, NetServiceDelegate {
         return "Exit fullscreen action requested"
     }
 
-    public func stopServer() {
+    public func stopServer(completion: @escaping () async -> Void = {}) {
         let runningTask = startServerTask
 
         startServerTask = nil
@@ -155,6 +155,7 @@ final class RemoteServer: NSObject, NetServiceDelegate {
 
         stopServerTask = Task {
             await runningTask?.value
+            await completion()
         }
     }
 }

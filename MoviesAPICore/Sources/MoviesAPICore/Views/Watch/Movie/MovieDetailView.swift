@@ -24,16 +24,20 @@ public struct MovieDetailView: View {
     @Query var history: [History]
     @Binding var displayServer: KTDisplayServer
     let result: KTSearchResult
+    /// Load once the view is installed; `@Query`/`modelContext` aren't usable inside `init`.
+    private let loadOnAppear: Bool
 
     public init(
         displayServer: Binding<KTDisplayServer>,
         result: KTSearchResult,
-        restoredURL: URL? = nil
+        restoredURL: URL? = nil,
+        loadingMovie: Bool = false
     ) {
         self._displayServer = displayServer
         self.result = result
         self._movieUrl = State(initialValue: restoredURL)
         self._hasLoadedMovie = State(initialValue: restoredURL != nil)
+        self.loadOnAppear = loadingMovie
     }
 
     @State private var error: String?
@@ -193,6 +197,11 @@ public struct MovieDetailView: View {
         .navigationBarBackButtonHidden()
         .navigationTitle(result.name ?? result.title ?? "")
         .frame(maxWidth: .infinity)
+        .task {
+            if loadOnAppear && !hasLoadedMovie {
+                loadMovie()
+            }
+        }
         .onChange(of: displayServer) {
             if hasLoadedMovie {
                 screenshotter.stop()
