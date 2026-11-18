@@ -212,7 +212,7 @@ public struct MovieDetailView: View {
         }
 #if os(iOS)
         .sheet(isPresented: $showRemoteSheet) {
-            RemoteClientSheet(result: result)
+            RemoteClientView(result: result)
         }
 #endif
         .toolbar{

@@ -17,19 +17,39 @@ struct RemoteDevicesView: View {
     @State private var showError: Bool = false
 
     var body: some View {
-        List {
-            if let error = remoteClient.error {
-                Text(error.localizedDescription)
-                    .foregroundStyle(.red)
-            }
-            ForEach(remoteClient.discoveredDevices, id: \.self) { device in
-                Button {
-                    showingDetail = device
-                } label: {
-                    Text(device.service.name)
-                        .foregroundStyle(.white)
+        ScrollView {
+            RemoteClientView()
+
+            VStack {
+                if let error = remoteClient.error {
+                    Text(error.localizedDescription)
+                        .foregroundStyle(.red)
+                }
+
+                Text("Devices")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                ForEach(remoteClient.discoveredDevices, id: \.self) { device in
+                    Button {
+                        showingDetail = device
+                    } label: {
+                        Text(device.service.name)
+                            .foregroundStyle(.white)
+                            .padding(8)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background {
+                                RoundedRectangle(cornerRadius: 28)
+                                    .fill(Color(white: 0.12))
+                            }
+                            .contentShape(.rect)
+                    }
                 }
             }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .alert(isPresented: $showError) {

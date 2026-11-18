@@ -191,7 +191,7 @@ public struct TVDetailView: View {
         ))
 #if os(iOS)
         .sheet(isPresented: $showRemoteSheet) {
-            RemoteClientSheet(
+            RemoteClientView(
                 result: result,
                 season: seasonInfo.map { Int($0.seasonNumber) },
                 episode: selectedEpisode.map { Int($0.episodeNumber) }

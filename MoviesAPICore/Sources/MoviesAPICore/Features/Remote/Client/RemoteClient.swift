@@ -18,7 +18,7 @@ enum RemoteClientError: LocalizedError {
     case cantMakeHealthRequest
     case cantMakePlayRequest
     case wrongPlayRequestArgument
-    case playRequestFailed(Int)
+    case playRequestFailed(Int, String)
     case cantMakePlayerAction
     case playerActionFailed(Int)
 
@@ -30,8 +30,8 @@ enum RemoteClientError: LocalizedError {
             "Cant Make Play Request"
         case .wrongPlayRequestArgument:
             "Wrong Play Request Argument"
-        case .playRequestFailed(let status):
-            "Play request failed (HTTP \(status))."
+        case .playRequestFailed(let status, let location):
+            "Play request failed in (\(location)): (HTTP \(status))."
         case .cantMakePlayerAction:
             "Connect to a remote device first."
         case .playerActionFailed(let status):
@@ -102,7 +102,7 @@ final class RemoteClient {
             throw URLError(.badServerResponse)
         }
         guard (200..<300).contains(response.statusCode) else {
-            throw RemoteClientError.playRequestFailed(response.statusCode)
+            throw RemoteClientError.playRequestFailed(response.statusCode, "Getting Volume")
         }
 
         guard let body = String(data: data, encoding: .utf8),
@@ -133,7 +133,7 @@ final class RemoteClient {
         }
         if Task.isCancelled { return }
         guard (200..<300).contains(response.statusCode) else {
-            throw RemoteClientError.playRequestFailed(response.statusCode)
+            throw RemoteClientError.playRequestFailed(response.statusCode, "Set Volume")
         }
     }
 
@@ -152,7 +152,7 @@ final class RemoteClient {
             throw URLError(.badServerResponse)
         }
         guard (200..<300).contains(response.statusCode) else {
-            throw RemoteClientError.playRequestFailed(response.statusCode)
+            throw RemoteClientError.playRequestFailed(response.statusCode, "Seek To \(time)")
         }
     }
 
@@ -210,7 +210,7 @@ final class RemoteClient {
             throw URLError(.badServerResponse)
         }
         guard (200..<300).contains(response.statusCode) else {
-            throw RemoteClientError.playRequestFailed(response.statusCode)
+            throw RemoteClientError.playRequestFailed(response.statusCode, "Send Play Request")
         }
     }
 

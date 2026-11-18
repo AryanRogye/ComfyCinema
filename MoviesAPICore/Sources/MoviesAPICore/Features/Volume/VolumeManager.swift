@@ -17,13 +17,7 @@ final class VolumeManager {
     init() {}
 
     public func setVolume(_ value: Float) {
-
-        print("Received volume:", value)
-
         let percentage = Int((min(max(value, 0), 1) * 100).rounded())
-
-        print("AppleScript percentage:", percentage)
-
         let script = NSAppleScript(
             source: "set volume output volume \(percentage)"
         )
@@ -93,9 +87,7 @@ final class VolumeManager {
             return
         }
 
-        DispatchQueue.main.async {
-            self.currentVolume = volume
-        }
+        self.currentVolume = volume
     }
 
     private func checkVolumeAppleScript() {

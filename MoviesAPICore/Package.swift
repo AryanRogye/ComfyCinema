@@ -17,6 +17,10 @@ let package = Package(
     ],
     dependencies: [
         .package(
+            url: "https://github.com/siteline/swiftui-introspect",
+            from: "27.0.0"
+        ),
+        .package(
             url: "https://github.com/sindresorhus/Defaults.git",
             from: "9.0.9"
         ),
@@ -41,6 +45,11 @@ let package = Package(
             dependencies: [
                 "SharedLogic",
                 "ProccesInfo",
+                .product(
+                    name: "SwiftUIIntrospect",
+                    package: "swiftui-introspect",
+                    condition: .when(platforms: [.iOS])
+                ),
                 .product(name: "Defaults", package: "Defaults"),
                 .product(name: "MoviesAPIData", package: "MoviesAPIData"),
                 .product(name: "Hummingbird", package: "hummingbird"),

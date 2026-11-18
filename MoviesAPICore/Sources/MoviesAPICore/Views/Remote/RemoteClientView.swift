@@ -8,18 +8,24 @@
 #if os(iOS)
 import SwiftUI
 
-struct RemoteClientSheet: View {
+struct RemoteClientView: View {
 
-    @Environment(RemoteClient.self) private var remoteClient
-    @State private var error: String?
-    @State private var isSending = false
-    @State private var sent = false
-
-    let result: KTSearchResult
+    /// Parameters
+    var result: KTSearchResult? = nil
     var season: Int? = nil
     var episode: Int? = nil
 
+    @Environment(RemoteClient.self) private var remoteClient
+
+    @State private var error: String?
+
+    /// Action Related
+    @State private var isSending = false
+    @State private var sent = false
+
     @State private var seconds: String = ""
+
+    /// Volume Related
     @State private var currentVolume: Float?
     @State private var volumeTask: Task<Void, Never>?
 
@@ -190,42 +196,44 @@ struct RemoteClientSheet: View {
                             .fill(Color(white: 0.12))
                     }
 
-                    Button {
-                        sendAction {
-                            try await remoteClient.sendPlayRequest(
-                                id: Int(result.id),
-                                name: result.name ?? result.title ?? "",
-                                mediaType: result.mediaType,
-                                season: season,
-                                episode: episode
-                            )
-                            sent = true
-                        }
-                    } label: {
-                        HStack(alignment: .center) {
-                            Image(systemName: "airplayvideo")
-                                .foregroundStyle(.yellow)
-                                .fontWeight(.bold)
+                    if let result {
+                        Button {
+                            sendAction {
+                                try await remoteClient.sendPlayRequest(
+                                    id: Int(result.id),
+                                    name: result.name ?? result.title ?? "",
+                                    mediaType: result.mediaType,
+                                    season: season,
+                                    episode: episode
+                                )
+                                sent = true
+                            }
+                        } label: {
+                            HStack(alignment: .center) {
+                                Image(systemName: "airplayvideo")
+                                    .foregroundStyle(.yellow)
+                                    .fontWeight(.bold)
 
-                            Text("Send Play Request")
-                                .foregroundStyle(.white)
-                                .fontWeight(.medium)
+                                Text("Send Play Request")
+                                    .foregroundStyle(.white)
+                                    .fontWeight(.medium)
 
-                            Spacer()
+                                Spacer()
 
-                            Image(systemName: "chevron.right")
-                                .foregroundStyle(.gray)
-                                .fontWeight(.bold)
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(.gray)
+                                    .fontWeight(.bold)
+                            }
+                            .padding(12)
+                            .frame(maxWidth: .infinity)
+                            .background {
+                                RoundedRectangle(cornerRadius: 28)
+                                    .fill(Color(white: 0.12))
+                            }
+                            .contentShape(.rect)
                         }
-                        .padding(12)
-                        .frame(maxWidth: .infinity)
-                        .background {
-                            RoundedRectangle(cornerRadius: 28)
-                                .fill(Color(white: 0.12))
-                        }
-                        .contentShape(.rect)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
 
                     VStack {
                         if let currentVolume {

@@ -12,6 +12,7 @@ import WebKit
 import SwiftData
 import Defaults
 import MoviesAPIData
+import SwiftUIIntrospect
 
 public struct Root: View {
 
@@ -34,6 +35,7 @@ public struct Root: View {
 
     @State private var homePath: [PlaybackRoute] = []
     @State private var libraryPath: [PlaybackRoute] = []
+    @State private var remotePath: [PlaybackRoute] = []
     @State private var historyPath: [PlaybackRoute] = []
     @State private var settingsPath: [PlaybackRoute] = []
     @State private var searchPath: [PlaybackRoute] = []
@@ -55,8 +57,7 @@ public struct Root: View {
         ZStack {
             if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
                 TabView(selection: $appRouter.selectedTab) {
-
-                    Tab("Home", systemImage: "house", value: .home) {
+                    Tab(TabID.home.rawValue, systemImage: TabID.home.icon, value: .home) {
                         NavigationStack(path: $homePath) {
                             Home()
                                 .navigationDestination(for: PlaybackRoute.self) { _ in
@@ -65,7 +66,7 @@ public struct Root: View {
                         }
                     }
 
-                    Tab("Library", systemImage: "books.vertical.fill", value: .library) {
+                    Tab(TabID.library.rawValue, systemImage: TabID.library.icon, value: .library) {
                         NavigationStack(path: $libraryPath) {
                             Library()
                                 .navigationDestination(for: PlaybackRoute.self) { _ in
@@ -74,7 +75,7 @@ public struct Root: View {
                         }
                     }
 
-                    Tab("History", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90", value: .history) {
+                    Tab(TabID.history.rawValue, systemImage: TabID.history.icon, value: .history) {
                         NavigationStack(path: $historyPath) {
                             HistoryView()
                                 .navigationDestination(for: PlaybackRoute.self) { _ in
@@ -83,7 +84,16 @@ public struct Root: View {
                         }
                     }
 
-                    Tab("Settings", systemImage: "gear", value: .settings) {
+                    Tab(TabID.remote.rawValue, systemImage: TabID.remote.icon, value: .remote) {
+                        NavigationStack(path: $remotePath) {
+                            RemoteDevicesView()
+                                .navigationDestination(for: PlaybackRoute.self) { _ in
+                                    PlaybackDestination()
+                                }
+                        }
+                    }
+
+                    Tab(TabID.settings.rawValue, systemImage: TabID.settings.icon, value: .settings) {
                         NavigationStack(path: $settingsPath) {
                             SettingsView()
                                 .navigationDestination(for: PlaybackRoute.self) { _ in
@@ -98,10 +108,14 @@ public struct Root: View {
                                 .navigationDestination(for: PlaybackRoute.self) { _ in
                                     PlaybackDestination()
                                 }
+                                .toolbar(.hidden, for: .tabBar)
                         }
                     }
                 }
                 .tint(.yellow)
+                .introspect(.tabView, on: .iOS(.v26, .v27)) { controller in
+                    _ = tryAllowingSixTabs(on: controller)
+                }
                 .onChange(of: playbackSession.activationID) {
                     playbackSession.sourceTab = appRouter.selectedTab
                 }
@@ -195,6 +209,8 @@ public struct Root: View {
             append(route, to: &homePath)
         case .library:
             append(route, to: &libraryPath)
+        case .remote:
+            append(route, to: &remotePath)
         case .history:
             append(route, to: &historyPath)
         case .settings:
