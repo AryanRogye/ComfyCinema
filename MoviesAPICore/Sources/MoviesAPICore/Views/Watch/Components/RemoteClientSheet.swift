@@ -20,6 +20,8 @@ struct RemoteClientSheet: View {
     var episode: Int? = nil
 
     @State private var seconds: String = ""
+    @State private var currentVolume: Float?
+    @State private var volumeTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
@@ -60,10 +62,11 @@ struct RemoteClientSheet: View {
 
                             HStack {
                                 Circle()
-                                    .fill(.green)
+                                    .fill(Color(red: 0.2, green: 1.0, blue: 0.4))
                                     .frame(width: 7, height: 7)
+                                    .shadow(color: .green.opacity(0.6), radius: 5)
 
-                                Text("Available")
+                                Text("Connected")
                                     .font(
                                         .system(
                                             size: 14,
@@ -136,10 +139,6 @@ struct RemoteClientSheet: View {
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity)
-                    .background {
-                        RoundedRectangle(cornerRadius: 28)
-                            .fill(Color(white: 0.12))
-                    }
 
                     HStack(alignment: .center) {
                         Image(systemName: "clock")
@@ -227,6 +226,42 @@ struct RemoteClientSheet: View {
                         .contentShape(.rect)
                     }
                     .buttonStyle(.plain)
+
+                    VStack {
+                        if let currentVolume {
+                            Slider(
+                                value: Binding(
+                                    get: { currentVolume },
+                                    set: { self.currentVolume = $0 }
+                                ),
+                                in: 0...1,
+                                step: 0.1,
+                                onEditingChanged: { isEditing in
+                                    if !isEditing {
+                                        // User finished dragging
+                                        // Send volume to remote server
+                                        volumeTask?.cancel()
+                                        volumeTask = Task {
+                                            do {
+                                                try await remoteClient.setVolume(to: currentVolume)
+                                            } catch {
+                                                self.error = error.localizedDescription
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    .onAppear {
+                        volumeTask = Task {
+                            do {
+                                currentVolume = try await remoteClient.getVolume()
+                            } catch {
+                                self.error = error.localizedDescription
+                            }
+                        }
+                    }
                 } else {
                     VStack(spacing: 14) {
                         Image(systemName: "wifi.slash")

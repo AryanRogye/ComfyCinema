@@ -89,6 +89,54 @@ final class RemoteClient {
         try await sendPlayerAction(path: "remote/player/backwardTenSeconds")
     }
 
+    public func getVolume() async throws -> Float {
+        guard let connectedServer else {
+            throw RemoteClientError.cantMakePlayerAction
+        }
+
+        var urlRequest = URLRequest(url: connectedServer.url.appending(path: "volume"))
+        urlRequest.httpMethod = "GET"
+
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        guard let response = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard (200..<300).contains(response.statusCode) else {
+            throw RemoteClientError.playRequestFailed(response.statusCode)
+        }
+
+        guard let body = String(data: data, encoding: .utf8),
+              let volume = Float(body.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            throw URLError(.cannotParseResponse)
+        }
+
+        return volume
+    }
+
+    public func setVolume(to value: Float) async throws {
+        guard let connectedServer else {
+            throw RemoteClientError.cantMakePlayerAction
+        }
+
+        var urlRequest = URLRequest(url: connectedServer.url.appending(path: "volume/set"))
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(value)
+
+        if Task.isCancelled { return }
+
+        let (_, response) = try await URLSession.shared.data(for: urlRequest)
+        if Task.isCancelled { return }
+
+        guard let response = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        if Task.isCancelled { return }
+        guard (200..<300).contains(response.statusCode) else {
+            throw RemoteClientError.playRequestFailed(response.statusCode)
+        }
+    }
+
     public func seek(to time: Double) async throws {
         guard let connectedServer else {
             throw RemoteClientError.cantMakePlayerAction

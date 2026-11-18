@@ -22,6 +22,8 @@ final class RemoteServer: NSObject, NetServiceDelegate {
     var applicationServer: Application<RouterResponder<BasicRequestContext>>?
     var error: String?
 
+    let volumeManager = VolumeManager()
+
     var onRemotePlay: ((PlayRequest) -> Void)?
     @MainActor var onPlay: (@MainActor () async throws -> Void)?
     @MainActor var onPause: (@MainActor () async throws -> Void)?
@@ -319,6 +321,23 @@ extension RemoteServer {
                 throw HTTPError(.serviceUnavailable, message: "Play action unavailable")
             }
             return try await self.performPlayAction()
+        }
+
+        router.get("/volume") { [weak self] _, _ in
+            guard let self = self else {
+                throw HTTPError(.serviceUnavailable, message: "Volume retrieval unavailable")
+            }
+            await volumeManager.getCurrentSystemVolume()
+            return "\(volumeManager.currentVolume)"
+        }
+
+        router.post("/volume/set") { [weak self] request, context in
+            guard let self else {
+                throw HTTPError(.serviceUnavailable, message: "Set volume action unavailable")
+            }
+            let amount: Float = try await request.decode(as: Float.self, context: context)
+            volumeManager.setVolume(amount)
+            return "Volume set to \(volumeManager.currentVolume)"
         }
 
         router.post("/remote/pause") { [weak self] _, _ in
