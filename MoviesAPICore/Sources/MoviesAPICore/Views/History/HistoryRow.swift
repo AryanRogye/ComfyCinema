@@ -77,10 +77,10 @@ struct HistoryRow: View {
             playButton
         }
         .padding(4)
+        .frame(height: 72)
         .background(.quaternary.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 9))
         .contentShape(Rectangle())
-        .padding(.horizontal, 16)
         .overlay {
             if isResolving {
                 ProgressView()

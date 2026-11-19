@@ -57,6 +57,12 @@ public struct HistoryView: View {
         )
     }
 
+    @State private var swipedHistory: [History.ID: Bool] = [:]
+    @State private var showAllHistory: History? = nil
+    @State private var swipedHistoryOffset: [History.ID: CGFloat] = [:]
+    @State private var currentDetent: PresentationDetent = .medium
+    @FocusState private var isSearchBarFocused: Bool
+
     public var body: some View {
         Group {
             if history.isEmpty {
@@ -78,16 +84,65 @@ public struct HistoryView: View {
                             .padding(.top, 6)
 
                         ForEach(filteredHistory, id: \.id) { item in
-                            Button {
-                                playbackSession.stop()
-                                resolve(item)
-                            } label: {
-                                HistoryRow(
-                                    history: item,
-                                    isResolving: resolvingHistory == item
-                                )
+                            let swipeBinding = Binding(
+                                get: { swipedHistory[item.id] ?? false },
+                                set: { isSwiped in
+                                    swipedHistory[item.id] = isSwiped
+
+                                    if isSwiped {
+                                        for id in swipedHistory.keys {
+                                            if id != item.id {
+                                                swipedHistory[id] = false
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+
+                            let swipeOffsetBinding = Binding(
+                                get: { swipedHistoryOffset[item.id] ?? 0 },
+                                set: { offset in
+                                    swipedHistoryOffset[item.id] = offset
+
+                                    if offset != 0 {
+                                        for id in swipedHistoryOffset.keys {
+                                            if id != item.id {
+                                                swipedHistoryOffset[id] = 0
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+
+                            SwipeableRow(isSwiped: swipeBinding, offset: swipeOffsetBinding) {
+                                Button {
+                                    playbackSession.stop()
+                                    resolve(item)
+                                } label: {
+                                    HistoryRow(
+                                        history: item,
+                                        isResolving: resolvingHistory == item
+                                    )
+                                }
+                                .buttonStyle(HistoryButton())
+                                .disabled(swipeOffsetBinding.wrappedValue != 0)
+                            } actions: {
+                                Button {
+                                    showAllHistory = item
+                                    swipedHistory[item.id] = false
+                                } label: {
+                                    Text("Show All")
+                                        .font(.body)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.black)
+                                        .padding()
+                                        .frame(height: 56)
+                                        .background(.yellow, in: .rect(cornerRadius: 9))
+                                        .contentShape(.rect)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(HistoryButton())
+                            .padding(.horizontal, 16)
                             .contextMenu {
                                 /// TODO: Here
                                 Button(role: .destructive) {
@@ -134,6 +189,18 @@ public struct HistoryView: View {
                         }
                     }
                 })
+                .onChange(of: showAllHistory?.id) { oldValue, newValue in
+                    print("Sheet:", oldValue as Any, "→", newValue as Any)
+                }
+                .sheet(item: $showAllHistory) { item in
+                    ShowAllHistoryForItemView(item: item) { history in
+                        resolve(history)
+                    }
+                    .presentationDetents([.medium, .large], selection: $currentDetent)
+                }
+                .onTapGesture {
+                    isSearchBarFocused = false
+                }
                 .onAppear {
                     /// if we come back
                     self.selectedHistory = nil
@@ -186,14 +253,31 @@ public struct HistoryView: View {
         }
     }
 
+    // MARK: - History Search View
     private var historySearchView: some View {
-        TextField("Search History", text: $searchHistory)
-            .textFieldStyle(.plain)
-            .padding(12)
-            .glassEffect(.regular, in: .capsule)
-            .padding(.horizontal)
+        HStack {
+            TextField("Search History", text: $searchHistory)
+                .textFieldStyle(.plain)
+                .focused($isSearchBarFocused)
+
+            if !searchHistory.isEmpty {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .onTapGesture {
+                        searchHistory = ""
+                    }
+            }
+        }
+        .padding(12)
+        .glassEffect(.regular, in: .capsule)
+        .padding(.horizontal)
+        .onTapGesture {
+            isSearchBarFocused = true
+        }
     }
 
+    // MARK: - EmptyView
     private var emptyView: some View {
         ContentUnavailableView(
             "No Watch History",

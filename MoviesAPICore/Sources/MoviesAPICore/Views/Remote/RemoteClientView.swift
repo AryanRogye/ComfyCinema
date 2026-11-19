@@ -16,7 +16,7 @@ private extension View {
         self
             .padding(padding)
             .frame(maxWidth: .infinity)
-            .background(Color(white: 0.11), in: .rect(cornerRadius: 20, style: .continuous))
+            .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -152,8 +152,6 @@ struct RemoteClientView: View {
                     run { try await remoteClient.forwardTenSeconds() }
                 }
             }
-
-            Divider().overlay(Color.white.opacity(0.1))
 
             HStack(spacing: 10) {
                 secondaryButton("pause.fill", title: "Pause") {

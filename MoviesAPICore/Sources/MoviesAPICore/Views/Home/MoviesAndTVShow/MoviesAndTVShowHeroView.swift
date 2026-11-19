@@ -231,11 +231,11 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
                     Text(displayName.uppercased())
                         .font(.system(size: 44, weight: .heavy))
                         .fontWidth(.condensed)
-                        .tracking(6)
                         .foregroundStyle(.white)
                         .lineLimit(2)
                         .minimumScaleFactor(0.6)
                         .multilineTextAlignment(.center)
+                        .padding(.horizontal, 6)
 
                     Text(description)
                         .font(.subheadline.weight(.medium))

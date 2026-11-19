@@ -124,6 +124,7 @@ struct RemoteDeviceDetailView: View {
                 }
             } footer: {
                 Text("Automatically connect to this device when it's available.")
+                    .multilineTextAlignment(.center)
             }
 
             Section {
