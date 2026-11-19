@@ -18,6 +18,7 @@ struct SwipeableRow<Content: View, Actions: View>: View {
     @State private var actionWidth: CGFloat = 0
 
     var body: some View {
+#if os(iOS)
         ZStack {
             /// we'll have a placeholder all the way to the right
             HStack {
@@ -79,6 +80,9 @@ struct SwipeableRow<Content: View, Actions: View>: View {
                 closeSwipeAction()
             }
         }
+#elseif os(macOS)
+        content
+#endif
     }
 
     public func closeSwipeAction() {
