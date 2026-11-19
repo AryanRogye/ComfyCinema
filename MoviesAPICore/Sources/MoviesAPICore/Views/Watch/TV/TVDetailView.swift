@@ -253,6 +253,16 @@ public struct TVDetailView: View {
             )
 #endif
         }
+        .onAppear {
+#if os(macOS)
+            remoteServer.onSetServer = { server in
+                self.displayServer = server
+            }
+            remoteServer.onGetServer = {
+                return self.displayServer
+            }
+#endif
+        }
         .onDisappear {
             timeInfoTask?.cancel()
             timeInfoTask = nil

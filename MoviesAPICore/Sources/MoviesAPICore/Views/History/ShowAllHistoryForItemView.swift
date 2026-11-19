@@ -81,7 +81,9 @@ struct ShowAllHistoryForItemView: View {
             }
             .contentMargins(.top, 12, for: .scrollContent)
             .navigationTitle(item.name)
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {

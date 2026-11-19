@@ -271,6 +271,14 @@ public struct MovieDetailView: View {
             }
             remoteServer.attachWebViewFunctions(webView)
         }
+        .onAppear {
+            remoteServer.onSetServer = { server in
+                self.displayServer = server
+            }
+            remoteServer.onGetServer = {
+                return self.displayServer
+            }
+        }
 #endif
         .onDisappear {
             screenshotter.stop()

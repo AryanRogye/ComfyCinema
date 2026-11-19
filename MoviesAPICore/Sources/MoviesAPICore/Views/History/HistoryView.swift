@@ -57,6 +57,7 @@ public struct HistoryView: View {
         )
     }
 
+    @State private var showStats: Bool = false
     @State private var swipedHistory: [History.ID: Bool] = [:]
     @State private var showAllHistory: History? = nil
     @State private var swipedHistoryOffset: [History.ID: CGFloat] = [:]
@@ -189,15 +190,18 @@ public struct HistoryView: View {
                         }
                     }
                 })
-                .onChange(of: showAllHistory?.id) { oldValue, newValue in
-                    print("Sheet:", oldValue as Any, "→", newValue as Any)
-                }
                 .sheet(item: $showAllHistory) { item in
                     ShowAllHistoryForItemView(item: item) { history in
                         resolve(history)
                     }
                     .presentationDetents([.medium, .large], selection: $currentDetent)
                 }
+#if os(iOS)
+                .sheet(isPresented: $showStats) {
+                    HistoryStatsScreen(history: history)
+                        .presentationDetents([.medium])
+                }
+#endif
                 .onTapGesture {
                     isSearchBarFocused = false
                 }
@@ -243,8 +247,8 @@ public struct HistoryView: View {
             ToolbarSpacer(.flexible)
 #elseif os(iOS)
             ToolbarItemGroup(placement: .primaryAction) {
-                NavigationLink {
-                    HistoryStatsScreen(history: history)
+                Button {
+                    showStats = true
                 } label: {
                     Image(systemName: "chart.bar.xaxis")
                 }

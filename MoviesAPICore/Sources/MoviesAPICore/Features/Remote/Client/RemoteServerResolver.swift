@@ -75,6 +75,16 @@ final class RemoteServerResolver: NSObject, @MainActor NetServiceBrowserDelegate
         }
     }
 
+    /// hostname/port are only available after resolution, but `discoveredDevices`
+    /// is appended to in `didFind`. Re-assign the entry so observers (e.g. Always
+    /// Connect) re-check it now that its address is known.
+    func netServiceDidResolveAddress(_ sender: NetService) {
+        guard let index = discoveredDevices.firstIndex(where: { $0.service == sender }) else {
+            return
+        }
+        discoveredDevices[index] = discoveredDevices[index]
+    }
+
 }
 
 #endif

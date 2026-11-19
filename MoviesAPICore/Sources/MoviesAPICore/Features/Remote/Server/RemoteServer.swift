@@ -32,6 +32,9 @@ final class RemoteServer: NSObject, NetServiceDelegate {
     @MainActor var onForwardTenSeconds: (@MainActor () async throws -> Void)?
     @MainActor var onBackTenSeconds: (@MainActor () async throws -> Void)?
     @MainActor var onSeek: (@MainActor (Double) async throws -> Void)?
+    @MainActor var onSetServer: (@MainActor (KTDisplayServer) async throws -> Void)?
+    @MainActor var onGetServer: (@MainActor () async throws -> KTDisplayServer)?
+    @MainActor var onClientConnected: (@MainActor () async throws -> Void)?
 
     var enableRemoteControl: Bool = Defaults[.enableRemoteControl] {
         didSet {
@@ -177,6 +180,8 @@ extension RemoteServer {
         onForwardTenSeconds = nil
         onBackTenSeconds = nil
         onSeek = nil
+        onSetServer = nil
+        onGetServer = nil
     }
     @MainActor
     public func attachWebViewFunctions(_ webView: WKWebView) {
@@ -292,6 +297,24 @@ extension RemoteServer {
     }
 
     @MainActor
+    private func performSetServer(_ server: KTDisplayServer) async throws -> String {
+        guard let action = onSetServer else {
+            throw HTTPError(.serviceUnavailable, message: "Set Server action unavailable")
+        }
+        try await action(server)
+        return "Set Server action requested"
+    }
+
+    @MainActor
+    private func performClientConnected() async throws -> String {
+        guard let action = onClientConnected else {
+            throw HTTPError(.serviceUnavailable, message: "On client connected unavailable")
+        }
+        try await action()
+        return "On Client Connected action requested"
+    }
+
+    @MainActor
     private func performForwardTenSeconds() async throws -> String {
         guard let action = onForwardTenSeconds else {
             throw HTTPError(.serviceUnavailable, message: "Forward 10 seconds action unavailable")
@@ -338,6 +361,37 @@ extension RemoteServer {
             let amount: Float = try await request.decode(as: Float.self, context: context)
             volumeManager.setVolume(amount)
             return "Volume set to \(volumeManager.currentVolume)"
+        }
+
+        router.post("client/connected") { [weak self] _, _ in
+            guard let self else {
+                throw HTTPError(.serviceUnavailable, message: "Client connected unavailable")
+            }
+            return try await self.performClientConnected()
+        }
+
+        router.post("display/set") { [weak self] request, context in
+            guard let self else {
+                throw HTTPError(.serviceUnavailable, message: "Set volume action unavailable")
+            }
+            let body = try await request.body.collect(upTo: 1024)
+            let json = String(buffer: body)
+
+            guard let server = DisplayServerCodec.shared.decodeOrNull(json: json) else {
+                throw HTTPError(.badRequest, message: "Invalid display server")
+            }
+
+            return try await self.performSetServer(server)
+        }
+
+        router.get("display") { [weak self] request, context in
+            guard let self else {
+                throw HTTPError(.serviceUnavailable, message: "Get server action unavailable")
+            }
+            if let server = try await self.onGetServer?() {
+                return "\(server)"
+            }
+            return "No server set"
         }
 
         router.post("/remote/pause") { [weak self] _, _ in

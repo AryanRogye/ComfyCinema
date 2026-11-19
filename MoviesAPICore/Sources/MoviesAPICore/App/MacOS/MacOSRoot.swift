@@ -36,6 +36,8 @@ struct MacOSRoot: View {
     @State private var navigationID = UUID()
     @State private var intentTriggeredResult: KTSearchResult?
 
+    @State private var clientJustJoined: Bool = false
+
     @Default(.hasShownCloudSavePrompt)
     private var hasShownCloudSavePrompt
 
@@ -125,6 +127,41 @@ struct MacOSRoot: View {
             } else {
                 ProgressView()
             }
+
+            VStack {
+                Spacer()
+                if clientJustJoined {
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.green)
+                            .symbolRenderingMode(.hierarchical)
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Client Connected")
+                                .font(.subheadline.weight(.semibold))
+
+                            Text("Remote control is ready")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(.regularMaterial, in: .rect(cornerRadius: 14))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(.primary.opacity(0.08))
+                    }
+                    .shadow(color: .black.opacity(0.12), radius: 12, y: 5)
+                    .padding(.bottom)
+                    .transition(
+                        .move(edge: .bottom)
+                        .combined(with: .opacity)
+                    )
+                }
+            }
+            .animation(.bouncy, value: clientJustJoined)
         }
         .alert(isPresented: $showError) {
             Alert(
@@ -153,6 +190,15 @@ struct MacOSRoot: View {
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true
+            }
+            remoteServer.onClientConnected = {
+                clientJustJoined = true
+                do {
+                    try await Task.sleep(for: .seconds(3))
+                } catch {
+                    clientJustJoined = false
+                }
+                clientJustJoined = false
             }
         }
         .onChange(of: appRouter.remoteRequest, initial: true) { _, request in

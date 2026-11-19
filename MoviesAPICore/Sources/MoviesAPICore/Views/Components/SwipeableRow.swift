@@ -150,8 +150,17 @@ struct SwipeableRow<Content: View, Actions: View>: View {
             }
     }
 
+    #if os(iOS)
     private func vibrate() {
         let generator = UISelectionFeedbackGenerator()
         generator.selectionChanged()
     }
+    #elseif os(macOS)
+    private func vibrate() {
+        NSHapticFeedbackManager.defaultPerformer.perform(
+            .alignment,
+            performanceTime: .now
+        )
+    }
+    #endif
 }

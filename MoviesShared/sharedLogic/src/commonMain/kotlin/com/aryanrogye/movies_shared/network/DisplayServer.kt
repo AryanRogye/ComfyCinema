@@ -1,24 +1,31 @@
 package com.aryanrogye.movies_shared.network
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.json.Json
+
+@Serializable
 enum class KTDisplayServer(val rawValue: String) {
-    MOVIES_API("MoviesAPI"),
-    VID_FAST("VidFast"),
 
-    VID_PHANTOM("VidPhantom"),
+    @SerialName("MoviesAPI")MOVIES_API("MoviesAPI"),
 
-    VID_SRC("VidSrc"),
+    @SerialName("VidFast")VID_FAST("VidFast"),
 
-    RIVE_STREAM("Rive Stream"),
+    @SerialName("VidPhantom")VID_PHANTOM("VidPhantom"),
 
-    VID_SPARK("VidSpark"),
+    @SerialName("VidSrc")VID_SRC("VidSrc"),
 
-    CDN_VID_SPARK("cdn.VidSpark"),
+    @SerialName("Rive Stream")RIVE_STREAM("Rive Stream"),
 
-    VID_LINK("VidLink"),
+    @SerialName("VidSpark")VID_SPARK("VidSpark"),
 
-    CINE_SRC("CineSrc"),
+    @SerialName("cdn.VidSpark")CDN_VID_SPARK("cdn.VidSpark"),
 
-    OneOneOneMovies("111movies");
+    @SerialName("VidLink")VID_LINK("VidLink"),
+
+    @SerialName("CineSrc")CINE_SRC("CineSrc"),
+
+    @SerialName("111movies")OneOneOneMovies("111movies");
 
     private val baseURL: String
         get() {
@@ -49,5 +56,17 @@ enum class KTDisplayServer(val rawValue: String) {
             RIVE_STREAM -> "$baseURL?type=tv&id=$showId&season=$season&episode=$episode"
             else -> "$baseURL/tv/$showId/$season/$episode"
         }
+    }
+}
+
+object DisplayServerCodec {
+    fun encode(server: KTDisplayServer): String {
+        return Json.encodeToString(server)
+    }
+
+    fun decodeOrNull(json: String): KTDisplayServer? {
+        return runCatching {
+            Json.decodeFromString<KTDisplayServer>(json)
+        }.getOrNull()
     }
 }

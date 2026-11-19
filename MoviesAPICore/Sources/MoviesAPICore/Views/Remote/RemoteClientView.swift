@@ -1,5 +1,5 @@
 //
-//  RemoteClientSheet.swift
+//  RemoteClientView.swift
 //  MoviesAPICore
 //
 //  Created by Aryan Rogye on 11/17/26.
@@ -53,6 +53,9 @@ struct RemoteClientView: View {
     @State private var currentVolume: Float?
     @State private var volumeTask: Task<Void, Never>?
 
+    /// Display Server Related
+    @State private var currentServer: KTDisplayServer?
+
     private let secondaryText = Color.white.opacity(0.6)
     private let controlFill = Color.white.opacity(0.07)
 
@@ -70,6 +73,7 @@ struct RemoteClientView: View {
                         deviceHeader(connectedServer)
                         playbackControls
                         seekRow
+                        displayServerRow
                         if result != nil {
                             playRequestRow
                         }
@@ -96,6 +100,11 @@ struct RemoteClientView: View {
         }
         .animation(.default, value: error)
         .animation(.default, value: currentVolume == nil)
+        /// Runs every time the view appears (and again if the connected device
+        /// changes), since the display server can be changed on the remote at any time.
+        .task(id: remoteClient.connectedServer?.url) {
+            await refreshDisplayServer()
+        }
     }
 
     // MARK: Sections
@@ -211,6 +220,44 @@ struct RemoteClientView: View {
             .opacity(isValid ? 1 : 0.35)
         }
         .remoteSurface(padding: 12)
+    }
+
+    private var displayServerRow: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "server.rack")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(secondaryText)
+
+            Text("Display Server")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white)
+
+            Spacer()
+
+            Menu {
+                ForEach(KTDisplayServer.entries, id: \.self) { server in
+                    Button {
+                        setDisplayServer(server)
+                    } label: {
+                        if currentServer == server {
+                            Label(server.rawValue, systemImage: "checkmark")
+                        } else {
+                            Text(server.rawValue)
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(currentServer?.rawValue ?? "Not set")
+                        .font(.subheadline.weight(.semibold))
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2.weight(.semibold))
+                }
+                .foregroundStyle(.yellow)
+            }
+            .tint(.yellow)
+        }
+        .remoteSurface(padding: 14)
     }
 
     private var playRequestRow: some View {
@@ -390,6 +437,26 @@ struct RemoteClientView: View {
             total = total * 60 + value
         }
         return total
+    }
+
+    private func refreshDisplayServer() async {
+        guard remoteClient.connectedServer != nil else {
+            currentServer = nil
+            return
+        }
+        do {
+            let server = try await remoteClient.getServer()
+            if !Task.isCancelled { currentServer = server }
+        } catch {
+            if !Task.isCancelled { self.error = error.localizedDescription }
+        }
+    }
+
+    private func setDisplayServer(_ server: KTDisplayServer) {
+        run {
+            try await remoteClient.setServer(entry: server)
+            currentServer = server
+        }
     }
 
     /// Light haptic, then send.

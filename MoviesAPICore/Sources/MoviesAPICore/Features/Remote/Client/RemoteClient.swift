@@ -77,6 +77,7 @@ final class RemoteClient {
 
         connectedServer = ConnectedServer(server: server, url: url)
         sendHealthRequest()
+        sendJustJoined()
     }
 
     public func setAlwaysConnect(to server: ResolvedServer) {
@@ -114,7 +115,8 @@ extension RemoteClient {
         } onChange: { [weak self] in
             guard let self else { return }
             DispatchQueue.main.async {
-                if let alwaysConnect = self.alwaysConnect {
+                if let alwaysConnect = self.alwaysConnect,
+                   self.connectedServer?.server.matches(with: alwaysConnect) != true {
                     for device in self.discoveredDevices {
                         if device.matches(with: alwaysConnect) {
                             try? self.connect(to: device)
@@ -130,6 +132,12 @@ extension RemoteClient {
 }
 
 extension RemoteClient {
+
+    public func sendJustJoined() {
+        Task {
+            try? await sendPlayerAction(path: "client/connected")
+        }
+    }
 
     public func sendPause() async throws {
         try await sendPlayerAction(path: "remote/pause")
@@ -177,6 +185,55 @@ extension RemoteClient {
         }
 
         return volume
+    }
+
+    public func getServer() async throws -> KTDisplayServer? {
+        guard let connectedServer else {
+            throw RemoteClientError.cantMakePlayerAction
+        }
+
+        var urlRequest = URLRequest(url: connectedServer.url.appending(path: "display"))
+        urlRequest.httpMethod = "GET"
+
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        guard let response = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard (200..<300).contains(response.statusCode) else {
+            throw RemoteClientError.playRequestFailed(response.statusCode, "Getting Server")
+        }
+
+        guard let body = String(data: data, encoding: .utf8) else {
+            throw URLError(.cannotParseResponse)
+        }
+        if body == "No server set" { return nil }
+
+        return KTDisplayServer.from(body)
+    }
+
+    public func setServer(entry: KTDisplayServer) async throws {
+        guard let connectedServer else {
+            throw RemoteClientError.cantMakePlayerAction
+        }
+
+        var urlRequest = URLRequest(url: connectedServer.url.appending(path: "display/set"))
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let json = DisplayServerCodec.shared.encode(server: entry)
+        urlRequest.httpBody = Data(json.utf8)
+
+        if Task.isCancelled { return }
+
+        let (_, response) = try await URLSession.shared.data(for: urlRequest)
+        if Task.isCancelled { return }
+
+        guard let response = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        if Task.isCancelled { return }
+        guard (200..<300).contains(response.statusCode) else {
+            throw RemoteClientError.playRequestFailed(response.statusCode, "Set Server")
+        }
     }
 
     public func setVolume(to value: Float) async throws {
@@ -286,17 +343,9 @@ extension RemoteClient {
             return
         }
         let healthUrl = connectedServer.url.appending(path: "health")
-
-        print("1. Enqueuing:", healthUrl)
-
         Task {
-            print("2. Queue started")
-
             do {
                 let (data, response) = try await URLSession.shared.data(from: healthUrl)
-
-                print("3. Received response:", response)
-
                 guard let response = response as? HTTPURLResponse,
                       response.statusCode == 200
                         else {
@@ -305,11 +354,18 @@ extension RemoteClient {
 
                 print(String(decoding: data, as: UTF8.self))
             } catch {
-                print("Request failed:", error)
-                /// error here, TODO: Figure out how to send this back
                 self.error = error
             }
         }
+    }
+}
+
+private extension KTDisplayServer {
+    /// `GET /display` returns the Kotlin enum name (e.g. "MOVIES_API"), while the
+    /// UI uses `rawValue` (e.g. "MoviesAPI"). Accept either.
+    static func from(_ string: String) -> KTDisplayServer? {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        return entries.first { $0.rawValue == trimmed || $0.name == trimmed }
     }
 }
 
