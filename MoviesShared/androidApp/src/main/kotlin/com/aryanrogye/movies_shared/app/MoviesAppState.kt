@@ -94,7 +94,7 @@ class MoviesAppState(context: Context) {
                     val token = tokenOrThrow()
                     val items = when (index) {
                         0 -> tmdb.trending(token).results.map {
-                            DiscoveryItem(KTSearchResult(it.id, it.mediaType, title = it.title, name = it.name, posterPath = it.posterPath, overview = it.overview, releaseDate = it.releaseDate, firstAirDate = it.firstAirDate, logoPath = it.logoPath), it.backdropPath, it.adult)
+                            DiscoveryItem(KTSearchResult(it.id, it.mediaType, title = it.title, name = it.name, posterPath = it.posterPath, overview = it.overview, releaseDate = it.releaseDate, firstAirDate = it.firstAirDate, logoPath = it.logoPath, heroPosterPath = it.heroPosterPath), it.backdropPath, it.adult)
                         }
                         1, 3, 5 -> {
                             val movies = when (index) {

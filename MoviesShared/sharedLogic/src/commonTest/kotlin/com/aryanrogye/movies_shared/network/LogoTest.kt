@@ -71,7 +71,10 @@ class LogoTest {
             assertTrue(trending.all { it.heroPosterPath == "/hero.jpg" && it.posterPath == "/poster.jpg" })
             val search = client.search("title", "token", false).results
             assertEquals(listOf("/movie.png", "/tv.png", null), search.map { it.logoPath })
-            assertEquals(listOf("/movie.png", "/tv.png"), client.creditsForPerson(7, "token").results.map { it.logoPath })
+            assertEquals(listOf("/hero.jpg", "/hero.jpg", null), search.map { it.heroPosterPath })
+            val credits = client.creditsForPerson(7, "token").results
+            assertEquals(listOf("/movie.png", "/tv.png"), credits.map { it.logoPath })
+            assertEquals(listOf("/hero.jpg", "/hero.jpg"), credits.map { it.heroPosterPath })
             val show = client.infoOnTV(7, "token")
             assertEquals("/tv.png", show.logoPath)
             assertEquals("/tv.png", show.seasons.first().logoPath)
@@ -97,6 +100,7 @@ class LogoTest {
             val first = client.search("title", "token", false).results.first()
             assertEquals("/poster.jpg", first.posterPath)
             assertNull(first.logoPath)
+            assertNull(first.heroPosterPath)
             assertEquals("/movie.png", client.search("title", "token", false).results.first().logoPath)
             assertEquals(2, attempts)
         } finally {

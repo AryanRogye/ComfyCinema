@@ -35,6 +35,8 @@ data class KTSearchResult(
     val firstAirDate: String? = null,
     @Transient
     val logoPath: String? = null,
+    @Transient
+    val heroPosterPath: String? = null,
 )
 
 @Serializable

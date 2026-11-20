@@ -516,7 +516,8 @@ public struct TVDetailView: View {
                     """,
                     releaseDate: nil,
                     firstAirDate: nil,
-                    logoPath: nil
+                    logoPath: nil,
+                    heroPosterPath: nil
                 )
             )
             .environment(tmdbManager)

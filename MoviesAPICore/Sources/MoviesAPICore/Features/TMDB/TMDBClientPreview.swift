@@ -124,7 +124,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
                 overview: "A mock search result for SwiftUI previews.",
                 releaseDate: nil,
                 firstAirDate: "2012-02-27",
-                logoPath: nil
+                logoPath: nil,
+                heroPosterPath: nil
             )
         ])
     }
@@ -141,7 +142,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
                 overview: "A mock search result for SwiftUI previews.",
                 releaseDate: nil,
                 firstAirDate: "2012-02-27",
-                logoPath: nil
+                logoPath: nil,
+                heroPosterPath: nil
             )
         ])
     }

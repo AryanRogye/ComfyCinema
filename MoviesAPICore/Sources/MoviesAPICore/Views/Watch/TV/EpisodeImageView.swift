@@ -62,10 +62,24 @@ struct EpisodeImageView: View {
         }
         .overlay(alignment: .bottomLeading) {
             VStack(alignment: .leading) {
-                Text(result.name ?? "")
-                    .fontDesign(.serif)
-                    .font(.largeTitle)
-                    .fontWeight(.medium)
+                if let logoPath = result.logoPath,
+                   let url = URL(string: "https://image.tmdb.org/t/p/w500\(logoPath)") {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(height: 50)
+                            .padding(.horizontal, 6)
+                    }  placeholder: {
+                        Color.clear
+                    }
+                } else {
+                    Text(result.name ?? "")
+                        .fontDesign(.serif)
+                        .font(.largeTitle)
+                        .fontWeight(.medium)
+                }
                 Text(result.overview ?? "")
                     .foregroundStyle(.secondary)
                     .font(.subheadline)

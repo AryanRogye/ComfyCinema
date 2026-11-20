@@ -79,7 +79,8 @@ struct SearchResultsView: View {
                     """,
                     releaseDate: "2026-07-31",
                     firstAirDate: nil,
-                    logoPath: nil
+                    logoPath: nil,
+                    heroPosterPath: nil
                 ),
                 KTSearchResult(
                     id: 38867,
@@ -93,7 +94,8 @@ struct SearchResultsView: View {
                     """,
                     releaseDate: nil,
                     firstAirDate: "2012-02-27",
-                    logoPath: nil
+                    logoPath: nil,
+                    heroPosterPath: nil
                 )
             ])
             .environment(tmdbManager)

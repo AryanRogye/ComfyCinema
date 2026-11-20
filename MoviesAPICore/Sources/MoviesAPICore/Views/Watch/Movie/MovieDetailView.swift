@@ -70,6 +70,10 @@ public struct MovieDetailView: View {
         }
     }
 
+    private var imagePath: String? {
+        result.heroPosterPath ?? result.posterPath
+    }
+
 #if os(iOS)
     var overviewFont: UIFont {
         let descriptor = UIFontDescriptor
@@ -134,25 +138,12 @@ public struct MovieDetailView: View {
                             Color.black
                                 .ignoresSafeArea()
                                 .overlay {
-                                    MovieImageBackground(imagePath: result.posterPath)
+                                    MovieImageBackground(imagePath: imagePath)
                                         .ignoresSafeArea()
                                 }
                                 .overlay(alignment: .bottomLeading) {
                                     VStack(alignment: .leading, spacing: 10) {
-                                        Text(result.title ?? "")
-                                            .font(.system(.largeTitle, design: .serif))
-                                            .fontWeight(.semibold)
-                                            .lineLimit(titleLineLimit)
-                                            .minimumScaleFactor(0.8)
-                                            .foregroundStyle(
-                                                LinearGradient(
-                                                    colors: [.white, .white.opacity(0.7)],
-                                                    startPoint: .top,
-                                                    endPoint: .bottom
-                                                )
-                                            )
-                                            .shadow(color: .black.opacity(0.6), radius: 4, x: 0, y: 2)
-
+                                        textView
 
                                         ExpandableText(
                                             text: result.overview ?? "",
@@ -289,6 +280,37 @@ public struct MovieDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var textView: some View {
+        if let logoPath = result.logoPath,
+           let url = URL(string: "https://image.tmdb.org/t/p/w500\(logoPath)") {
+            AsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(height: 50)
+                    .padding(.horizontal, 6)
+            }  placeholder: {
+                Color.clear
+            }
+        } else {
+            Text(result.title ?? "")
+                .font(.system(.largeTitle, design: .serif))
+                .fontWeight(.semibold)
+                .lineLimit(titleLineLimit)
+                .minimumScaleFactor(0.8)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.white, .white.opacity(0.7)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .shadow(color: .black.opacity(0.6), radius: 4, x: 0, y: 2)
+        }
+    }
+
     private func loadMovie() {
         do {
             let movieUrlString = displayServer.loadMovie(movieId: result.id)
@@ -346,7 +368,8 @@ public struct MovieDetailView: View {
                 """,
                     releaseDate: nil,
                     firstAirDate: nil,
-                    logoPath: nil
+                    logoPath: nil,
+                    heroPosterPath: nil
                 )
             )
             .environment(tmdbManager)

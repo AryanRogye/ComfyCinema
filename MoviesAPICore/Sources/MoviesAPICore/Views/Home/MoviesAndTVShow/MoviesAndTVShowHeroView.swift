@@ -29,6 +29,11 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
         return contents[activeIndex].displayName
     }
 
+    var logoPath: String? {
+        if contents.isEmpty { return nil }
+        return contents[activeIndex].logoPath
+    }
+
     var displayType: String {
         if contents.isEmpty { return "" }
         return contents[activeIndex].mediaType == .tv ? "TV Show" : "Movie"
@@ -228,14 +233,7 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
             VStack {
                 Spacer()
                 VStack {
-                    Text(displayName.uppercased())
-                        .font(.system(size: 44, weight: .heavy))
-                        .fontWidth(.condensed)
-                        .foregroundStyle(.white)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.6)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 6)
+                    textView
 
                     Text(description)
                         .font(.subheadline.weight(.medium))
@@ -285,7 +283,7 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 .padding(.vertical)
             }
             .allowsTightening(false)
@@ -360,6 +358,32 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
                 self.error = error.localizedDescription
                 self.showError = true
             }
+        }
+    }
+
+    @ViewBuilder
+    private var textView: some View {
+        if let logoPath,
+           let url = URL(string: "https://image.tmdb.org/t/p/w500\(logoPath)") {
+            AsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .padding(.horizontal, 6)
+            }  placeholder: {
+                Color.clear
+            }
+        } else {
+            Text(displayName.uppercased())
+                .font(.system(size: 44, weight: .heavy))
+                .fontWidth(.condensed)
+                .foregroundStyle(.white)
+                .lineLimit(2)
+                .minimumScaleFactor(0.6)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 6)
         }
     }
 }

@@ -122,7 +122,11 @@ class TMDBClient internal constructor(private val client: HttpClient): TMDBClien
 
     private suspend fun searchResults(items: List<KTSearchResult>, token: String) =
         items.parallelMap { item ->
-            item.copy(logoPath = images(item.id, item.mediaType, token)?.let { selectLogo(it.logos) })
+            val artwork = images(item.id, item.mediaType, token)
+            item.copy(
+                logoPath = artwork?.let { selectLogo(it.logos) },
+                heroPosterPath = artwork?.let { selectHeroPoster(it.posters) },
+            )
         }
 
     @Throws(Exception::class)
