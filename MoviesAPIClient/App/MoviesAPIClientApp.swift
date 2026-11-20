@@ -43,7 +43,7 @@ struct MoviesAPIClientApp: App {
             }
 
 
-            let schema = Schema(versionedSchema: MoviesSchemaV3.self)
+            let schema = Schema(versionedSchema: MoviesSchemaV4.self)
             let configuration = ModelConfiguration(
                 schema: schema,
                 groupContainer: .identifier(identifier),
