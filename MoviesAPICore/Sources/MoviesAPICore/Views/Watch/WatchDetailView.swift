@@ -44,7 +44,10 @@ public struct WatchDetailView: View {
                 restoredPlayback: restoredPlayback?.tvPlayback(for: result)
             )
         case .person:
-            Text("Not Yet Supported")
+            PeopleDetailView(
+                displayServer: displayServerBinding,
+                result: result,
+            )
         default:
             Text("Unkown Media Type")
         }

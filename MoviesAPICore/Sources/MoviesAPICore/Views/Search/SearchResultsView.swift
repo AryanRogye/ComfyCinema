@@ -73,6 +73,7 @@ struct SearchResultsView: View {
                     title: "Spider-Man: Brand New Day",
                     name: nil,
                     posterPath: "/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
+                    profile_path: nil,
                     overview: """
                     Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control.
                     """,
@@ -85,6 +86,7 @@ struct SearchResultsView: View {
                     title: nil,
                     name: "Lab Rats",
                     posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
+                    profile_path: nil,
                     overview: """
                     Leo discovers three superhuman teenagers living in a secret underground lab beneath his new home.
                     """,

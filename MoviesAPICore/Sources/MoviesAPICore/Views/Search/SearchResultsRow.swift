@@ -22,12 +22,23 @@ struct SearchResultsRow: View {
         .contentShape(Rectangle())
     }
 
+    var urlForImage: URL? {
+        switch result.mediaType {
+        case .person:
+            if let profilePath = result.profile_path {
+                return URL(string: "https://image.tmdb.org/t/p/w185\(profilePath)")
+            }
+        default:
+            if let posterPath = result.posterPath {
+                return URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
+            }
+        }
+        return nil
+    }
+
     @ViewBuilder
     private var imageView: some View {
-        if let posterPath = result.posterPath,
-           let url = URL(
-            string: "https://image.tmdb.org/t/p/w500\(posterPath)"
-           ) {
+        if let url = urlForImage {
             AsyncImage(url: url) { image in
                 image
                     .resizable()
@@ -68,7 +79,7 @@ struct SearchResultsRow: View {
                 }
             }
 
-            Text(result.mediaType == .tv ? "TV Show" : "Movie")
+            Text(result.mediaType.rawValue)
                 .font(.caption)
                 .foregroundStyle(.secondary)
 

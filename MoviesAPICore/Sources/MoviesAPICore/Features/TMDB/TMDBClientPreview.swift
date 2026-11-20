@@ -119,6 +119,7 @@ public final class TMDBClientPreview: TMDBClientProviding {
                 title: nil,
                 name: "Lab Rats",
                 posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
+                profile_path: nil,
                 overview: "A mock search result for SwiftUI previews.",
                 releaseDate: nil,
                 firstAirDate: "2012-02-27"
