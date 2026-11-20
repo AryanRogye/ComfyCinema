@@ -33,6 +33,10 @@ let package = Package(
         )
     ],
     targets: [
+        .testTarget(
+            name: "MoviesAPICoreTests",
+            dependencies: ["MoviesAPICore"]
+        ),
         .binaryTarget(
             name: "SharedLogic",
             path: "Frameworks/SharedLogic.xcframework"

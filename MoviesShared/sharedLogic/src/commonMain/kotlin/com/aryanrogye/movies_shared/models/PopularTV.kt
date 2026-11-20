@@ -20,6 +20,8 @@ data class KTTVListResult(
     val posterPath: String? = null,
     val voteAverage: Double,
     val voteCount: Int,
+    @Transient
+    val logoPath: String? = null,
 )
 
 @Serializable

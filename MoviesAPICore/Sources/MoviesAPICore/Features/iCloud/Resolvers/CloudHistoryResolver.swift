@@ -15,7 +15,8 @@ enum CloudHistoryResolver {
     public static func resolve(
         from history: [History],
         with records: [CKRecord],
-        deleted: [CKRecord] = []
+        deleted: [CKRecord] = [],
+        localDeletions: [DeletedHistory] = []
     ) -> [History] {
 
         /// Convert records to `[History]`
@@ -63,27 +64,9 @@ enum CloudHistoryResolver {
             updatedHistory.append(history)
         }
 
-        for delete in deleted {
-            guard let deletedHistory = CloudRecordResolver.deletedHistory(from: delete) else { continue }
-            switch deletedHistory.mediaType {
-            case .episode:
-                if let history = updatedHistory.first(where: {
-                    $0.resultId == deletedHistory.resultId &&
-                    $0.mediaType == deletedHistory.mediaType &&
-                    $0.season == deletedHistory.season &&
-                    $0.episode == deletedHistory.episode
-                }) {
-                    if history.syncDate <= deletedHistory.deletedAt {
-                        updatedHistory.removeAll(where: { $0 == history })
-                    }
-                }
-            case .movie:
-                if let history = updatedHistory.first(where: { $0.resultId == deletedHistory.resultId && $0.mediaType == deletedHistory.mediaType }) {
-                    if history.syncDate <= deletedHistory.deletedAt {
-                        updatedHistory.removeAll(where: { $0 == history })
-                    }
-                }
-            }
+        let deletions = deleted.compactMap(CloudRecordResolver.deletedHistory(from:)) + localDeletions
+        updatedHistory.removeAll { history in
+            deletions.contains { $0.matches(history) && history.syncDate <= $0.deletedAt }
         }
 
         return updatedHistory

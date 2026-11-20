@@ -54,7 +54,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
             backdropPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
             numberOfEpisodes: 98,
             numberOfSeasons: 4,
-            seasons: Self.seasons
+            seasons: Self.seasons,
+            logoPath: nil
         )
     }
 
@@ -80,7 +81,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
             overview: "Mock season data used by SwiftUI previews.",
             posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
             seasonNumber: seasonNumber,
-            episodes: episodes
+            episodes: episodes,
+            logoPath: nil
         )
     }
 
@@ -121,7 +123,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
                 profile_path: nil,
                 overview: "A mock search result for SwiftUI previews.",
                 releaseDate: nil,
-                firstAirDate: "2012-02-27"
+                firstAirDate: "2012-02-27",
+                logoPath: nil
             )
         ])
     }
@@ -137,7 +140,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
                 profile_path: nil,
                 overview: "A mock search result for SwiftUI previews.",
                 releaseDate: nil,
-                firstAirDate: "2012-02-27"
+                firstAirDate: "2012-02-27",
+                logoPath: nil
             )
         ])
     }
@@ -164,7 +168,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
             popularity: 100,
             voteAverage: 8.0,
             voteCount: 500,
-            heroPosterPath: nil
+            heroPosterPath: nil,
+            logoPath: nil
         )
 
         return KTTrendingResponse(page: 1, results: [result], totalPages: 1, totalResults: 1)
@@ -185,7 +190,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
             name: "Season \(seasonNumber)",
             seasonNumber: Int32(seasonNumber),
             episodeCount: 6,
-            posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg"
+            posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
+            logoPath: nil
         )
     }
 
@@ -196,7 +202,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
             originalLanguage: "en", originalTitle: "Preview Movie",
             overview: "A mock movie used by SwiftUI previews.", popularity: 100,
             posterPath: nil, releaseDate: "2026-07-31", title: "Preview Movie",
-            video: false, voteAverage: 8.2, voteCount: 250
+            video: false, voteAverage: 8.2, voteCount: 250,
+            logoPath: nil
         )
     ]
 
@@ -207,7 +214,8 @@ public final class TMDBClientPreview: TMDBClientProviding {
             genreIds: [], genres: [], id: 38867, name: "Lab Rats", originCountry: ["US"],
             originalLanguage: "en", originalName: "Lab Rats",
             overview: "A mock TV result used by SwiftUI previews.", popularity: 100,
-            posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg", voteAverage: 8.0, voteCount: 500
+            posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg", voteAverage: 8.0, voteCount: 500,
+            logoPath: nil
         )
     ]
 }

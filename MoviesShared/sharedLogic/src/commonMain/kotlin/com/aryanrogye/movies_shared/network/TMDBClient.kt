@@ -12,15 +12,21 @@ import com.aryanrogye.movies_shared.models.KTTVShow
 import com.aryanrogye.movies_shared.models.KTTrendingResponse
 import com.aryanrogye.movies_shared.models.KTGenre
 import com.aryanrogye.movies_shared.models.KTGenreResponse
+import com.aryanrogye.movies_shared.models.KTImagesResponse
+import com.aryanrogye.movies_shared.models.KTImage
+import com.aryanrogye.movies_shared.models.KTMovieListResult
+import com.aryanrogye.movies_shared.models.KTTVListResult
+import com.aryanrogye.movies_shared.models.KTSearchResult
+import com.aryanrogye.movies_shared.models.selectLogo
 import com.aryanrogye.movies_shared.models.KTMediaType
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -64,29 +70,60 @@ interface TMDBClientProviding {
     suspend fun recommendationsForTV(id: Int, token: String, page: Int): KTTVListResponse
 }
 
-class TMDBClient: TMDBClientProviding {
-    private val heroImageRequests = Semaphore(4)
+class TMDBClient internal constructor(private val client: HttpClient): TMDBClientProviding {
+    constructor(): this(createTMDBHttpClient())
 
-    private suspend fun heroPosterPath(id: Int, mediaType: KTMediaType, token: String): String? {
+    private val imageRequests = Semaphore(4)
+    private val imageCacheMutex = Mutex()
+    private val imageCache = linkedMapOf<Pair<KTMediaType, Int>, KTImagesResponse>()
+
+    private suspend fun images(id: Int, mediaType: KTMediaType, token: String): KTImagesResponse? {
         if (mediaType == KTMediaType.PERSON) return null
+        val key = mediaType to id
         return try {
-            heroImageRequests.withPermit {
+            imageRequests.withPermit {
+                imageCacheMutex.withLock { imageCache[key] }?.let { return@withPermit it }
                 val response = client.get("https://api.themoviedb.org/3/${mediaType.rawValue}/$id/images") {
-                    parameter("include_image_language", "null")
+                    parameter("include_image_language", "en,null")
                     header("accept", "application/json")
                     header("Authorization", "Bearer $token")
                 }
                 check(response.status.value in 200..299)
-                selectHeroPoster(response.body<HeroImagesResponse>().posters)
+                response.body<KTImagesResponse>().also { images ->
+                    imageCacheMutex.withLock {
+                        imageCache[key] = images
+                        if (imageCache.size > 256) imageCache.remove(imageCache.keys.first())
+                    }
+                }
             }
         } catch (error: CancellationException) {
             throw error
         } catch (_: Exception) {
-            // Optional artwork must not prevent the trending feed from loading.
+            // Artwork is optional. Do not cache failures so a later call can retry.
             null
         }
     }
 
+    private suspend fun movieResults(items: List<KTMovieListResult>, token: String) =
+        items.parallelMap { item ->
+            item.copy(
+                genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token),
+                logoPath = images(item.id, KTMediaType.MOVIE, token)?.let { selectLogo(it.logos) },
+            )
+        }
+
+    private suspend fun tvResults(items: List<KTTVListResult>, token: String) =
+        items.parallelMap { item ->
+            item.copy(
+                genres = TMDBGenreResolver.genreNames(KTMediaType.TV, item.genreIds, token),
+                logoPath = images(item.id, KTMediaType.TV, token)?.let { selectLogo(it.logos) },
+            )
+        }
+
+    private suspend fun searchResults(items: List<KTSearchResult>, token: String) =
+        items.parallelMap { item ->
+            item.copy(logoPath = images(item.id, item.mediaType, token)?.let { selectLogo(it.logos) })
+        }
 
     @Throws(Exception::class)
     override suspend fun ratingsAndReviewsForMovie(id: Int, token: String): KTRatingsAndReviews {
@@ -157,18 +194,6 @@ class TMDBClient: TMDBClientProviding {
         return response.body<KTGenreResponse>().genres
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    private val client = HttpClient {
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                    namingStrategy = JsonNamingStrategy.SnakeCase
-                }
-            )
-        }
-    }
-
     @Throws(Exception::class)
     override suspend fun popularTV(token: String, page: Int): KTTVListResponse {
         val response = client.get("https://api.themoviedb.org/3/tv/popular?language=en-US&page=$page") {
@@ -177,9 +202,7 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val result = response.body<KTTVListResponse>()
-        return result.copy(results = result.results.map { item ->
-            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.TV, item.genreIds, token))
-        })
+        return result.copy(results = tvResults(result.results, token))
     }
 
     @Throws(Exception::class)
@@ -190,9 +213,7 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val result = response.body<KTMovieListResponse>()
-        return result.copy(results = result.results.map { item ->
-            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
-        })
+        return result.copy(results = movieResults(result.results, token))
     }
 
     @Throws(Exception::class)
@@ -203,9 +224,7 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val result = response.body<KTMovieListResponse>()
-        return result.copy(results = result.results.map { item ->
-            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
-        })
+        return result.copy(results = movieResults(result.results, token))
     }
 
     @Throws(Exception::class)
@@ -216,9 +235,7 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val result = response.body<KTTVListResponse>()
-        return result.copy(results = result.results.map { item ->
-            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.TV, item.genreIds, token))
-        })
+        return result.copy(results = tvResults(result.results, token))
     }
 
     @Throws(Exception::class)
@@ -229,9 +246,7 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val result = response.body<KTNowPlayingMovieResponse>()
-        return result.copy(results = result.results.map { item ->
-            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
-        })
+        return result.copy(results = movieResults(result.results, token))
     }
 
     @Throws(Exception::class)
@@ -242,16 +257,14 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val trending = response.body<KTTrendingResponse>()
-        return coroutineScope {
-            trending.copy(results = trending.results.map { item ->
-                async {
-                    item.copy(
-                        genreType = TMDBGenreResolver.genreNames(item.mediaType, item.genreIds, token),
-                        heroPosterPath = heroPosterPath(item.id, item.mediaType, token),
-                    )
-                }
-            }.awaitAll())
-        }
+        return trending.copy(results = trending.results.parallelMap { item ->
+            val artwork = images(item.id, item.mediaType, token)
+            item.copy(
+                genreType = TMDBGenreResolver.genreNames(item.mediaType, item.genreIds, token),
+                heroPosterPath = artwork?.let { selectHeroPoster(it.posters) },
+                logoPath = artwork?.let { selectLogo(it.logos) },
+            )
+        })
     }
 
     override suspend fun search(query: String, token: String, includeAdult: Boolean): KTSearchResponse {
@@ -265,7 +278,8 @@ class TMDBClient: TMDBClientProviding {
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTSearchResponse>()
+        return result.copy(results = searchResults(result.results, token))
     }
 
     override suspend fun creditsForPerson(id: Int, token: String): KTSearchResponse {
@@ -278,7 +292,7 @@ class TMDBClient: TMDBClientProviding {
         val credits = response.body<KTPersonCombinedCredits>()
 
         return KTSearchResponse(
-            results = credits.cast
+            results = searchResults(credits.cast, token)
         )
     }
 
@@ -290,7 +304,12 @@ class TMDBClient: TMDBClientProviding {
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTTVShow>()
+        val logoPath = images(id, KTMediaType.TV, token)?.let { selectLogo(it.logos) }
+        return result.copy(
+            logoPath = logoPath,
+            seasons = result.seasons.map { it.copy(logoPath = logoPath) },
+        )
     }
 
     @Throws(Exception::class)
@@ -304,9 +323,7 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val result = response.body<KTMovieListResponse>()
-        return result.copy(results = result.results.map { item ->
-            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.MOVIE, item.genreIds, token))
-        })
+        return result.copy(results = movieResults(result.results, token))
     }
 
     @Throws(Exception::class)
@@ -320,9 +337,7 @@ class TMDBClient: TMDBClientProviding {
         }
 
         val result = response.body<KTTVListResponse>()
-        return result.copy(results = result.results.map { item ->
-            item.copy(genres = TMDBGenreResolver.genreNames(KTMediaType.TV, item.genreIds, token))
-        })
+        return result.copy(results = tvResults(result.results, token))
     }
 
     override suspend fun seasonInfo(id: Int, seasonNumber: Int, token: String): KTSeasonInfo {
@@ -333,28 +348,30 @@ class TMDBClient: TMDBClientProviding {
             header("Authorization", "Bearer $token")
         }
 
-        return response.body()
+        val result = response.body<KTSeasonInfo>()
+        // Seasons use their parent show's title logo, not the season's ID.
+        return result.copy(logoPath = images(id, KTMediaType.TV, token)?.let { selectLogo(it.logos) })
     }
 }
 
 
-@Serializable
-internal data class HeroImagesResponse(val posters: List<HeroPosterImage> = emptyList())
+@OptIn(ExperimentalSerializationApi::class)
+private fun createTMDBHttpClient() = HttpClient {
+    install(ContentNegotiation) {
+        json(Json {
+            ignoreUnknownKeys = true
+            namingStrategy = JsonNamingStrategy.SnakeCase
+        })
+    }
+}
 
-@Serializable
-internal data class HeroPosterImage(
-    val filePath: String,
-    @SerialName("iso_639_1") val language: String? = null,
-    val width: Int = 0,
-    val height: Int = 0,
-    val voteAverage: Double = 0.0,
-    val voteCount: Int = 0,
-)
+private suspend fun <T, R> List<T>.parallelMap(transform: suspend (T) -> R): List<R> =
+    coroutineScope { map { async { transform(it) } }.awaitAll() }
 
 // No-language is a best-effort signal, not a guarantee that artwork contains no text.
-internal fun selectHeroPoster(posters: List<HeroPosterImage>): String? = posters
+internal fun selectHeroPoster(posters: List<KTImage>): String? = posters
     .filter { it.language == null && it.width > 0 && it.height > it.width && it.filePath.isNotBlank() }
-    .sortedWith(compareByDescending<HeroPosterImage> { it.voteAverage }
+    .sortedWith(compareByDescending<KTImage> { it.voteAverage }
         .thenByDescending { it.voteCount }
         .thenByDescending { it.width })
     .firstOrNull()?.filePath

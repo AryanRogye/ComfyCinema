@@ -60,17 +60,45 @@ extension CloudKitManager {
 
     /// Called when history is deleted
     public func markHistoryAsDeleted(_ history: History) async throws {
-        let deletedHistory = DeletedHistory(history: history)
-        let deleted = try await CloudRecordResolver.createHistoryDeletion(basedOn: deletedHistory)
-        let _ = try await database.modifyRecords(
-            saving: [deleted],
-            deleting: [],
-            savePolicy: .ifServerRecordUnchanged,
-            atomically: false
-        )
+        try await markHistoryAsDeleted(DeletedHistory(history: history))
+    }
+
+    func markHistoryAsDeleted(_ deletion: DeletedHistory) async throws {
+        let record = try await CloudRecordResolver.createHistoryDeletion(basedOn: deletion)
+        _ = try await saveDeletionResolvingConflict(record)
+    }
+
+    private func saveDeletionResolvingConflict(
+        _ record: CKRecord,
+        retriesRemaining: Int = 3
+    ) async throws -> CKRecord {
+        do {
+            return try await database.save(record)
+        } catch let error as CKError {
+            guard error.code == .serverRecordChanged,
+                  retriesRemaining > 0,
+                  let server = error.serverRecord,
+                  let localDate = record["deletedAt"] as? Date,
+                  let serverDate = server["deletedAt"] as? Date else {
+                throw error
+            }
+            guard localDate > serverDate else { return server }
+            server["deletedAt"] = localDate
+            return try await saveDeletionResolvingConflict(
+                server,
+                retriesRemaining: retriesRemaining - 1
+            )
+        }
     }
 
     public func resolveHistory(from ctx: ModelContext) async throws -> [History] {
+        try await resolveHistory(from: ctx, localDeletions: [])
+    }
+
+    func resolveHistory(
+        from ctx: ModelContext,
+        localDeletions: [DeletedHistory]
+    ) async throws -> [History] {
         defer { resolveStatus = nil }
         let currentHistory = try extractHistory(from: ctx)
         resolveStatus = "Gathered Current History: \(currentHistory.count)"
@@ -84,7 +112,8 @@ extension CloudKitManager {
         let mergedHistory = CloudHistoryResolver.resolve(
             from: currentHistory,
             with: cloudHistory,
-            deleted: deletedHistory
+            deleted: deletedHistory,
+            localDeletions: localDeletions
         )
         resolveStatus = "Merged History: \(mergedHistory.count)"
 
@@ -140,7 +169,8 @@ extension CloudKitManager {
         return CloudHistoryResolver.resolve(
             from: currentHistory,
             with: latestCloudRecords,
-            deleted: deletedHistory
+            deleted: deletedHistory,
+            localDeletions: localDeletions
         )
     }
 

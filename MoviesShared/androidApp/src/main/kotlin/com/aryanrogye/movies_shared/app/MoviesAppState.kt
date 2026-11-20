@@ -94,7 +94,7 @@ class MoviesAppState(context: Context) {
                     val token = tokenOrThrow()
                     val items = when (index) {
                         0 -> tmdb.trending(token).results.map {
-                            DiscoveryItem(KTSearchResult(it.id, it.mediaType, it.title, it.name, it.posterPath, it.overview, it.releaseDate, it.firstAirDate), it.backdropPath, it.adult)
+                            DiscoveryItem(KTSearchResult(it.id, it.mediaType, title = it.title, name = it.name, posterPath = it.posterPath, overview = it.overview, releaseDate = it.releaseDate, firstAirDate = it.firstAirDate, logoPath = it.logoPath), it.backdropPath, it.adult)
                         }
                         1, 3, 5 -> {
                             val movies = when (index) {
@@ -102,11 +102,11 @@ class MoviesAppState(context: Context) {
                                 3 -> tmdb.popularMovies(token, 1).results
                                 else -> tmdb.topRatedMovies(token, 1).results
                             }
-                            movies.map { DiscoveryItem(KTSearchResult(it.id, KTMediaType.MOVIE, title = it.title, posterPath = it.posterPath, overview = it.overview, releaseDate = it.releaseDate), it.backdropPath, it.adult) }
+                            movies.map { DiscoveryItem(KTSearchResult(it.id, KTMediaType.MOVIE, title = it.title, posterPath = it.posterPath, overview = it.overview, releaseDate = it.releaseDate, logoPath = it.logoPath), it.backdropPath, it.adult) }
                         }
                         else -> {
                             val shows = if (index == 2) tmdb.popularTV(token, 1).results else tmdb.topRatedTV(token, 1).results
-                            shows.map { DiscoveryItem(KTSearchResult(it.id, KTMediaType.TV, name = it.name, posterPath = it.posterPath, overview = it.overview, firstAirDate = it.firstAirDate), it.backdropPath) }
+                            shows.map { DiscoveryItem(KTSearchResult(it.id, KTMediaType.TV, name = it.name, posterPath = it.posterPath, overview = it.overview, firstAirDate = it.firstAirDate, logoPath = it.logoPath), it.backdropPath) }
                         }
                     }
                     discovery[index] = section.copy(items = items.distinctBy { it.result.mediaType to it.result.id }, loading = false)

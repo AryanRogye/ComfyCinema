@@ -2,6 +2,7 @@ package com.aryanrogye.movies_shared.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class KTPersonCombinedCredits(
@@ -32,6 +33,8 @@ data class KTSearchResult(
     val overview: String? = null,
     val releaseDate: String? = null,
     val firstAirDate: String? = null,
+    @Transient
+    val logoPath: String? = null,
 )
 
 @Serializable

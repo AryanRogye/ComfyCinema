@@ -15,6 +15,7 @@ import WidgetKit
 public final class CloudKitSyncService {
     let modelContainer: ModelContainer
     private let cloudKitManager: CloudKitManager
+    private let deletionStore: HistoryDeletionStore
 
     private var isSyncing: Bool = false
     private var cloudQueue = TaskQueue()
@@ -35,41 +36,23 @@ public final class CloudKitSyncService {
     ) {
         self.modelContainer = modelContainer
         self.cloudKitManager = cloudKitManager
+        self.deletionStore = HistoryDeletionStore(identifier: cloudKitManager.identifier)
     }
 
     var pendingSyncs: Int = 0
 
     func addToHistoryThenSync(_ history: History) {
         guard enabledCloudSave else { return }
-        Task {
-            cloudQueue.enqueue {
-                do {
-                    try await self.cloudKitManager.removeHistoryFromDeletedIfNeeded(history)
-                } catch {
-                    /// ignore error since
-                }
-            }
-            cloudQueue.enqueue {
-                do {
-                    try await self.saveToCloud()
-                } catch {
-                    /// ignore error
-                }
-            }
-        }
+        // A newer watch date supersedes a tombstone; keep the marker so older
+        // copies on other devices cannot bring deleted progress back.
+        syncSaveToCloud()
     }
 
     func didJustDeleteHistory(_ history: History) {
-        guard enabledCloudSave else { return }
-        Task {
-            cloudQueue.enqueue {
-                do {
-                    try await self.cloudKitManager.markHistoryAsDeleted(history)
-                } catch {
-                    /// ignore error
-                }
-            }
-        }
+        // Snapshot before the caller deletes the SwiftData object. Record even
+        // with sync disabled so enabling it later preserves the deletion.
+        deletionStore.record(DeletedHistory(history: history))
+        syncSaveToCloud()
     }
 
     func syncSaveToCloud() {
@@ -99,13 +82,23 @@ public final class CloudKitSyncService {
         repeat {
             pendingSyncs = 0
 
-            let merged = try await cloudKitManager.resolveHistory(from: ctx)
+            // Never import cloud history until pending deletions are uploaded.
+            // Failed uploads remain durable and are retried on the next sync.
+            for deletion in deletionStore.pending {
+                try await cloudKitManager.markHistoryAsDeleted(deletion)
+                deletionStore.markUploaded(deletion)
+            }
+
+            let merged = try await cloudKitManager.resolveHistory(
+                from: ctx,
+                localDeletions: deletionStore.deletions
+            )
             let deleted: [DeletedHistory] = try await cloudKitManager.fetchAllDeletedRecords().compactMap {
                 return CloudRecordResolver.deletedHistory(from: $0)
             }
 
             try reconcileLocalHistory(merged, in: ctx)
-            try removeFromHistoryDeleted(deleted, in: ctx)
+            try removeFromHistoryDeleted(deleted + deletionStore.deletions, in: ctx)
 
 #if os(iOS)
             SettingLogs.shared.add("Synced to iCloud")
@@ -120,25 +113,11 @@ public final class CloudKitSyncService {
     ) throws {
 
         let history = try ctx.fetch(FetchDescriptor<History>())
-        for deletedHistory in deleted {
-            switch deletedHistory.mediaType {
-            case .episode:
-                if let history = history.first(where: {
-                    $0.resultId == deletedHistory.resultId &&
-                    $0.mediaType == deletedHistory.mediaType &&
-                    $0.season == deletedHistory.season &&
-                    $0.episode == deletedHistory.episode
-                }) {
-                    if history.syncDate <= deletedHistory.deletedAt {
-                        ctx.delete(history)
-                    }
-                }
-            case .movie:
-                if let history = history.first(where: { $0.resultId == deletedHistory.resultId && $0.mediaType == deletedHistory.mediaType }) {
-                    if history.syncDate <= deletedHistory.deletedAt {
-                        ctx.delete(history)
-                    }
-                }
+        for history in history {
+            if deleted.contains(where: {
+                $0.matches(history) && history.syncDate <= $0.deletedAt
+            }) {
+                ctx.delete(history)
             }
         }
         try ctx.save()

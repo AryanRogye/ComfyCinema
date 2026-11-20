@@ -1,6 +1,7 @@
 package com.aryanrogye.movies_shared.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class KTSeasonInfo(
@@ -10,7 +11,9 @@ data class KTSeasonInfo(
     val overview: String,
     val posterPath: String? = null,
     val seasonNumber: Int,
-    val episodes: List<KTEpisode>
+    val episodes: List<KTEpisode>,
+    @Transient
+    val logoPath: String? = null,
 )
 
 @Serializable

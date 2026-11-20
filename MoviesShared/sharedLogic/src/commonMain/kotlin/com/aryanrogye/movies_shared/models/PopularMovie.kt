@@ -21,6 +21,8 @@ data class KTMovieListResult(
     val video: Boolean = false,
     val voteAverage: Double,
     val voteCount: Int,
+    @Transient
+    val logoPath: String? = null,
 )
 
 @Serializable

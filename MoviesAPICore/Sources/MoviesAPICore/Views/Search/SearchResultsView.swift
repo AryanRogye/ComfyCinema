@@ -78,7 +78,8 @@ struct SearchResultsView: View {
                     Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control.
                     """,
                     releaseDate: "2026-07-31",
-                    firstAirDate: nil
+                    firstAirDate: nil,
+                    logoPath: nil
                 ),
                 KTSearchResult(
                     id: 38867,
@@ -91,7 +92,8 @@ struct SearchResultsView: View {
                     Leo discovers three superhuman teenagers living in a secret underground lab beneath his new home.
                     """,
                     releaseDate: nil,
-                    firstAirDate: "2012-02-27"
+                    firstAirDate: "2012-02-27",
+                    logoPath: nil
                 )
             ])
             .environment(tmdbManager)

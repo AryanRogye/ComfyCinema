@@ -7,7 +7,7 @@
 
 import MoviesAPIData
 
-struct DeletedHistory {
+struct DeletedHistory: Codable, Sendable {
     let resultId: Int
     let mediaType: HistoryMediaType
     let season: Int?
@@ -20,6 +20,18 @@ struct DeletedHistory {
         self.season = season
         self.episode = episode
         self.deletedAt = deletedAt
+    }
+
+    func matches(_ history: History) -> Bool {
+        resultId == history.resultId && mediaType == history.mediaType &&
+        (mediaType == .movie || (season == history.season && episode == history.episode))
+    }
+
+    var recordName: String {
+        switch mediaType {
+        case .movie: "deletion-movie-\(resultId)"
+        case .episode: "deletion-episode-\(resultId)-s\(season ?? 0)-e\(episode ?? 0)"
+        }
     }
 
     init(history: History) {

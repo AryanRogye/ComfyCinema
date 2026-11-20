@@ -9,6 +9,7 @@ protocol MediaListItem: Equatable {
     var id: Int32 { get }
     var displayName: String { get }
     var posterPath: String? { get }
+    var logoPath: String? { get }
     var backdropPath: String? { get }
     var genresTypes: [String] { get }
     var heroPosterPath: String? { get }

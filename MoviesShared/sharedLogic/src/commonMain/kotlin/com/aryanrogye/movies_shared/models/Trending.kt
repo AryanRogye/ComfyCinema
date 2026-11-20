@@ -28,6 +28,8 @@ data class KTTrendingResult(
     val voteCount: Int,
     @Transient
     val heroPosterPath: String? = null,
+    @Transient
+    val logoPath: String? = null,
 ) {
     val genres: List<String> get() = genreType
 }

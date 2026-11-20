@@ -27,6 +27,9 @@ struct SearchEntity: AppEntity {
     @Property(title: "PosterPath")
     var posterPath: String?
 
+    @Property(title: "LogoPath")
+    var logoPath: String?
+
     @Property(title: "ProfilePath")
     var profile_path: String?
 
@@ -75,6 +78,7 @@ struct SearchEntity: AppEntity {
         self.name = searchResult.name
         self.mediaType = searchResult.mediaType.rawValue
         self.posterPath = searchResult.posterPath
+        self.logoPath = searchResult.logoPath
         self.profile_path = searchResult.profile_path
         self.firstAirDate = searchResult.firstAirDate
         self.overview = searchResult.overview
@@ -174,7 +178,8 @@ struct OpenSearchIntent: OpenIntent {
             profile_path: target.profile_path,
             overview: target.overview,
             releaseDate: target.releaseDate,
-            firstAirDate: target.firstAirDate
+            firstAirDate: target.firstAirDate,
+            logoPath: target.logoPath
         )
 
         return .result()
