@@ -4,6 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class KTPersonCombinedCredits(
+    val cast: List<KTSearchResult>,
+    val crew: List<KTSearchResult>,
+)
+
+@Serializable
 enum class KTMediaType(val rawValue: String) {
     @SerialName("tv")
     TV("tv"),

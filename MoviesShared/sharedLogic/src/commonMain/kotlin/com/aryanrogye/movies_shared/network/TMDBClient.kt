@@ -3,6 +3,7 @@ package com.aryanrogye.movies_shared.network
 import com.aryanrogye.movies_shared.models.KTRatingsAndReviews
 import com.aryanrogye.movies_shared.models.KTReviewResponse
 import com.aryanrogye.movies_shared.models.KTSearchResponse
+import com.aryanrogye.movies_shared.models.KTPersonCombinedCredits
 import com.aryanrogye.movies_shared.models.KTSeasonInfo
 import com.aryanrogye.movies_shared.models.KTMovieListResponse
 import com.aryanrogye.movies_shared.models.KTNowPlayingMovieResponse
@@ -54,6 +55,7 @@ interface TMDBClientProviding {
     @Throws(Exception::class)
     suspend fun trending(token: String): KTTrendingResponse
     suspend fun search(query: String, token: String, includeAdult: Boolean): KTSearchResponse
+    suspend fun creditsForPerson(id: Int, token: String): KTSearchResponse
     suspend fun infoOnTV(id: Int, token: String): KTTVShow
     suspend fun seasonInfo(id: Int, seasonNumber: Int, token: String): KTSeasonInfo
     @Throws(Exception::class)
@@ -264,6 +266,20 @@ class TMDBClient: TMDBClientProviding {
         }
 
         return response.body()
+    }
+
+    override suspend fun creditsForPerson(id: Int, token: String): KTSearchResponse {
+        val response = client.get("https://api.themoviedb.org/3/person/$id/combined_credits") {
+            parameter("language", "en-US")
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+
+        val credits = response.body<KTPersonCombinedCredits>()
+
+        return KTSearchResponse(
+            results = credits.cast
+        )
     }
 
     override suspend fun infoOnTV(id: Int, token: String): KTTVShow {

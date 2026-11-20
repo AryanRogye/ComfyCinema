@@ -18,7 +18,6 @@ public final class TMDBClientPreview: TMDBClientProviding {
         await tvResponse(page: page)
     }
 
-
     public func ratingsAndReviewsForMovie(id: Int32, token: String) async throws -> KTRatingsAndReviews {
         KTRatingsAndReviews(id: id, voteAverage: 8.2, voteCount: 250,
                             reviews: try await reviewsForMovie(id: id, token: token, page: 1))
@@ -109,6 +108,22 @@ public final class TMDBClientPreview: TMDBClientProviding {
 
     public func topRatedTV(token: String, page: Int32) async throws -> KTTVListResponse {
         await tvResponse(page: page)
+    }
+
+    public func creditsForPerson(id: Int32, token: String) async throws -> KTSearchResponse {
+        KTSearchResponse(results: [
+            KTSearchResult(
+                id: 38867,
+                mediaType: .tv,
+                title: nil,
+                name: "Lab Rats",
+                posterPath: "/lcQMvn9ZptPd3dxn0a17viRfi7Y.jpg",
+                profile_path: nil,
+                overview: "A mock search result for SwiftUI previews.",
+                releaseDate: nil,
+                firstAirDate: "2012-02-27"
+            )
+        ])
     }
 
     public func search(query: String, token: String, includeAdult: Bool) async throws -> KTSearchResponse {
