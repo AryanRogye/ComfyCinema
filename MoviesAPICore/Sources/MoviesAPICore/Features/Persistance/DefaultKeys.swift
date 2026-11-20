@@ -13,6 +13,10 @@ extension Defaults.Keys {
     static let hasShownCloudSavePrompt = Key<Bool>("hasShownCloudSavePrompt", default: false)
     static let enabledCloudSave = Key<Bool>("enabledCloudSave", default: false)
 
+    #if os(iOS)
+    static let useCustomTabIcons = Key<Bool>("useCustomTabIcons", default: false)
+    #endif
+
     #if os(macOS)
     static let enableRemoteControl = Key<Bool>("enableRemoteControl", default: false)
     static let remoteControlIp = Key<String>("remoteControlIp", default: "0.0.0.0")

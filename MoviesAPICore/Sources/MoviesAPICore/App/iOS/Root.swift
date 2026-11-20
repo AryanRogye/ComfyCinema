@@ -57,60 +57,69 @@ public struct Root: View {
         ZStack {
             if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
                 TabView(selection: $appRouter.selectedTab) {
-                    Tab(TabID.home.rawValue, systemImage: TabID.home.icon, value: .home) {
-                        NavigationStack(path: $homePath) {
-                            Home()
-                                .navigationDestination(for: PlaybackRoute.self) { _ in
-                                    PlaybackDestination()
-                                }
+                    if defaultManager.useCustomTabIcons {
+                        Tab(value: .home) {
+                            homeView
+                        } label: {
+                            TabID.home.label
                         }
-                    }
 
-                    Tab(TabID.library.rawValue, systemImage: TabID.library.icon, value: .library) {
-                        NavigationStack(path: $libraryPath) {
-                            Library()
-                                .navigationDestination(for: PlaybackRoute.self) { _ in
-                                    PlaybackDestination()
-                                }
+                        Tab(value: .library) {
+                            libraryView
+                        } label: {
+                            TabID.library.label
                         }
-                    }
 
-                    Tab(TabID.history.rawValue, systemImage: TabID.history.icon, value: .history) {
-                        NavigationStack(path: $historyPath) {
-                            HistoryView()
-                                .navigationDestination(for: PlaybackRoute.self) { _ in
-                                    PlaybackDestination()
-                                }
+                        Tab(value: .history) {
+                            historyView
+                        } label: {
+                            TabID.history.label
                         }
-                    }
 
-                    Tab(TabID.remote.rawValue, systemImage: TabID.remote.icon, value: .remote) {
-                        NavigationStack(path: $remotePath) {
-                            RemoteDevicesView()
-                                .navigationDestination(for: PlaybackRoute.self) { _ in
-                                    PlaybackDestination()
-                                }
+                        Tab(value: .remote) {
+                            remoteView
+                        } label: {
+                            TabID.remote.label
                         }
-                    }
 
-                    Tab(TabID.settings.rawValue, systemImage: TabID.settings.icon, value: .settings) {
-                        NavigationStack(path: $settingsPath) {
-                            SettingsView()
-                                .navigationDestination(for: PlaybackRoute.self) { _ in
-                                    PlaybackDestination()
-                                }
+                        Tab(value: .settings) {
+                            settingsView
+                        } label: {
+                            TabID.settings.label
                         }
-                    }
 
-                    Tab(value: .search, role: .search) {
-                        NavigationStack(path: $searchPath) {
-                            SearchTab()
-                                .navigationDestination(for: PlaybackRoute.self) { _ in
-                                    PlaybackDestination()
-                                }
+                        Tab(value: .search, role: .search) {
+                            searchView
+                        } label: {
+                            TabID.search.label
+                        }
+                    } else {
+                        Tab(TabID.home.rawValue, systemImage: TabID.home.icon, value: .home) {
+                            homeView
+                        }
+
+                        Tab(TabID.library.rawValue, systemImage: TabID.library.icon, value: .library) {
+                            libraryView
+                        }
+
+                        Tab(TabID.history.rawValue, systemImage: TabID.history.icon, value: .history) {
+                            historyView
+                        }
+
+                        Tab(TabID.remote.rawValue, systemImage: TabID.remote.icon, value: .remote) {
+                            remoteView
+                        }
+
+                        Tab(TabID.settings.rawValue, systemImage: TabID.settings.icon, value: .settings) {
+                            settingsView
+                        }
+
+                        Tab(value: .search, role: .search) {
+                            searchView
                         }
                     }
                 }
+                .animation(.smooth, value: defaultManager.useCustomTabIcons)
                 .tint(.yellow)
                 .introspect(.tabView, on: .iOS(.v26, .v27)) { controller in
                     _ = tryAllowingSixTabs(on: controller)
@@ -240,6 +249,60 @@ public struct Root: View {
         }
     }
 
+
+    private var homeView: some View {
+        NavigationStack(path: $homePath) {
+            Home()
+                .navigationDestination(for: PlaybackRoute.self) { _ in
+                    PlaybackDestination()
+                }
+        }
+    }
+
+    private var libraryView: some View {
+        NavigationStack(path: $libraryPath) {
+            Library()
+                .navigationDestination(for: PlaybackRoute.self) { _ in
+                    PlaybackDestination()
+                }
+        }
+    }
+
+    private var historyView: some View {
+        NavigationStack(path: $historyPath) {
+            HistoryView()
+                .navigationDestination(for: PlaybackRoute.self) { _ in
+                    PlaybackDestination()
+                }
+        }
+    }
+
+    private var remoteView: some View {
+        NavigationStack(path: $remotePath) {
+            RemoteDevicesView()
+                .navigationDestination(for: PlaybackRoute.self) { _ in
+                    PlaybackDestination()
+                }
+        }
+    }
+
+    private var settingsView: some View {
+        NavigationStack(path: $settingsPath) {
+            SettingsView()
+                .navigationDestination(for: PlaybackRoute.self) { _ in
+                    PlaybackDestination()
+                }
+        }
+    }
+
+    private var searchView: some View {
+        NavigationStack(path: $searchPath) {
+            SearchTab()
+                .navigationDestination(for: PlaybackRoute.self) { _ in
+                    PlaybackDestination()
+                }
+        }
+    }
 }
 
 private struct SearchTabModifier: ViewModifier {

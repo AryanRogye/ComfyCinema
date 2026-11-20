@@ -26,78 +26,23 @@ public struct SettingsView: View {
         @Bindable var defaultManager = defaultManager
 
         Form {
-            Section {
-                Toggle("Include Adult Content", isOn: $defaultManager.includeAdult)
-                    .toggleStyle(.switch)
-            } header: {
-                Label("Search Settings", systemImage: "magnifyingglass")
-            }
 
-            Section {
-                if blockingService.isNetworkFilteringReady {
-                    Label("Blocking Ready", systemImage: "checkmark.circle.fill")
-                } else {
-                    ProgressView("Preparing Blocking")
-                }
-#if os(macOS)
-                NavigationLink {
-                    RemoteServerView()
-                } label: {
-                    Text("Remote Control")
-                }
-#endif
-            } header: {
-                Label("Network", systemImage: "network")
-            }
+            AppearanceSettings(defaultManager: defaultManager)
+
+            SearchSettings(defaultManager: defaultManager)
+
+            NetworkSettings()
 
 #if os(macOS)
-            Section("Widgets") {
-                NavigationLink {
-                    WidgetFavoriteConfigView()
-                } label: {
-                    Label("Configure Favorites", systemImage: "star.fill")
-                }
-            }
+            WidgetSettingsView()
 #endif
 
-            Section {
-                NavigationLink {
-                    SyncView()
-                } label: {
-                    Label("Configuration", systemImage: "doc")
-                }
-            } header: {
-                Label("iCloud", systemImage: "cloud")
-            }
+            StorageSettingsView()
 
-#if os(iOS)
-            NavigationLink {
-                StorageView()
-            } label: {
-                Label("Storage", systemImage: "internaldrive")
-            }
-#elseif os(macOS)
-            Section {
-                NavigationLink {
-                    SettingLogsView()
-                } label: {
-                    Text("View")
-                }
-            } header: {
-                Label("Logs", systemImage: "doc.text")
-            }
+#if os(macOS)
+            LogSettingsView()
 #endif
-
-            Section {
-                Link(destination: URL(string: "https://www.themoviedb.org")!) {
-                    Label("The Movie Database (TMDB)", systemImage: "film")
-                }
-
-                Text("This product uses the TMDB API but is not endorsed or certified by TMDB.")
-                    .foregroundStyle(.secondary)
-            } header: {
-                Label("Attribution", systemImage: "info.circle")
-            }
+            AttributionView()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .toolbar {
@@ -168,7 +113,129 @@ public struct SettingsView: View {
         }
 #endif
     }
+}
 
+// MARK: - Appearance Settings
+struct AppearanceSettings: View {
+
+    @Bindable var defaultManager: DefaultManager
+
+    var body: some View {
 #if os(iOS)
+        Toggle("Use Custom Tab Icons", isOn: $defaultManager.useCustomTabIcons)
+            .toggleStyle(.switch)
 #endif
+    }
+}
+
+// MARK: - Search Settings
+struct SearchSettings: View {
+
+    @Bindable var defaultManager: DefaultManager
+
+    var body: some View {
+        Section {
+            Toggle("Include Adult Content", isOn: $defaultManager.includeAdult)
+                .toggleStyle(.switch)
+        } header: {
+            Label("Search Settings", systemImage: "magnifyingglass")
+        }
+    }
+}
+
+// MARK: - Network Settings
+struct NetworkSettings: View {
+
+    @Environment(BlockingService.self) var blockingService
+
+    var body: some View {
+        Section {
+            if blockingService.isNetworkFilteringReady {
+                Label("Blocking Ready", systemImage: "checkmark.circle.fill")
+            } else {
+                ProgressView("Preparing Blocking")
+            }
+#if os(macOS)
+            NavigationLink {
+                RemoteServerView()
+            } label: {
+                Text("Remote Control")
+            }
+#endif
+        } header: {
+            Label("Network", systemImage: "network")
+        }
+    }
+}
+
+#if os(macOS)
+
+// MARK: - Widget Settings
+struct WidgetSettingsView: View {
+    var body: some View {
+        Section("Widgets") {
+            NavigationLink {
+                WidgetFavoriteConfigView()
+            } label: {
+                Label("Configure Favorites", systemImage: "star.fill")
+            }
+        }
+    }
+}
+#endif
+
+// MARK: - Storage Settings
+struct StorageSettingsView: View {
+    var body: some View {
+        Section {
+            NavigationLink {
+                SyncView()
+            } label: {
+                Label("iCloud", systemImage: "cloud")
+            }
+#if os(iOS)
+            NavigationLink {
+                StorageView()
+            } label: {
+                Text("View Storage Space")
+            }
+#endif
+        } header: {
+            Label("Storage", systemImage: "internaldrive")
+        }
+    }
+}
+
+#if os(macOS)
+
+// MARK: - Log Settings
+struct LogSettingsView: View {
+    var body: some View {
+        Section {
+            NavigationLink {
+                SettingLogsView()
+            } label: {
+                Text("View")
+            }
+        } header: {
+            Label("Logs", systemImage: "doc.text")
+        }
+    }
+}
+#endif
+
+// MARK: - Attribution
+struct AttributionView: View {
+    var body: some View {
+        Section {
+            Link(destination: URL(string: "https://www.themoviedb.org")!) {
+                Label("The Movie Database (TMDB)", systemImage: "film")
+            }
+
+            Text("This product uses the TMDB API but is not endorsed or certified by TMDB.")
+                .foregroundStyle(.secondary)
+        } header: {
+            Label("Attribution", systemImage: "info.circle")
+        }
+    }
 }

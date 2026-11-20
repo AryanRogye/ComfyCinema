@@ -5,6 +5,8 @@
 //  Created by Aryan Rogye on 9/17/26.
 //
 
+import SwiftUI
+
 public enum TabID: String, Hashable, CaseIterable {
     case home = "Home"
     case library = "Library"
@@ -31,6 +33,31 @@ public enum TabID: String, Hashable, CaseIterable {
             "gear"
         case .search:
             "magnifyingglass"
+        }
+    }
+
+    public var image: String {
+        switch self {
+        case .home:
+            "HomeIcon"
+        case .library:
+            "LibraryIcon"
+        case .history:
+            "HistoryIcon"
+        case .remote:
+            "RemoteIcon"
+        case .settings:
+            "SettingsIcon"
+        case .search:
+            "SearchIcon"
+        }
+    }
+
+    var label: some View {
+        Label {
+            Text(self.rawValue)
+        } icon: {
+            Image(self.image, bundle: .module)
         }
     }
 }
