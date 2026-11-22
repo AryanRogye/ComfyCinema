@@ -172,7 +172,9 @@ final class RemoteServer: NSObject, NetServiceDelegate {
 
 extension RemoteServer {
     @MainActor
-    public func clearClosures() {
+    public func clearClosures(
+        avoidingKTDisplayServer: Bool = false
+    ) {
         onPlay = nil
         onPause = nil
         onEnterFullscreen = nil
@@ -180,9 +182,21 @@ extension RemoteServer {
         onForwardTenSeconds = nil
         onBackTenSeconds = nil
         onSeek = nil
-        onSetServer = nil
-        onGetServer = nil
+        if !avoidingKTDisplayServer {
+            onSetServer = nil
+            onGetServer = nil
+        }
     }
+
+    @MainActor
+    public func attachKTDisplayServerFunctions(
+        onSetServer: @escaping (KTDisplayServer) -> Void,
+        onGetServer: @escaping () -> KTDisplayServer
+    ) {
+        self.onSetServer = onSetServer
+        self.onGetServer = onGetServer
+    }
+
     @MainActor
     public func attachWebViewFunctions(_ webView: WKWebView) {
         onPlay = {
@@ -372,7 +386,7 @@ extension RemoteServer {
 
         router.post("display/set") { [weak self] request, context in
             guard let self else {
-                throw HTTPError(.serviceUnavailable, message: "Set volume action unavailable")
+                throw HTTPError(.serviceUnavailable, message: "Set server action unavailable")
             }
             let body = try await request.body.collect(upTo: 1024)
             let json = String(buffer: body)

@@ -44,8 +44,10 @@ public enum TabID: String, Hashable, CaseIterable {
             "LibraryIcon"
         case .history:
             "HistoryIcon"
+#if os(iOS)
         case .remote:
             "RemoteIcon"
+#endif
         case .settings:
             "SettingsIcon"
         case .search:

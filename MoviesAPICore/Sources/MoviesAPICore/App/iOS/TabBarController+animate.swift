@@ -5,6 +5,7 @@
 //  Created by Aryan Rogye on 11/20/26.
 //
 
+#if os(iOS)
 import UIKit
 import ObjectiveC.runtime
 
@@ -47,3 +48,4 @@ private func animateSelectedContent(in view: UIView) {
         animateSelectedContent(in: subview)
     }
 }
+#endif

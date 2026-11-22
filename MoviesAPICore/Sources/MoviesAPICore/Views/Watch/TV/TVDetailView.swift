@@ -253,16 +253,6 @@ public struct TVDetailView: View {
             )
 #endif
         }
-        .onAppear {
-#if os(macOS)
-            remoteServer.onSetServer = { server in
-                self.displayServer = server
-            }
-            remoteServer.onGetServer = {
-                return self.displayServer
-            }
-#endif
-        }
         .onDisappear {
             timeInfoTask?.cancel()
             timeInfoTask = nil
@@ -312,9 +302,19 @@ public struct TVDetailView: View {
             }
         }
 #if os(macOS)
+        .onAppear {
+            remoteServer.attachKTDisplayServerFunctions(
+                onSetServer: { server in
+                    self.displayServer = server
+                },
+                onGetServer: {
+                    return self.displayServer
+                }
+            )
+        }
         .onChange(of: webviewModel.webView, initial: true) { _, webView in
             guard let webView else {
-                remoteServer.clearClosures()
+                remoteServer.clearClosures(avoidingKTDisplayServer: true)
                 return
             }
             remoteServer.attachWebViewFunctions(webView)

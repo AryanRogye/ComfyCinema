@@ -255,20 +255,22 @@ public struct MovieDetailView: View {
             collectionResultToAdd: $collectionResultToAdd
         ))
 #if os(macOS)
+        .onAppear {
+            remoteServer.attachKTDisplayServerFunctions(
+                onSetServer: { server in
+                    self.displayServer = server
+                },
+                onGetServer: {
+                    return self.displayServer
+                }
+            )
+        }
         .onChange(of: webviewModel.webView, initial: true) { _, webView in
             guard let webView else {
-                remoteServer.clearClosures()
+                remoteServer.clearClosures(avoidingKTDisplayServer: true)
                 return
             }
             remoteServer.attachWebViewFunctions(webView)
-        }
-        .onAppear {
-            remoteServer.onSetServer = { server in
-                self.displayServer = server
-            }
-            remoteServer.onGetServer = {
-                return self.displayServer
-            }
         }
 #endif
         .onDisappear {
