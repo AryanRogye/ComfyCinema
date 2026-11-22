@@ -7,18 +7,28 @@
 
 import SwiftData
 
-@MainActor
-public enum MoviesSchemaV2: @preconcurrency VersionedSchema {
-    @MainActor public static var versionIdentifier = Schema.Version(2, 0, 0)
+/// MoviesSchemaV2 handles both macOS and iOS
+public enum MoviesSchemaV2: VersionedSchemaDeviceDetail {
+    public nonisolated static var versionIdentifier: Schema.Version {
+        .init(2, 0, 0)
+    }
+
+    public nonisolated static let didChangeOnPhone = true
+    public nonisolated static let didChangeOnMac = true
 
     public static var models: [any PersistentModel.Type] {
         [Favorite.self, History.self, Collection.self, CollectionItem.self]
     }
 }
 
-@MainActor
-public enum MoviesSchemaV3: @preconcurrency VersionedSchema {
-    @MainActor public static var versionIdentifier = Schema.Version(3, 0, 0)
+/// MoviesSchemaV3 keeps iOS the exact same, but macOS gets a new `WidgetFavorites`
+public enum MoviesSchemaV3: VersionedSchemaDeviceDetail {
+    public nonisolated static var versionIdentifier: Schema.Version {
+        .init(3, 0, 0)
+    }
+
+    public nonisolated static let didChangeOnPhone: Bool = false
+    public nonisolated static let didChangeOnMac: Bool = true
 
     public static var models: [any PersistentModel.Type] {
 #if os(iOS)
@@ -29,9 +39,14 @@ public enum MoviesSchemaV3: @preconcurrency VersionedSchema {
     }
 }
 
-@MainActor
-public enum MoviesSchemaV4: @preconcurrency VersionedSchema {
-    @MainActor public static var versionIdentifier = Schema.Version(4, 0, 0)
+/// MoviesSchemaV4 adds a `SearchQuery` to both iOS and macOS
+public enum MoviesSchemaV4: VersionedSchemaDeviceDetail {
+    public nonisolated static var versionIdentifier: Schema.Version {
+        .init(4, 0, 0)
+    }
+
+    public nonisolated static let didChangeOnPhone: Bool = true
+    public nonisolated static let didChangeOnMac: Bool = true
 
     public static var models: [any PersistentModel.Type] {
 #if os(iOS)
@@ -45,39 +60,10 @@ public enum MoviesSchemaV4: @preconcurrency VersionedSchema {
 public enum MoviesMigrationPlan: SchemaMigrationPlan {
 
     public static var schemas: [any VersionedSchema.Type] {
-#if os(iOS)
-        [
-            MoviesSchemaV2.self,
-            MoviesSchemaV4.self
-        ]
-#elseif os(macOS)
-        [
-            MoviesSchemaV2.self,
-            MoviesSchemaV3.self,
-            MoviesSchemaV4.self
-        ]
-#endif
+        VersionedSchemaGenerator.schemas()
     }
 
     public static var stages: [MigrationStage] {
-#if os(iOS)
-        [
-            .lightweight(
-                fromVersion: MoviesSchemaV2.self,
-                toVersion: MoviesSchemaV4.self
-            )
-        ]
-#elseif os(macOS)
-        [
-            .lightweight(
-                fromVersion: MoviesSchemaV2.self,
-                toVersion: MoviesSchemaV3.self
-            ),
-            .lightweight(
-                fromVersion: MoviesSchemaV3.self,
-                toVersion: MoviesSchemaV4.self
-            )
-        ]
-#endif
+        VersionedSchemaGenerator.stages()
     }
 }
