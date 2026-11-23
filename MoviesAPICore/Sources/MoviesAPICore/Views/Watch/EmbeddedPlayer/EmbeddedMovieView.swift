@@ -282,7 +282,7 @@ struct WebView: Representable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
 
-        let url: URL
+        let initialUrl: URL
         private var videoFrame: WKFrameInfo?
         // Aggregate limit across every iframe, independent of provider-side throttling.
         internal var diagnosticWindowStart = ProcessInfo.processInfo.systemUptime
@@ -321,7 +321,7 @@ struct WebView: Representable {
 
         ) {
             self.vm = vm
-            self.url = url
+            self.initialUrl = url
             self.onTimeInfo = onTimeInfo
             self.iFrameLogs = iFrameLogs
             self.videoFrameLogs = videoFrameLogs
@@ -391,7 +391,7 @@ extension WebView.Coordinator {
         }
 
         let liveHosts: Set<String> = ["dlive.sx", "thedaddy.pk", "dembed.st"]
-        if let originalHost = self.url.host?.lowercased(), liveHosts.contains(originalHost),
+        if let originalHost = self.initialUrl.host?.lowercased(), liveHosts.contains(originalHost),
            let targetHost = navigationAction.targetFrame?.request.url?.host?.lowercased(),
            liveHosts.contains(targetHost),
            ["http", "https"].contains(scheme),
@@ -404,6 +404,11 @@ extension WebView.Coordinator {
 
         guard navigationAction.targetFrame?.isMainFrame == true else {
             decisionHandler(.allow)
+            return
+        }
+
+        if self.initialUrl != url {
+            decisionHandler(.cancel)
             return
         }
 
