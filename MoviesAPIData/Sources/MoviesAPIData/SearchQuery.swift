@@ -8,10 +8,10 @@
 import SwiftData
 
 @Model
-final class SearchQuery {
-    var query: String
+public final class SearchQuery {
+    public var query: String
 
-    init(query: String) {
+    public init(query: String) {
         self.query = query
     }
 }

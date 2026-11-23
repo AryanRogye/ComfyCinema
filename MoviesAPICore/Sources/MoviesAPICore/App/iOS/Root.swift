@@ -39,7 +39,6 @@ public struct Root: View {
     @State private var historyPath: [PlaybackRoute] = []
     @State private var settingsPath: [PlaybackRoute] = []
     @State private var searchPath: [PlaybackRoute] = []
-    @State private var searchText = ""
     @State private var isSearching = false
     @State private var error: String?
     @State private var showError: Bool = false
@@ -139,14 +138,6 @@ public struct Root: View {
                 .environment(playbackSession)
                 .environment(defaultManager)
                 .environment(appRouter)
-                .modifier(
-                    SearchTabModifier(
-                        isSearchTabSelected: appRouter.selectedTab == .search,
-                        searchText: $searchText
-                    ) {
-                        search(using: tmdbManager)
-                    }
-                )
                 .sheet(item: $intentTriggeredResult) { search in
                     NavigationStack {
                         WatchDetailView(result: search)
@@ -228,28 +219,6 @@ public struct Root: View {
         }
     }
 
-    private func search(using manager: TMDBManager) {
-        guard !isSearching else { return }
-
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else {
-            manager.clearSearchResults()
-            return
-        }
-
-        isSearching = true
-        Task {
-            defer { isSearching = false }
-            do {
-                try await manager.search(query)
-            } catch {
-                self.error = error.localizedDescription
-                self.showError = true
-            }
-        }
-    }
-
-
     private var homeView: some View {
         NavigationStack(path: $homePath) {
             Home()
@@ -301,25 +270,6 @@ public struct Root: View {
                 .navigationDestination(for: PlaybackRoute.self) { _ in
                     PlaybackDestination()
                 }
-        }
-    }
-}
-
-private struct SearchTabModifier: ViewModifier {
-
-    let isSearchTabSelected: Bool
-    @Binding var searchText: String
-    let submit: () -> Void
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if isSearchTabSelected {
-            content
-                .searchable(text: $searchText, prompt: "Search movies, TV, and people")
-                .tabViewSearchActivation(.searchTabSelection)
-                .onSubmit(of: .search, submit)
-        } else {
-            content
         }
     }
 }

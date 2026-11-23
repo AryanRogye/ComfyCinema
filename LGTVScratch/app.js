@@ -21,7 +21,12 @@
     ['VidSpark', 'https://vidspark.to'],
     ['VidLink', 'https://vidlink.pro'],
     ['CineSrc', 'https://cinesrc.st/embed'],
-    ['111movies', 'https://111movies.net']
+    ['111movies', 'https://111movies.net'],
+    ['VidNest', 'https://vidnest.fun'],
+    ['VidRock', 'https://vidrock.net'],
+    ['Vidy', 'https://www.vidy.st'],
+    ['VidZee', 'https://player.vidzee.wtf/embed'],
+    ['Videasy', 'https://player.videasy.ws/embed']
   ];
   const LIVE_SERVERS = [
     ['DLive Stream', 'https://dlive.sx/stream/stream-'],

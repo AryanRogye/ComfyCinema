@@ -25,7 +25,17 @@ enum class KTDisplayServer(val rawValue: String) {
 
     @SerialName("CineSrc")CINE_SRC("CineSrc"),
 
-    @SerialName("111movies")OneOneOneMovies("111movies");
+    @SerialName("111movies")OneOneOneMovies("111movies"),
+
+    @SerialName("VidNest") VID_NEST("VidNest"),
+
+    @SerialName("VidRock") VID_ROCK("VidRock"),
+
+    @SerialName("Vidy") VIDY("Vidy"),
+
+    @SerialName("VidZee") VID_ZEE("VidZee"),
+
+    @SerialName("Videasy") VIDEASY("Videasy");
 
     private val baseURL: String
         get() {
@@ -40,6 +50,11 @@ enum class KTDisplayServer(val rawValue: String) {
                 VID_LINK -> "https://vidlink.pro"
                 CINE_SRC -> "https://cinesrc.st/embed"
                 OneOneOneMovies -> "https://111movies.net"
+                VID_NEST -> "https://vidnest.fun"
+                VID_ROCK -> "https://vidrock.net"
+                VIDY -> "https://www.vidy.st"
+                VID_ZEE -> "https://player.vidzee.wtf/embed"
+                VIDEASY -> "https://player.videasy.ws/embed"
             }
         }
 

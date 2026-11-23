@@ -16,6 +16,7 @@ struct SearchResultsView: View {
     @Query var favorites: [Favorite]
     @Query var collections: [Collection]
     let searchResults: [KTSearchResult]
+    var onClick: () -> Void = {}
 
     @State private var selectedResult: KTSearchResult?
     @State private var showDetail = false
@@ -32,6 +33,7 @@ struct SearchResultsView: View {
                 }
                 .contentShape(.rect)
                 .onTapGesture {
+                    onClick()
                     playbackSession.stop()
                     selectedResult = result
                     showDetail = true

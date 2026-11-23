@@ -7,6 +7,9 @@
 
 import Foundation
 import Defaults
+#if os(iOS)
+import UIKit
+#endif
 
 enum TMDBError: LocalizedError {
     case noToken
@@ -34,6 +37,12 @@ public final class TMDBManager {
     private var fullPopularMovieResults: [KTMovieListResult] = []
     private var fullTopRatedMovieResults: [KTMovieListResult] = []
     private var fullNowPlayingMovieResults: [KTMovieListResult] = []
+
+#if os(iOS)
+    var isPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+#endif
 
     public var trendingResults: [KTTrendingResult] {
         fullTrendingResults.filter { result in
@@ -102,56 +111,74 @@ public final class TMDBManager {
         }.deduplicatedByMediaIdentity()
     }
 
-    public func nowPlaying() async throws {
-        let result = try await tmdbClient.nowPlayingMovies(token: token, page: 1)
-        fullNowPlayingMovieResults = result.results
-
-#if os(macOS)
-        let result2 = try await tmdbClient.nowPlayingMovies(token: token, page: 2)
-        fullNowPlayingMovieResults.append(contentsOf: result2.results)
+    var pagesForDevice: Int {
+#if os(iOS)
+        return isPad ? 2 : 1
+#elseif os(macOS)
+        return 2
 #endif
-        fullNowPlayingMovieResults = fullNowPlayingMovieResults.deduplicatedByMediaIdentity()
+    }
+
+    private func perform<Element>(count: Int, action: (Int32) async throws -> [Element]) async throws -> [Element] {
+        guard count > 0 else { return [] }
+
+        var results: [Element] = []
+
+        for page in 1...count {
+            results.append(contentsOf: try await action(Int32(page)))
+        }
+
+        return results
+    }
+
+    public func nowPlaying() async throws {
+        fullNowPlayingMovieResults = try await perform(count: pagesForDevice) { [weak self] page in
+            guard let self else { return [] }
+            return try await tmdbClient.nowPlayingMovies(
+                token: token,
+                page: page
+            ).results
+        }.deduplicatedByMediaIdentity()
     }
 
     public func popularMovie() async throws {
-        let result = try await tmdbClient.popularMovies(token: token, page: 1)
-        fullPopularMovieResults = result.results
-#if os(macOS)
-        let result2 = try await tmdbClient.popularMovies(token: token, page: 2)
-        fullPopularMovieResults.append(contentsOf: result2.results)
-#endif
-        fullPopularMovieResults = fullPopularMovieResults.deduplicatedByMediaIdentity()
+        fullPopularMovieResults = try await perform(count: pagesForDevice) { [weak self] page in
+            guard let self else { return []}
+            return try await tmdbClient.popularMovies(
+                token: token,
+                page: page
+            ).results
+        }.deduplicatedByMediaIdentity()
     }
 
     public func popularTV() async throws {
-        let result = try await tmdbClient.popularTV(token: token, page: 1)
-        popularTV = result.results
-
-#if os(macOS)
-        let result2 = try await tmdbClient.popularTV(token: token, page: 2)
-        popularTV.append(contentsOf: result2.results)
-#endif
-        popularTV = popularTV.deduplicatedByMediaIdentity()
+        popularTV = try await perform(count: pagesForDevice) { [weak self] page in
+            guard let self else { return [] }
+            return try await tmdbClient.popularTV(
+                token: token,
+                page: page
+            ).results
+        }.deduplicatedByMediaIdentity()
     }
 
     public func topRatedMovie() async throws {
-        let result = try await tmdbClient.topRatedMovies(token: token, page: 1)
-        fullTopRatedMovieResults = result.results
-#if os(macOS)
-        let result2 = try await tmdbClient.topRatedMovies(token: token, page: 2)
-        fullTopRatedMovieResults.append(contentsOf: result2.results)
-#endif
-        fullTopRatedMovieResults = fullTopRatedMovieResults.deduplicatedByMediaIdentity()
+        fullTopRatedMovieResults = try await perform(count: pagesForDevice) { [weak self] page in
+            guard let self else { return [] }
+            return try await tmdbClient.topRatedMovies(
+                token: token,
+                page: page
+            ).results
+        }.deduplicatedByMediaIdentity()
     }
 
     public func topRatedTV() async throws {
-        let result = try await tmdbClient.topRatedTV(token: token, page: 1)
-        topRatedTV = result.results
-#if os(macOS)
-        let result2 = try await tmdbClient.topRatedTV(token: token, page: 2)
-        topRatedTV.append(contentsOf: result2.results)
-#endif
-        topRatedTV = topRatedTV.deduplicatedByMediaIdentity()
+        topRatedTV = try await perform(count: pagesForDevice) { [weak self] page in
+            guard let self else { return [] }
+            return try await tmdbClient.topRatedTV(
+                token: token,
+                page: page
+            ).results
+        }.deduplicatedByMediaIdentity()
     }
 
     public func seasonInfo(for id: Int, seasonNumber: Int) async throws -> KTSeasonInfo {
