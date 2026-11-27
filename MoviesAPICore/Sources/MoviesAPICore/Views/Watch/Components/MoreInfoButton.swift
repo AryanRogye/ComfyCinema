@@ -9,13 +9,10 @@ import SwiftUI
 
 enum MoreInfoSelectable {
     case movie(MovieSelectedOption)
-    case tv(TVSelectedOption)
 
     var rawValue: String {
         switch self {
         case .movie(let option):
-            return option.rawValue
-        case .tv(let option):
             return option.rawValue
         }
     }

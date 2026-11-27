@@ -37,14 +37,16 @@ struct SeasonsView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                     .frame(width: 120, height: 35)
-                    .background(
-                        Color(white: 34.0 / 255.0),
-                        in: .rect(cornerRadius: 6)
-                    )
+                    .contentShape(.rect)
                 }
+                .menuStyle(.button)
                 .buttonStyle(.plain)
-                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
                 .tint(.primary)
+                .background(
+                    Color(white: 34.0 / 255.0),
+                    in: .rect(cornerRadius: 6)
+                )
                 Spacer()
             }
             .padding(.horizontal)
