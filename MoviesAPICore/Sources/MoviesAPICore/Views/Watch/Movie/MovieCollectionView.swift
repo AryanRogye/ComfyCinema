@@ -18,32 +18,36 @@ struct MovieCollectionView: View {
     var body: some View {
         VStack(alignment: .leading) {
             if let collection {
-                HStack(alignment: .bottom, spacing: 12) {
-                    poster(path: collection.posterPath)
+                NavigationLink {
+                    MovieCollectionDetailView(collection: collection)
+                } label: {
+                    HStack(alignment: .bottom, spacing: 12) {
+                        poster(path: collection.posterPath)
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Part of")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                            .tracking(1)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Part of")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .textCase(.uppercase)
+                                .tracking(1)
 
-                        Text(collection.name)
-                            .fontDesign(.serif)
-                            .font(.title2)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.white)
-                            .lineLimit(2)
+                            Text(collection.name)
+                                .fontDesign(.serif)
+                                .font(.title2)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
+                        }
+
+                        Spacer(minLength: 0)
                     }
-
-                    Spacer(minLength: 0)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background {
+                        backdrop(path: collection.backdropPath)
+                    }
+                    .clipShape(.rect(cornerRadius: 12))
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background {
-                    backdrop(path: collection.backdropPath)
-                }
-                .clipShape(.rect(cornerRadius: 12))
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity)

@@ -20,6 +20,7 @@ import com.aryanrogye.movies_shared.models.KTMovieInfo
 import com.aryanrogye.movies_shared.models.KTSearchResult
 import com.aryanrogye.movies_shared.models.selectLogo
 import com.aryanrogye.movies_shared.models.KTMediaType
+import com.aryanrogye.movies_shared.models.KTCollectionResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -71,6 +72,7 @@ interface TMDBClientProviding {
     suspend fun recommendationsForTV(id: Int, token: String, page: Int): KTTVListResponse
     @Throws(Exception::class)
     suspend fun infoOnMovie(id: Int, token: String): KTMovieInfo
+    suspend fun collectionInfo(collectionId: Int, token: String): KTCollectionResponse
 }
 
 class TMDBClient internal constructor(private val client: HttpClient): TMDBClientProviding {
@@ -327,6 +329,17 @@ class TMDBClient internal constructor(private val client: HttpClient): TMDBClien
         }
 
         return response.body<KTMovieInfo>()
+    }
+
+    override suspend fun collectionInfo(collectionId: Int, token: String): KTCollectionResponse {
+        val response = client.get("https://api.themoviedb.org/3/collection/$collectionId") {
+            parameter("language", "en-US")
+
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+
+        return response.body<KTCollectionResponse>()
     }
 
     @Throws(Exception::class)

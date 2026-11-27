@@ -84,6 +84,64 @@ public final class TMDBClientPreview: TMDBClientProviding {
         )
     }
 
+    public func collectionInfo(collectionId: Int32, token: String) async throws -> KTCollectionResponse {
+        KTCollectionResponse(
+            id: collectionId,
+            name: "Star Wars Collection",
+            original_language: "en",
+            original_name: "Star Wars Collection",
+            overview: "An epic space-opera theatrical film series, which depicts the adventures of various characters a long time ago in a galaxy far, far away.",
+            poster_path: "/pWVLFh4OuejTpUaDQbB1C4zoS2p.jpg",
+            backdrop_path: "/iY2ujEY2m68OTTlPFTiHub9joHS.jpg",
+            parts: [
+                Self.collectionPart(
+                    id: 11,
+                    title: "Star Wars",
+                    overview: "Princess Leia is captured by Imperial forces. Luke Skywalker and Han Solo team up to rescue her and restore peace to the galaxy.",
+                    posterPath: "/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+                    releaseDate: "1977-05-25"
+                ),
+                Self.collectionPart(
+                    id: 1891,
+                    title: "The Empire Strikes Back",
+                    overview: "The Rebels scatter after the Empire attacks their base on Hoth, and Luke begins his Jedi training with Yoda.",
+                    posterPath: "/nNAeTmF4CtdSgMDplXTDPOpYzsX.jpg",
+                    releaseDate: "1980-05-20"
+                ),
+                Self.collectionPart(
+                    id: 1892,
+                    title: "Return of the Jedi",
+                    overview: "Luke and the Rebel Alliance face the Empire's second Death Star in a final battle for the galaxy.",
+                    posterPath: "/jQYlydvHm3kUix1f8prMucrplhm.jpg",
+                    releaseDate: "1983-05-25"
+                )
+            ]
+        )
+    }
+
+    private static func collectionPart(
+        id: Int32,
+        title: String,
+        overview: String,
+        posterPath: String?,
+        releaseDate: String?
+    ) -> KTCollectionPart {
+        KTCollectionPart(
+            adult: false,
+            backdrop_path: nil,
+            id: id,
+            name: nil,
+            title: title,
+            original_title: title,
+            original_name: nil,
+            overview: overview,
+            poster_path: posterPath,
+            media_type: .movie,
+            original_language: "en",
+            release_date: releaseDate
+        )
+    }
+
     public func seasonInfo(id: Int32, seasonNumber: Int32, token: String) async throws -> KTSeasonInfo {
         let episodes = (1...6).map { episodeNumber in
             KTEpisode(

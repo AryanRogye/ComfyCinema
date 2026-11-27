@@ -225,6 +225,10 @@ public final class TMDBManager {
         return try await tmdbClient.creditsForPerson(id: id, token: token).results
     }
 
+    public func collectionInfo(collectionId: Int32) async throws -> KTCollectionResponse {
+        return try await tmdbClient.collectionInfo(collectionId: collectionId, token: token)
+    }
+
     /// Function to search for tv,movie,person
     public func search(_ text: String) async throws {
         let results = try await tmdbClient.search(query: text, token: token, includeAdult: includeAdult)

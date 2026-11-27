@@ -115,6 +115,51 @@ class TMDBClientTest {
     }
 
     @Test
+    fun collectionInfoReturnsStarWarsCollection() = runTest {
+        val collection = client.collectionInfo(collectionId = STAR_WARS_COLLECTION_ID, token = requireToken())
+
+        assertEquals(STAR_WARS_COLLECTION_ID, collection.id)
+        assertEquals("Star Wars Collection", collection.name)
+        assertTrue(collection.original_language.isNotBlank())
+        assertTrue(collection.original_name.isNotBlank())
+        assertFalse(collection.overview.isBlank())
+        assertFalse(collection.poster_path.isNullOrBlank())
+        assertFalse(collection.backdrop_path.isNullOrBlank())
+    }
+
+    @Test
+    fun collectionInfoReturnsMovieParts() = runTest {
+        val collection = client.collectionInfo(collectionId = STAR_WARS_COLLECTION_ID, token = requireToken())
+
+        assertTrue(collection.parts.isNotEmpty())
+        assertTrue(collection.parts.all { it.id > 0 && !(it.title ?: it.name).isNullOrBlank() })
+        assertTrue(collection.parts.all { it.media_type == KTMediaType.MOVIE })
+        assertEquals(
+            collection.parts.size,
+            collection.parts.map { it.id }.toSet().size,
+            "Expected each collection part to appear once.",
+        )
+        // Star Wars (1977) is TMDB movie 11.
+        assertTrue(collection.parts.any { it.id == 11 })
+    }
+
+    @Test
+    fun movieInfoCollectionMatchesCollectionInfo() = runTest {
+        val token = requireToken()
+        val movie = client.infoOnMovie(id = 11, token = token)
+        val belongsTo = assertNotNull(
+            movie.belongsToCollection,
+            "Expected Star Wars (1977) to belong to a collection.",
+        )
+
+        val collection = client.collectionInfo(collectionId = belongsTo.id, token = token)
+
+        assertEquals(belongsTo.id, collection.id)
+        assertEquals(belongsTo.name, collection.name)
+        assertTrue(collection.parts.any { it.id == movie.id })
+    }
+
+    @Test
     fun tvInfoReturnsLabRatsDetails() = runTest {
         val token = requireToken()
         val labRats = findLabRats(token)
@@ -159,6 +204,10 @@ class TMDBClientTest {
             },
             "Expected the Lab Rats TV series in the search results.",
         )
+    }
+
+    private companion object {
+        const val STAR_WARS_COLLECTION_ID = 10
     }
 }
 
