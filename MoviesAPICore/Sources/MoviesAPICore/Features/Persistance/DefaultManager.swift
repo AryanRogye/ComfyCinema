@@ -20,6 +20,12 @@ public final class DefaultManager {
     }
     #endif
 
+    var seasonPicker: SeasonsPicker = Defaults[.seasonPicker] {
+        didSet {
+            Defaults[.seasonPicker] = seasonPicker
+        }
+    }
+
     public var includeAdult: Bool = Defaults[.includeAdult] {
         didSet {
             Defaults[.includeAdult] = includeAdult

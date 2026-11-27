@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EpisodesOptionView: View {
 
+    @Bindable var defaultManager: DefaultManager
     let seasonInfo: KTSeasonInfo?
     let tvShow: KTTVShow?
     @Binding var selectedEpisode: KTEpisode?
@@ -16,11 +17,20 @@ struct EpisodesOptionView: View {
     let isLoadingSeason: Bool
 
     var body: some View {
-        SeasonsView(
-            tvShow: tvShow,
-            isLoadingSeason: isLoadingSeason,
-            selectedSeasonNumber: $selectedSeasonNumber
-        )
+        switch defaultManager.seasonPicker {
+        case .picker:
+            SeasonsViewPicker(
+                tvShow: tvShow,
+                isLoadingSeason: isLoadingSeason,
+                selectedSeasonNumber: $selectedSeasonNumber
+            )
+        case .showAll:
+            SeasonsView(
+                tvShow: tvShow,
+                isLoadingSeason: isLoadingSeason,
+                selectedSeasonNumber: $selectedSeasonNumber
+            )
+        }
 
         EpisodesView(
             seasonInfo: seasonInfo,

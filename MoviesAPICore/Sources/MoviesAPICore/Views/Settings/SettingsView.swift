@@ -121,10 +121,19 @@ struct AppearanceSettings: View {
     @Bindable var defaultManager: DefaultManager
 
     var body: some View {
+        Section {
 #if os(iOS)
-        Toggle("Use Custom Tab Icons", isOn: $defaultManager.useCustomTabIcons)
-            .toggleStyle(.switch)
+            Toggle("Use Custom Tab Icons", isOn: $defaultManager.useCustomTabIcons)
+                .toggleStyle(.switch)
 #endif
+            Picker("Season Style", selection: $defaultManager.seasonPicker) {
+                ForEach(SeasonsPicker.allCases, id: \.self) { option in
+                    Text(option.rawValue).tag(option)
+                }
+            }
+        } header: {
+            Label("Appearance", systemImage: "pencil.and.scribble")
+        }
     }
 }
 

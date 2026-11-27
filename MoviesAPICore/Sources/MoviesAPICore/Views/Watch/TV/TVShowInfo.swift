@@ -29,10 +29,13 @@ struct TVShowInfo: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(8)
+            /// Background only looks nice on macOS
+#if os(macOS)
             .background {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(.white.opacity(0.06))
             }
+#endif
             .padding(.horizontal)
             .padding(.top, 8)
         }

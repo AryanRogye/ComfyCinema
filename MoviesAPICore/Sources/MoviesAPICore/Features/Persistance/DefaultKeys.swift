@@ -17,6 +17,8 @@ extension Defaults.Keys {
     static let useCustomTabIcons = Key<Bool>("useCustomTabIcons", default: false)
     #endif
 
+    static let seasonPicker = Key<SeasonsPicker>("seasonPicker", default: .picker)
+
     #if os(macOS)
     static let enableRemoteControl = Key<Bool>("enableRemoteControl", default: false)
     static let remoteControlIp = Key<String>("remoteControlIp", default: "0.0.0.0")
@@ -24,4 +26,9 @@ extension Defaults.Keys {
     static let remoteControlName = Key<String>("remoteControlName", default: "")
     static let remoteControlPort = Key<Int>("remoteControlPort", default: 8082)
     #endif
+}
+
+enum SeasonsPicker: String, CaseIterable, Defaults.Serializable {
+    case picker = "Picker"
+    case showAll = "Show All"
 }
