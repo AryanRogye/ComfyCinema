@@ -83,6 +83,7 @@ struct RatingsAndReviews: View {
             totalPages = 0
             await load(initial: true)
         }
+        .padding(.horizontal)
     }
 
     @MainActor

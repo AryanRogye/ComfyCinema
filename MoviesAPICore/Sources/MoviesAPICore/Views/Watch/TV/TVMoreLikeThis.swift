@@ -70,6 +70,7 @@ struct TVMoreLikeThis: View {
                 WatchDetailView(result: selectedResult)
             }
         }
+        .padding(.horizontal)
     }
 
     func resolve(_ result: KTTVListResult) {

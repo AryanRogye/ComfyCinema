@@ -59,6 +59,7 @@ struct CastAndCrew: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(.white.opacity(0.06))
             }
+            .padding(.horizontal)
         }
     }
 }

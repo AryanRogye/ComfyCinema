@@ -34,7 +34,7 @@ struct TVShowInfo: View {
                     .fill(.white.opacity(0.06))
             }
             .padding(.horizontal)
-            .padding(.top)
+            .padding(.top, 8)
         }
     }
 }

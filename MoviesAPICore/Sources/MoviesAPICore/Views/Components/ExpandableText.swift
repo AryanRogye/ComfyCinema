@@ -30,6 +30,7 @@ struct ExpandableText<ForegroundStlye: ShapeStyle>: View {
     var body: some View {
         Text(displayString ?? AttributedString(text))
             .foregroundStyle(foregroundStyle)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .onChange(of: text) {
                 isExpanded = false
                 rebuild()
@@ -51,7 +52,6 @@ struct ExpandableText<ForegroundStlye: ShapeStyle>: View {
                 }
                 return .systemAction
             })
-            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func rebuild() {

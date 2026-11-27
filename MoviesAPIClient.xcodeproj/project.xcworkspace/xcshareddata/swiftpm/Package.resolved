@@ -20,6 +20,15 @@
       }
     },
     {
+      "identity" : "deinit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AryanRogye/Deinit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "d0684a3bfae64f3723616fc883b826fbdc6082eb"
+      }
+    },
+    {
       "identity" : "hummingbird",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hummingbird-project/hummingbird.git",

@@ -10,6 +10,14 @@ import SwiftData
 import WebKit
 import MoviesAPIData
 
+enum TVDetailSelectedOption: String, CaseIterable {
+    case episodes = "Episodes"
+    case moreLikeThis = "More Like This"
+    case castAndCrew = "Cast"
+    case ratingsAndReviews = "Reviews"
+}
+
+
 public struct TVDetailView: View {
 
 #if os(macOS)
@@ -67,6 +75,8 @@ public struct TVDetailView: View {
     @State private var timeInfo: TimeInfo? = nil
     @State private var lastProgressSaveAt: Date?
     @State private var timeInfoTask: Task<Void, Never>?
+
+    @State private var optionSelected: TVDetailSelectedOption = .episodes
 
     @State private var showingLogs = false
     @State private var iFrameLogs: [String] = []
@@ -146,22 +156,52 @@ public struct TVDetailView: View {
                         selectedEpisode: selectedEpisode
                     )
 
-                    SeasonsView(
-                        tvShow: tvShow,
-                        isLoadingSeason: isLoadingSeason,
-                        selectedSeasonNumber: $selectedSeasonNumber
-                    )
+                    HStack(spacing: 12) {
+                        ForEach(TVDetailSelectedOption.allCases, id: \.self) { option in
+                            let isSelected = optionSelected == option
+                            VStack(spacing: 6) {
+                                Rectangle()
+                                    .fill(isSelected ? .yellow : .clear)
+                                    .frame(height: 4)
+                                    .scaleEffect(
+                                        x: isSelected ? 1 : 0,
+                                        y: 1,
+                                        anchor: .leading
+                                    )
+                                    .animation(.easeInOut(duration: 0.25), value: isSelected)
 
-                    EpisodesView(
-                        seasonInfo: seasonInfo,
-                        selectedEpisode: $selectedEpisode
-                    )
-
-                    TVMoreInfo(
-                        selectedEpisode: selectedEpisode,
-                        result: result
-                    )
-                    .padding(.bottom, 24)
+                                Text(option.rawValue)
+                                    .minimumScaleFactor(0.5)
+                                    .lineLimit(1)
+                                    .foregroundStyle(
+                                        isSelected ? .primary : .secondary
+                                    )
+                            }
+                            .contentShape(.rect)
+                            .onTapGesture {
+                                withAnimation(.spring) {
+                                    optionSelected = option
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    switch optionSelected {
+                    case .episodes:
+                        EpisodesOptionView(
+                            seasonInfo: seasonInfo,
+                            tvShow: tvShow,
+                            selectedEpisode: $selectedEpisode,
+                            selectedSeasonNumber: $selectedSeasonNumber,
+                            isLoadingSeason: isLoadingSeason
+                        )
+                    case .moreLikeThis:
+                        TVMoreLikeThis(result: result)
+                    case .castAndCrew:
+                        CastAndCrew(selectedEpisode: selectedEpisode)
+                    case .ratingsAndReviews:
+                        RatingsAndReviews(result: result, type: .tv)
+                    }
                 }
             }
         }
