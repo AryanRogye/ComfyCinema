@@ -1,5 +1,5 @@
 //
-//  DefaultManager.swift
+//  DefaultsManager.swift
 //  MoviesAPICore
 //
 //  Created by Aryan Rogye on 10/27/26.
@@ -10,7 +10,7 @@ import Defaults
 
 @Observable
 @MainActor
-public final class DefaultManager {
+public final class DefaultsManager {
 
     #if os(iOS)
     public var useCustomTabIcons: Bool = Defaults[.useCustomTabIcons] {

@@ -10,7 +10,7 @@ import SwiftUI
 public struct SettingsView: View {
 
     @Environment(TMDBManager.self) var tmdbManager
-    @Environment(DefaultManager.self) var defaultManager
+    @Environment(DefaultsManager.self) var defaultsManager
     @Environment(BlockingService.self) var blockingService
 #if os(iOS)
     @State private var motionMonitor = SecretMotionManager()
@@ -23,13 +23,13 @@ public struct SettingsView: View {
 
     public var body: some View {
 
-        @Bindable var defaultManager = defaultManager
+        @Bindable var defaultsManager = defaultsManager
 
         Form {
 
-            AppearanceSettings(defaultManager: defaultManager)
+            AppearanceSettings(defaultsManager: defaultsManager)
 
-            SearchSettings(defaultManager: defaultManager)
+            SearchSettings(defaultsManager: defaultsManager)
 
             NetworkSettings()
 
@@ -118,15 +118,15 @@ public struct SettingsView: View {
 // MARK: - Appearance Settings
 struct AppearanceSettings: View {
 
-    @Bindable var defaultManager: DefaultManager
+    @Bindable var defaultsManager: DefaultsManager
 
     var body: some View {
         Section {
 #if os(iOS)
-            Toggle("Use Custom Tab Icons", isOn: $defaultManager.useCustomTabIcons)
+            Toggle("Use Custom Tab Icons", isOn: $defaultsManager.useCustomTabIcons)
                 .toggleStyle(.switch)
 #endif
-            Picker("Season Style", selection: $defaultManager.seasonPicker) {
+            Picker("Season Style", selection: $defaultsManager.seasonPicker) {
                 ForEach(SeasonsPicker.allCases, id: \.self) { option in
                     Text(option.rawValue).tag(option)
                 }
@@ -140,11 +140,11 @@ struct AppearanceSettings: View {
 // MARK: - Search Settings
 struct SearchSettings: View {
 
-    @Bindable var defaultManager: DefaultManager
+    @Bindable var defaultsManager: DefaultsManager
 
     var body: some View {
         Section {
-            Toggle("Include Adult Content", isOn: $defaultManager.includeAdult)
+            Toggle("Include Adult Content", isOn: $defaultsManager.includeAdult)
                 .toggleStyle(.switch)
         } header: {
             Label("Search Settings", systemImage: "magnifyingglass")

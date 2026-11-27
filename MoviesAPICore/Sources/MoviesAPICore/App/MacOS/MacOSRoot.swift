@@ -23,7 +23,7 @@ struct MacOSRoot: View {
     @Bindable var remoteServer: RemoteServer
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
-    @State private var defaultManager = DefaultManager()
+    @State private var defaultsManager = DefaultsManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
 
@@ -59,7 +59,7 @@ struct MacOSRoot: View {
                         .environment(tmdbManager)
                         .environment(blockingService)
                         .environment(playbackSession)
-                        .environment(defaultManager)
+                        .environment(defaultsManager)
 
                     Divider()
 
@@ -105,7 +105,7 @@ struct MacOSRoot: View {
                     .environment(blockingService)
                     .environment(cloudKitSync)
                     .environment(playbackSession)
-                    .environment(defaultManager)
+                    .environment(defaultsManager)
                     .environment(appRouter)
                     .environment(remoteServer)
                     .sheet(item: $intentTriggeredResult) { result in
@@ -118,7 +118,7 @@ struct MacOSRoot: View {
                         .environment(cloudKitSync)
                         .environment(blockingService)
                         .environment(playbackSession)
-                        .environment(defaultManager)
+                        .environment(defaultsManager)
                         .environment(appRouter)
                     }
                 }
@@ -180,8 +180,8 @@ struct MacOSRoot: View {
         }
         .task {
             do {
-                let manager = try TMDBManager(defaultManager: defaultManager)
-                let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
+                let manager = try TMDBManager(defaultsManager: defaultsManager)
+                let liveTVManager = try LiveTVManager(defaultsManager: defaultsManager)
 
                 self.tmdbManager = manager
                 self.liveTVManager = liveTVManager

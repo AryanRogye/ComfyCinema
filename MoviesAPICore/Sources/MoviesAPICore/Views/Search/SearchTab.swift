@@ -90,7 +90,7 @@ public struct SearchTab: View {
         .onDisappear {
             focused = false
         }
-        .safeAreaInset(edge: .bottom) {
+        .safeAreaInset(edge: .top) {
             HStack(spacing: 4) {
                 TextField("Search movies, TV, and people", text: $searchText)
                     .textFieldStyle(.plain)

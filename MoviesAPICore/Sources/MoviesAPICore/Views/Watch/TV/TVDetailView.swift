@@ -27,7 +27,7 @@ public struct TVDetailView: View {
     @Environment(TMDBManager.self) private var tmdbManager
     @Environment(PlaybackSession.self) private var playbackSession
     @Environment(CloudKitSyncService.self) private var cloudKitSyncService
-    @Environment(DefaultManager.self) private var defaultManager
+    @Environment(DefaultsManager.self) private var defaultsManager
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -194,7 +194,7 @@ public struct TVDetailView: View {
                     switch optionSelected {
                     case .episodes:
                         EpisodesOptionView(
-                            defaultManager: defaultManager,
+                            defaultsManager: defaultsManager,
                             seasonInfo: seasonInfo,
                             tvShow: tvShow,
                             selectedEpisode: $selectedEpisode,
@@ -577,7 +577,7 @@ public struct TVDetailView: View {
                 do {
                     tmdbManager = try .init(
                         tmdbClient: TMDBClientPreview(),
-                        defaultManager: DefaultManager(),
+                        defaultsManager: DefaultsManager(),
                         token: "preview"
                     )
                 } catch {

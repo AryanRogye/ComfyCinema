@@ -28,7 +28,7 @@ public struct Root: View {
     @Bindable var cloudKitSync: CloudKitSyncService
     @State private var tmdbManager: TMDBManager?
     @State private var liveTVManager: LiveTVManager?
-    @State private var defaultManager = DefaultManager()
+    @State private var defaultsManager = DefaultsManager()
     @State private var blockingService = BlockingService()
     @State private var playbackSession = PlaybackSession()
     @State private var remoteClient = RemoteClient()
@@ -56,7 +56,7 @@ public struct Root: View {
         ZStack {
             if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
                 TabView(selection: $appRouter.selectedTab) {
-                    if defaultManager.useCustomTabIcons {
+                    if defaultsManager.useCustomTabIcons {
                         Tab(value: .home) {
                             homeView
                         } label: {
@@ -118,7 +118,7 @@ public struct Root: View {
                         }
                     }
                 }
-                .animation(.smooth, value: defaultManager.useCustomTabIcons)
+                .animation(.smooth, value: defaultsManager.useCustomTabIcons)
                 .tint(.yellow)
                 .introspect(.tabView, on: .iOS(.v26, .v27)) { controller in
                     _ = tryAllowingSixTabs(on: controller)
@@ -136,7 +136,7 @@ public struct Root: View {
                 .environment(remoteClient)
                 .environment(cloudKitSync)
                 .environment(playbackSession)
-                .environment(defaultManager)
+                .environment(defaultsManager)
                 .environment(appRouter)
                 .sheet(item: $intentTriggeredResult) { search in
                     NavigationStack {
@@ -146,7 +146,7 @@ public struct Root: View {
                             .environment(cloudKitSync)
                             .environment(blockingService)
                             .environment(playbackSession)
-                            .environment(defaultManager)
+                            .environment(defaultsManager)
                             .environment(appRouter)
                     }
                 }
@@ -178,8 +178,8 @@ public struct Root: View {
         }
         .task {
             do {
-                let manager = try TMDBManager(defaultManager: defaultManager)
-                let liveTVManager = try LiveTVManager(defaultManager: defaultManager)
+                let manager = try TMDBManager(defaultsManager: defaultsManager)
+                let liveTVManager = try LiveTVManager(defaultsManager: defaultsManager)
 
                 self.tmdbManager = manager
                 self.liveTVManager = liveTVManager

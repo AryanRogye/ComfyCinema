@@ -258,7 +258,7 @@ struct MovieCollectionDetailView: View {
             .task {
                 tmdbManager = try? .init(
                     tmdbClient: TMDBClientPreview(),
-                    defaultManager: DefaultManager(),
+                    defaultsManager: DefaultsManager(),
                     token: "preview"
                 )
             }

@@ -114,7 +114,7 @@ struct SearchResultsView: View {
                 do {
                     tmdbManager = try .init(
                         tmdbClient: TMDBClientPreview(),
-                        defaultManager: DefaultManager(),
+                        defaultsManager: DefaultsManager(),
                         token: "preview"
                     )
                 } catch {

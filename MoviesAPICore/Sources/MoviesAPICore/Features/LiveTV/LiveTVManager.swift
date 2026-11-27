@@ -60,15 +60,15 @@ final class LiveTVManager {
         }
     }
 
-    private let defaultManager: DefaultManager
+    private let defaultsManager: DefaultsManager
     private let json: URL
     private var sectionInternal: [LiveTVSection] = []
 
     private var includeAdult: Bool {
-        defaultManager.includeAdult
+        defaultsManager.includeAdult
     }
 
-    init(defaultManager: DefaultManager) throws {
+    init(defaultsManager: DefaultsManager) throws {
         guard let json = Bundle.main.url(
             forResource: "LiveTV",
             withExtension: "json"
@@ -77,7 +77,7 @@ final class LiveTVManager {
         }
 
         self.json = json
-        self.defaultManager = defaultManager
+        self.defaultsManager = defaultsManager
         try sync()
     }
 

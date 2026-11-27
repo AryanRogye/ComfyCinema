@@ -30,7 +30,7 @@ enum TMDBError: LocalizedError {
 public final class TMDBManager {
 
     private let tmdbClient: TMDBClientProviding
-    private let defaultManager: DefaultManager
+    private let defaultsManager: DefaultsManager
     private let token: String
 
     private var fullTrendingResults: [KTTrendingResult] = []
@@ -70,17 +70,17 @@ public final class TMDBManager {
     public private(set) var searchResults: [KTSearchResult] = []
 
     var includeAdult: Bool {
-        defaultManager.includeAdult
+        defaultsManager.includeAdult
     }
 
     public init(
         tmdbClient: TMDBClientProviding = TMDBClient(),
-        defaultManager: DefaultManager,
+        defaultsManager: DefaultsManager,
         token tokenOverride: String? = nil
     ) throws {
         if let tokenOverride {
             self.tmdbClient = tmdbClient
-            self.defaultManager = defaultManager
+            self.defaultsManager = defaultsManager
             self.token = tokenOverride
             return
         }
@@ -94,7 +94,7 @@ public final class TMDBManager {
             throw TMDBError.tokenEmpty
         }
 
-        self.defaultManager = defaultManager
+        self.defaultsManager = defaultsManager
         self.tmdbClient = tmdbClient
         self.token = token
     }

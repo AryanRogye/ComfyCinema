@@ -123,7 +123,7 @@ struct SearchQuery: EntityQuery {
     ) async throws -> [SearchEntity] {
 
         let tmdbManager = try await TMDBManager(
-            defaultManager: DefaultManager()
+            defaultsManager: DefaultsManager()
         )
         await tmdbManager.clearSearchResults()
 
@@ -215,7 +215,7 @@ struct ContentSearchIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<[SearchEntity]> & ShowsSnippetView {
         let tmdbManager = try TMDBManager(
-            defaultManager: DefaultManager()
+            defaultsManager: DefaultsManager()
         )
         tmdbManager.clearSearchResults()
         try await tmdbManager.search(query)

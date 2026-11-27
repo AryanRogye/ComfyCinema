@@ -379,7 +379,7 @@ public struct MovieDetailView: View {
     } else {
         ProgressView()
             .task {
-                tmdbManager = try? .init(defaultManager: DefaultManager())
+                tmdbManager = try? .init(defaultsManager: DefaultsManager())
             }
     }
 }
