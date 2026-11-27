@@ -59,6 +59,31 @@ public final class TMDBClientPreview: TMDBClientProviding {
         )
     }
 
+    public func infoOnMovie(id: Int32, token: String) async throws -> KTMovieInfo {
+        KTMovieInfo(
+            id: 11,
+            title: "Star Wars",
+            overview: "Princess Leia is captured by Imperial forces. Luke Skywalker and Han Solo team up to rescue her and restore peace to the galaxy.",
+            tagline: "A long time ago in a galaxy far, far away...",
+            backdropPath: "/2w4xG178RpB4MDAIfTkqAuSJzec.jpg",
+            belongsToCollection: KTMovieCollection(
+                id: 10,
+                name: "Star Wars Collection",
+                posterPath: "/pWVLFh4OuejTpUaDQbB1C4zoS2p.jpg",
+                backdropPath: "/iY2ujEY2m68OTTlPFTiHub9joHS.jpg"
+            ),
+            budget: 11_000_000,
+            genres: [
+                KTGenre(id: 12, name: "Adventure"),
+                KTGenre(id: 28, name: "Action"),
+                KTGenre(id: 878, name: "Science Fiction")
+            ],
+            release_date: nil,
+            popularity: 20.6912,
+            runtime: KotlinInt(value: 121)
+        )
+    }
+
     public func seasonInfo(id: Int32, seasonNumber: Int32, token: String) async throws -> KTSeasonInfo {
         let episodes = (1...6).map { episodeNumber in
             KTEpisode(

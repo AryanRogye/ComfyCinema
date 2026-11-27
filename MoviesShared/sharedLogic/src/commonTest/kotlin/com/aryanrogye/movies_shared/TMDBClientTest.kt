@@ -107,6 +107,14 @@ class TMDBClientTest {
     }
 
     @Test
+    fun movieInfoReturnsGenreIdsAndNames() = runTest {
+        val movie = client.infoOnMovie(id = 11, token = requireToken())
+
+        assertEquals(11, movie.id)
+        assertTrue(movie.genres.any { it.id == 12 && it.name == "Adventure" })
+    }
+
+    @Test
     fun tvInfoReturnsLabRatsDetails() = runTest {
         val token = requireToken()
         val labRats = findLabRats(token)

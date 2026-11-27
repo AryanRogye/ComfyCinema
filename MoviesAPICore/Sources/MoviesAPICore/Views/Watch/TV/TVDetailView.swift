@@ -153,40 +153,44 @@ public struct TVDetailView: View {
 
                 if !hideSeasonsAndEpisodes {
 
-                    TVShowInfo(
+                    TVShowInfoView(
                         selectedEpisode: selectedEpisode
                     )
 
                     HStack(spacing: 12) {
                         ForEach(TVDetailSelectedOption.allCases, id: \.self) { option in
                             let isSelected = optionSelected == option
-                            VStack(spacing: 6) {
-                                Rectangle()
-                                    .fill(isSelected ? .yellow : .clear)
-                                    .frame(height: 4)
-                                    .scaleEffect(
-                                        x: isSelected ? 1 : 0,
-                                        y: 1,
-                                        anchor: .leading
-                                    )
-                                    .animation(.easeInOut(duration: 0.25), value: isSelected)
 
-                                Text(option.rawValue)
-                                    .minimumScaleFactor(0.5)
-                                    .lineLimit(1)
-                                    .foregroundStyle(
-                                        isSelected ? .primary : .secondary
-                                    )
-                            }
-                            .contentShape(.rect)
-                            .onTapGesture {
-                                withAnimation(.spring) {
-                                    optionSelected = option
+                            Text(option.rawValue)
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                                .layoutPriority(1)
+                                .foregroundStyle(
+                                    isSelected ? .primary : .secondary
+                                )
+                                .frame(height: 30, alignment: .bottom)
+                                .overlay(alignment: .top) {
+                                    Rectangle()
+                                        .fill(isSelected ? .yellow : .clear)
+                                        .frame(height: 4)
+                                        .scaleEffect(
+                                            x: isSelected ? 1 : 0,
+                                            y: 1,
+                                            anchor: .leading
+                                        )
+                                        .animation(.easeInOut(duration: 0.25), value: isSelected)
                                 }
-                            }
+                                .contentShape(.rect)
+                                .onTapGesture {
+                                    withAnimation(.spring) {
+                                        optionSelected = option
+                                    }
+                                }
                         }
+                        Spacer()
                     }
                     .padding(.horizontal)
+
                     switch optionSelected {
                     case .episodes:
                         EpisodesOptionView(

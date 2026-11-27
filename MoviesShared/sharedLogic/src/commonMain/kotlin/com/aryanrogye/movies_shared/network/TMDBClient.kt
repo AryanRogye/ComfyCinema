@@ -16,6 +16,7 @@ import com.aryanrogye.movies_shared.models.KTImagesResponse
 import com.aryanrogye.movies_shared.models.KTImage
 import com.aryanrogye.movies_shared.models.KTMovieListResult
 import com.aryanrogye.movies_shared.models.KTTVListResult
+import com.aryanrogye.movies_shared.models.KTMovieInfo
 import com.aryanrogye.movies_shared.models.KTSearchResult
 import com.aryanrogye.movies_shared.models.selectLogo
 import com.aryanrogye.movies_shared.models.KTMediaType
@@ -68,6 +69,8 @@ interface TMDBClientProviding {
     suspend fun recommendationsForMovie(id: Int, token: String, page: Int): KTMovieListResponse
     @Throws(Exception::class)
     suspend fun recommendationsForTV(id: Int, token: String, page: Int): KTTVListResponse
+    @Throws(Exception::class)
+    suspend fun infoOnMovie(id: Int, token: String): KTMovieInfo
 }
 
 class TMDBClient internal constructor(private val client: HttpClient): TMDBClientProviding {
@@ -314,6 +317,16 @@ class TMDBClient internal constructor(private val client: HttpClient): TMDBClien
             logoPath = logoPath,
             seasons = result.seasons.map { it.copy(logoPath = logoPath) },
         )
+    }
+
+    @Throws(Exception::class)
+    override suspend fun infoOnMovie(id: Int, token: String): KTMovieInfo {
+        val response = client.get("https://api.themoviedb.org/3/movie/$id?language=en-US") {
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+
+        return response.body<KTMovieInfo>()
     }
 
     @Throws(Exception::class)

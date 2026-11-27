@@ -9,7 +9,7 @@ import SwiftUI
 
 /// This is info about the TV Show
 /// Name and Description/Overview
-struct TVShowInfo: View {
+struct TVShowInfoView: View {
     let selectedEpisode: KTEpisode?
 
     var body: some View {

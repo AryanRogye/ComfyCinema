@@ -10,6 +10,12 @@ import SwiftData
 import WebKit
 import MoviesAPIData
 
+enum MovieSelectedOption: String, CaseIterable {
+    case collection = "Collection"
+    case moreLikeThis = "More Like This"
+    case ratingsAndReviews = "Reviews"
+}
+
 public struct MovieDetailView: View {
 
 #if os(macOS)
@@ -19,10 +25,13 @@ public struct MovieDetailView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(PlaybackSession.self) var playbackSession
     @Environment(CloudKitSyncService.self) var cloudKitSyncService
+    @Environment(TMDBManager.self) var tmdbManager
     @Environment(\.dismiss) var dismiss
 
-    @Query var history: [History]
-    @Binding var displayServer: KTDisplayServer
+    @Query private var history: [History]
+    @Binding private var displayServer: KTDisplayServer
+    @State private var movieInfo: KTMovieInfo?
+    @State private var optionSelected: MovieSelectedOption = .moreLikeThis
     let result: KTSearchResult
     /// Load once the view is installed; `@Query`/`modelContext` aren't usable inside `init`.
     private let loadOnAppear: Bool
@@ -71,7 +80,7 @@ public struct MovieDetailView: View {
     }
 
     private var imagePath: String? {
-        result.heroPosterPath ?? result.posterPath
+        movieInfo?.backdropPath
     }
 
 #if os(iOS)
@@ -105,10 +114,10 @@ public struct MovieDetailView: View {
 #endif
 
     public var body: some View {
-        ZStack {
-            if let movieUrl {
+        GeometryReader { proxy in
+            ScrollView {
+                if let movieUrl {
 #if os(iOS)
-                GeometryReader { proxy in
                     EmbeddedMovieView(url: movieUrl, vm: webviewModel, onWKWebView: { webView in
                         /// schedule to take a screenshot every 2 mins
                         screenshotter.scheduleWebViewScreenshot(webView: webView, for: result)
@@ -117,65 +126,81 @@ public struct MovieDetailView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 200)
                     .padding(.horizontal, 10)
-                }
-                .frame(height: 200)
 #elseif os(macOS)
-                EmbeddedMovieView(url: movieUrl, vm: webviewModel, onWKWebView: { webView in
-                    /// schedule to take a screenshot every 2 mins
-                    screenshotter.scheduleWebViewScreenshot(webView: webView, for: result)
+                    EmbeddedMovieView(url: movieUrl, vm: webviewModel, onWKWebView: { webView in
+                        /// schedule to take a screenshot every 2 mins
+                        screenshotter.scheduleWebViewScreenshot(webView: webView, for: result)
 
-                })
-                .id(reloadID)
-                .frame(
-                    maxWidth: .infinity,
-                    maxHeight: .infinity
-                )
+                    })
+                    .id(reloadID)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity
+                    )
 #endif
-            } else {
-                GeometryReader { geometry in
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            Color.black
-                                .ignoresSafeArea()
-                                .overlay {
-                                    MovieImageBackground(imagePath: imagePath)
-                                        .ignoresSafeArea()
-                                }
-                                .overlay(alignment: .bottomLeading) {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        textView
+                } else {
+                    MovieImageView(
+                        result: result,
+                        imagePath: imagePath
+                    )
+                    MovieInfoDetailView(
+                        result: result,
+                        movieInfo: movieInfo
+                    )
 
-                                        ExpandableText(
-                                            text: result.overview ?? "",
-                                            tintColor: .yellow,
-                                            font: overviewFont,
-                                            background: .black,
-                                            foregroundStyle: .white.opacity(0.65)
+                    MoviewPlayButton { loadMovie() }
+
+                    MovieOverviewView(
+                        result: result,
+                    )
+
+                    HStack(spacing: 12) {
+                        ForEach(MovieSelectedOption.allCases.filter {
+                            if $0 == .collection {
+                                return movieInfo?.belongsToCollection != nil
+                            }
+
+                            return true
+                        }, id: \.self) { option in
+                            let isSelected = optionSelected == option
+
+                            Text(option.rawValue)
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                                .layoutPriority(1)
+                                .foregroundStyle(
+                                    isSelected ? .primary : .secondary
+                                )
+                                .frame(height: 30, alignment: .bottom)
+                                .overlay(alignment: .top) {
+                                    Rectangle()
+                                        .fill(isSelected ? .yellow : .clear)
+                                        .frame(height: 4)
+                                        .scaleEffect(
+                                            x: isSelected ? 1 : 0,
+                                            y: 1,
+                                            anchor: .leading
                                         )
-                                        .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
-
-                                        Button {
-                                            loadMovie()
-                                        } label: {
-                                            Label("Play Movie", systemImage: "play.fill")
-                                                .font(.body)
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(.white)
-                                                .padding(.vertical, 10)
-                                                .padding(.horizontal, 20)
-                                                .glassEffect(.clear.tint(.yellow.opacity(0.1).mix(with: .black, by: 0.8)), in: .capsule)
-                                        }
-                                        .buttonStyle(.plain)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
-                                    .padding()
+                                        .animation(.easeInOut(duration: 0.25), value: isSelected)
                                 }
-                                .frame(height: geometry.size.height)
-
-
-                            MovieMoreInfo(result: result)
-                                .padding(.top, 32)
+                                .contentShape(.rect)
+                                .onTapGesture {
+                                    withAnimation(.spring) {
+                                        optionSelected = option
+                                    }
+                                }
                         }
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+
+                    switch optionSelected {
+                    case .collection:
+                        MovieCollectionView(movieInfo: movieInfo)
+                    case .moreLikeThis:
+                        MovieMoreLikeThis(result: result)
+                    case .ratingsAndReviews:
+                        RatingsAndReviews(result: result, type: .tv)
                     }
                 }
             }
@@ -186,9 +211,14 @@ public struct MovieDetailView: View {
         }
 #endif
         .navigationBarBackButtonHidden()
-        .navigationTitle(result.name ?? result.title ?? "")
         .frame(maxWidth: .infinity)
         .task {
+            do {
+                self.movieInfo = try await tmdbManager.infoOnMovie(for: result.id)
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
+            }
             if loadOnAppear && !hasLoadedMovie {
                 loadMovie()
             }
@@ -279,37 +309,6 @@ public struct MovieDetailView: View {
             webviewModel.stopPlayback()
             remoteServer.clearClosures()
 #endif
-        }
-    }
-
-    @ViewBuilder
-    private var textView: some View {
-        if let logoPath = result.logoPath,
-           let url = URL(string: "https://image.tmdb.org/t/p/w500\(logoPath)") {
-            AsyncImage(url: url) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 50)
-                    .padding(.horizontal, 6)
-            }  placeholder: {
-                Color.clear
-            }
-        } else {
-            Text(result.title ?? "")
-                .font(.system(.largeTitle, design: .serif))
-                .fontWeight(.semibold)
-                .lineLimit(titleLineLimit)
-                .minimumScaleFactor(0.8)
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.white, .white.opacity(0.7)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .shadow(color: .black.opacity(0.6), radius: 4, x: 0, y: 2)
         }
     }
 

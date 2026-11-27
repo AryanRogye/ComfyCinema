@@ -75,7 +75,7 @@ struct EpisodeImageView: View {
                         Color.clear
                     }
                 } else {
-                    Text(result.name ?? "")
+                    Text(result.name ?? result.title ?? "")
                         .fontDesign(.serif)
                         .font(.largeTitle)
                         .fontWeight(.medium)
