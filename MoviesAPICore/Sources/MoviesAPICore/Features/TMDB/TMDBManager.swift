@@ -229,6 +229,19 @@ public final class TMDBManager {
         return try await tmdbClient.collectionInfo(collectionId: collectionId, token: token)
     }
 
+    public func creditsForMovie(id: Int32) async throws -> KTCredits {
+        return try await tmdbClient.creditsForMovie(id: id, token: token)
+    }
+
+    public func creditsForEpisode(id: Int32, seasonNumber: Int32, episodeNumber: Int32) async throws -> KTCredits {
+        return try await tmdbClient.creditsForEpisode(
+            id: id,
+            seasonNumber: seasonNumber,
+            episodeNumber: episodeNumber,
+            token: token
+        )
+    }
+
     /// Function to search for tv,movie,person
     public func search(_ text: String) async throws {
         let results = try await tmdbClient.search(query: text, token: token, includeAdult: includeAdult)

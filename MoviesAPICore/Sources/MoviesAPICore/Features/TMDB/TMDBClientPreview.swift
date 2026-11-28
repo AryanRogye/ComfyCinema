@@ -10,6 +10,28 @@ import SharedLogic
 
 public final class TMDBClientPreview: TMDBClientProviding {
 
+    public func creditsForMovie(id: Int32, token: String) async throws -> KTCredits {
+        KTCredits(id: KotlinInt(int: id), cast: previewCast)
+    }
+
+    public func creditsForEpisode(id: Int32, seasonNumber: Int32, episodeNumber: Int32, token: String) async throws -> KTCredits {
+        KTCredits(id: nil, cast: previewCast)
+    }
+
+    private var previewCast: [KTCastMember] {
+        (1...8).map { index in
+            KTCastMember(
+                id: Int32(index),
+                name: "Actor \(index)",
+                character: "Character \(index)",
+                creditId: "preview-credit-\(index)",
+                knownForDepartment: "Acting",
+                profilePath: nil,
+                order: KotlinInt(int: Int32(index - 1))
+            )
+        }
+    }
+
     public func recommendationsForMovie(id: Int32, token: String, page: Int32) async throws -> KTMovieListResponse {
         await movieResponse(page: page)
     }

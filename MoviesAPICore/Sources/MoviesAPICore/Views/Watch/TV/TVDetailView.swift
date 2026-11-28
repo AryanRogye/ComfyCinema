@@ -67,6 +67,7 @@ public struct TVDetailView: View {
 
     @State private var seasonInfo: KTSeasonInfo?
     @State private var selectedEpisode: KTEpisode? = nil
+    @State private var credits: KTCredits? = nil
 
     @State private var tvUrl: URL?
     @State private var reloadID = UUID()
@@ -207,7 +208,7 @@ public struct TVDetailView: View {
                     case .moreLikeThis:
                         TVMoreLikeThis(result: result)
                     case .castAndCrew:
-                        CastAndCrew(selectedEpisode: selectedEpisode)
+                        CastAndCrew(credits: credits)
                     case .ratingsAndReviews:
                         RatingsAndReviews(result: result, type: .tv)
                     }
@@ -419,6 +420,10 @@ public struct TVDetailView: View {
 
             attachHistory(season: season, episode: episode)
 
+            /// ok to start on the background
+            Task {
+                self.credits = try await tmdbManager.creditsForEpisode(id: result.id, seasonNumber: Int32(season), episodeNumber: Int32(episode))
+            }
             self.startPlaybackSession(with: url, season: season)
             self.tvUrl = url
         } catch {

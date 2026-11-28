@@ -9,13 +9,17 @@ import SwiftUI
 
 struct CastAndCrew: View {
 
-    let selectedEpisode: KTEpisode?
+    @Environment(PlaybackSession.self) var playbackSession
+
+    let credits: KTCredits?
+
+    @State private var selectedPerson: KTSearchResult?
 
     var body: some View {
-        if let selectedEpisode {
+        if let credits {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack {
-                    ForEach(selectedEpisode.guestStars, id: \.self) { star in
+                    ForEach(credits.cast, id: \.self) { star in
                         VStack {
                             ZStack {
                                 if let path = star.profilePath,
@@ -51,6 +55,23 @@ struct CastAndCrew: View {
                                 .fixedSize(horizontal: false, vertical: true)
                                 .frame(height: 36, alignment: .top)
                         }
+                        .contentShape(.rect)
+                        .onTapGesture {
+                            playbackSession.stop()
+                            selectedPerson = KTSearchResult(
+                                id: star.id,
+                                mediaType: .person,
+                                title: nil,
+                                name: star.name,
+                                posterPath: nil,
+                                profile_path: star.profilePath,
+                                overview: nil,
+                                releaseDate: nil,
+                                firstAirDate: nil,
+                                logoPath: nil,
+                                heroPosterPath: nil
+                            )
+                        }
                     }
                 }
             }
@@ -60,6 +81,9 @@ struct CastAndCrew: View {
                     .fill(.white.opacity(0.06))
             }
             .padding(.horizontal)
+            .navigationDestination(item: $selectedPerson) { person in
+                WatchDetailView(result: person)
+            }
         }
     }
 }

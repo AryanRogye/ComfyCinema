@@ -21,6 +21,7 @@ import com.aryanrogye.movies_shared.models.KTSearchResult
 import com.aryanrogye.movies_shared.models.selectLogo
 import com.aryanrogye.movies_shared.models.KTMediaType
 import com.aryanrogye.movies_shared.models.KTCollectionResponse
+import com.aryanrogye.movies_shared.models.KTCredits
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -73,6 +74,10 @@ interface TMDBClientProviding {
     @Throws(Exception::class)
     suspend fun infoOnMovie(id: Int, token: String): KTMovieInfo
     suspend fun collectionInfo(collectionId: Int, token: String): KTCollectionResponse
+    @Throws(Exception::class)
+    suspend fun creditsForMovie(id: Int, token: String): KTCredits
+    @Throws(Exception::class)
+    suspend fun creditsForEpisode(id: Int, seasonNumber: Int, episodeNumber: Int, token: String): KTCredits
 }
 
 class TMDBClient internal constructor(private val client: HttpClient): TMDBClientProviding {
@@ -368,6 +373,26 @@ class TMDBClient internal constructor(private val client: HttpClient): TMDBClien
 
         val result = response.body<KTTVListResponse>()
         return result.copy(results = tvResults(result.results, token))
+    }
+
+    @Throws(Exception::class)
+    override suspend fun creditsForMovie(id: Int, token: String): KTCredits =
+        credits("https://api.themoviedb.org/3/movie/$id/credits", token)
+
+    @Throws(Exception::class)
+    override suspend fun creditsForEpisode(id: Int, seasonNumber: Int, episodeNumber: Int, token: String): KTCredits =
+        credits("https://api.themoviedb.org/3/tv/$id/season/$seasonNumber/episode/$episodeNumber/credits", token)
+
+    private suspend fun credits(url: String, token: String): KTCredits {
+        val response = client.get(url) {
+            parameter("language", "en-US")
+            header("accept", "application/json")
+            header("Authorization", "Bearer $token")
+        }
+        check(response.status.value in 200..299) {
+            "TMDB credits request failed with HTTP ${response.status.value}"
+        }
+        return response.body()
     }
 
     override suspend fun seasonInfo(id: Int, seasonNumber: Int, token: String): KTSeasonInfo {

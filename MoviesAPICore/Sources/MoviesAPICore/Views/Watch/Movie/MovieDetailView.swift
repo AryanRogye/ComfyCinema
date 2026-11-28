@@ -13,6 +13,7 @@ import MoviesAPIData
 enum MovieSelectedOption: String, CaseIterable {
     case collection = "Collection"
     case moreLikeThis = "More Like This"
+    case castAndCrew = "Cast"
     case ratingsAndReviews = "Reviews"
 }
 
@@ -31,6 +32,7 @@ public struct MovieDetailView: View {
     @Query private var history: [History]
     @Binding private var displayServer: KTDisplayServer
     @State private var movieInfo: KTMovieInfo?
+    @State private var credits: KTCredits? = nil
     @State private var optionSelected: MovieSelectedOption = .moreLikeThis
     let result: KTSearchResult
     /// Load once the view is installed; `@Query`/`modelContext` aren't usable inside `init`.
@@ -202,6 +204,8 @@ public struct MovieDetailView: View {
                         MovieCollectionView(movieInfo: movieInfo)
                     case .moreLikeThis:
                         MovieMoreLikeThis(result: result)
+                    case .castAndCrew:
+                        CastAndCrew(credits: credits)
                     case .ratingsAndReviews:
                         RatingsAndReviews(result: result, type: .tv)
                     }
@@ -225,6 +229,12 @@ public struct MovieDetailView: View {
             }
             if loadOnAppear && !hasLoadedMovie {
                 loadMovie()
+            }
+            do {
+                self.credits = try await tmdbManager.creditsForMovie(id: result.id)
+            } catch {
+                self.error = error.localizedDescription
+                self.showError = true
             }
         }
         .onChange(of: displayServer) {

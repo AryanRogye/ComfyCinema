@@ -11,6 +11,7 @@ struct PeopleDetailView: View {
 
     @Environment(TMDBManager.self) var tmdbManager
     @Environment(PlaybackSession.self) var playbackSession
+    @Environment(\.dismiss) var dismiss
 
     @Binding var displayServer: KTDisplayServer
     let result: KTSearchResult
@@ -32,6 +33,16 @@ struct PeopleDetailView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.backward")
+                }
+            }
+        }
         .navigationDestination(item: $searchResult) { searchResult in
             WatchDetailView(result: searchResult)
         }
