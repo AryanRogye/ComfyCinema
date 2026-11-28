@@ -43,7 +43,7 @@ struct MoviesAPIClientApp: App {
             }
 
 
-            let schema = Schema(versionedSchema: MoviesSchemaV4.self)
+            let schema = Schema(versionedSchema: current_iOS_schema)
             let configuration = ModelConfiguration(
                 schema: schema,
                 groupContainer: .identifier(identifier),
@@ -126,4 +126,5 @@ struct MoviesAPIClientApp: App {
         .defaultLaunchBehavior(.suppressed)
 #endif
     }
+
 }

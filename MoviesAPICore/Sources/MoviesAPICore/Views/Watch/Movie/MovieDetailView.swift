@@ -130,6 +130,8 @@ public struct MovieDetailView: View {
                     EmbeddedMovieView(url: movieUrl, vm: webviewModel, onWKWebView: { webView in
                         /// schedule to take a screenshot every 2 mins
                         screenshotter.scheduleWebViewScreenshot(webView: webView, for: result)
+                        /// Attach here: `webviewModel.webView` is weak + ObservationIgnored, so onChange can miss it
+                        remoteServer.attachWebViewFunctions(webView)
 
                     })
                     .id(reloadID)
@@ -294,6 +296,17 @@ public struct MovieDetailView: View {
                     return self.displayServer
                 }
             )
+            remoteServer.attachOnBackServerFunction {
+                screenshotter.stop()
+                remoteServer.clearClosures()
+                webviewModel.stopPlayback()
+
+                movieUrl = nil
+                hasLoadedMovie = false
+
+                cloudKitSyncService.syncSaveToCloud()
+                dismiss()
+            }
         }
         .onChange(of: webviewModel.webView, initial: true) { _, webView in
             guard let webView else {

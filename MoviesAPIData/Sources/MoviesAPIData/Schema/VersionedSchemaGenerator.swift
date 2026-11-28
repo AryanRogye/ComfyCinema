@@ -11,7 +11,8 @@ enum VersionedSchemaGenerator {
     private static let deviceSchemas: [any VersionedSchemaDeviceDetail.Type] = [
         MoviesSchemaV2.self,
         MoviesSchemaV3.self,
-        MoviesSchemaV4.self
+        MoviesSchemaV4.self,
+        MoviesSchemaV5.self
     ]
 
     /// Returns the schema versions that changed on the current platform.

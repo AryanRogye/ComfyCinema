@@ -86,6 +86,18 @@ private typealias Representable = UIViewRepresentable
 private typealias Representable = NSViewRepresentable
 #endif
 
+final class WebViewContainer: WKWebView {
+
+    override init(frame: CGRect, configuration: WKWebViewConfiguration) {
+        super.init(frame: frame, configuration: configuration)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+}
+
 /// Bridges a `WKWebView` from `WebViewModel` into SwiftUI.
 struct WebView: Representable {
     @Bindable var vm: EmbeddedMovieViewModel
@@ -103,12 +115,12 @@ struct WebView: Representable {
     let onWKWebView: (WKWebView) -> Void
 
 #if os(iOS)
-    func makeUIView(context: Context) -> WKWebView {
+    func makeUIView(context: Context) -> WebViewContainer {
         let webView = makeWebView(context: context)
         onWKWebView(webView)
         return webView
     }
-    func updateUIView(_ uiView: WKWebView, context: Context) {
+    func updateUIView(_ uiView: WebViewContainer, context: Context) {
         attachPlaybackCompatabilityIfNeeded(in: uiView)
     }
 #elseif os(macOS)
@@ -139,7 +151,7 @@ struct WebView: Representable {
 #endif
 
 #if os(macOS)
-    private func makeWebView(context: Context) -> WKWebView {
+    private func makeWebView(context: Context) -> WebViewContainer {
         let config = WKWebViewConfiguration()
         config.preferences.isElementFullscreenEnabled = true
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
@@ -147,7 +159,7 @@ struct WebView: Representable {
         config.websiteDataStore = .default()
         blockingService.attachPopupBlocking(to: config)
 
-        let wv = WKWebView(frame: .zero, configuration: config)
+        let wv = WebViewContainer(frame: .zero, configuration: config)
         attachPlaybackCompatabilityIfNeeded(in: wv)
         attachFrameActions(in: wv)
         wv.isInspectable = true
@@ -167,7 +179,7 @@ struct WebView: Representable {
         return wv
     }
 #elseif os(iOS)
-    private func makeWebView(context: Context) -> WKWebView {
+    private func makeWebView(context: Context) -> WebViewContainer {
 
         if let webView = playbackSession.webView {
             blockingService.attachNetworkFilters(to: webView)
@@ -196,7 +208,7 @@ struct WebView: Representable {
         }
         blockingService.attachPopupBlocking(to: config)
 
-        let wv = WKWebView(frame: .zero, configuration: config)
+        let wv = WebViewContainer(frame: .zero, configuration: config)
         attachPlaybackCompatabilityIfNeeded(in: wv)
         wv.isInspectable = true
         wv.allowsBackForwardNavigationGestures = false

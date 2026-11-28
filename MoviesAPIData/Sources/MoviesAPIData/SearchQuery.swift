@@ -6,12 +6,15 @@
 //
 
 import SwiftData
+import Foundation
 
 @Model
 public final class SearchQuery {
     public var query: String
+    public var date: Date? = nil
 
     public init(query: String) {
         self.query = query
+        self.date = .now
     }
 }

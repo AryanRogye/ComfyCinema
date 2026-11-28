@@ -149,7 +149,7 @@ class AppCoordinator {
                 fatalError("AppGroup Empty")
             }
 
-            let schema = Schema(versionedSchema: MoviesSchemaV4.self)
+            let schema = Schema(versionedSchema: current_macOS_schema)
             let configuration = ModelConfiguration(
                 schema: schema,
                 groupContainer: .identifier(identifier),

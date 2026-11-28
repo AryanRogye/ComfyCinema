@@ -18,7 +18,7 @@ final class EmbeddedMovieViewModel {
 
 #if os(macOS)
     @ObservationIgnored
-    weak var webView: WKWebView?
+    weak var webView: WebViewContainer?
 
     func stopPlayback() {
         webView?.stopLoading()

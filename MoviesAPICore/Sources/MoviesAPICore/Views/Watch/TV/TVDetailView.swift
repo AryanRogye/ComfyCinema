@@ -132,6 +132,8 @@ public struct TVDetailView: View {
                     } onWKWebView: { webView in
                         /// schedule to take a screenshot every 2 mins
                         screenshotter.scheduleWebViewScreenshot(webView: webView, for: result)
+                        /// Attach here: `webviewModel.webView` is weak + ObservationIgnored, so onChange can miss it
+                        remoteServer.attachWebViewFunctions(webView)
                     }
                     .id(reloadID)
                     .frame(maxWidth: .infinity)
@@ -357,6 +359,21 @@ public struct TVDetailView: View {
                     return self.displayServer
                 }
             )
+            remoteServer.attachOnBackServerFunction {
+                timeInfoTask?.cancel()
+                timeInfoTask = nil
+
+                screenshotter.stop()
+                saveCurrentPlaybackPosition()
+
+                remoteServer.clearClosures()
+                webviewModel.stopPlayback()
+
+                tvUrl = nil
+
+                cloudKitSyncService.syncSaveToCloud()
+                dismiss()
+            }
         }
         .onChange(of: webviewModel.webView, initial: true) { _, webView in
             guard let webView else {

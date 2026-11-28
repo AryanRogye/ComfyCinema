@@ -11,7 +11,9 @@ public struct SearchTab: View {
 
     @Environment(TMDBManager.self) private var tmdbManager
     @Environment(\.modelContext) private var modelContext
-    @Query private var searchQueries: [MoviesAPIData.SearchQuery]
+    /// Most recent first. Rows saved before `date` existed have nil dates and sort last.
+    @Query(sort: \MoviesAPIData.SearchQuery.date, order: .reverse)
+    private var searchQueries: [MoviesAPIData.SearchQuery]
     @State private var searchText: String = ""
     @State private var isSearching: Bool = false
 
@@ -25,14 +27,19 @@ public struct SearchTab: View {
     /// All saved queries when `searchText` is empty, otherwise only those whose text contains it.
     private var filteredSearchQueries: [MoviesAPIData.SearchQuery] {
         let text = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Most recently inserted first (no timestamp on the model, so rely on insertion order).
-        let all = Array(searchQueries.reversed())
-        guard !text.isEmpty else { return all }
-        return all.filter { $0.query.localizedCaseInsensitiveContains(text) }
+        guard !text.isEmpty else { return searchQueries }
+        return searchQueries.filter { $0.query.localizedCaseInsensitiveContains(text) }
     }
 
     public var body: some View {
         ScrollView {
+            SearchTextField(
+                searchText: $searchText,
+                focused: $focused,
+                showXMark: focused || !tmdbManager.searchResults.isEmpty,
+                onSubmit: submit
+            )
+
             if tmdbManager.searchResults.isEmpty && didSubmit {
                 ContentUnavailableView.search
             }
@@ -47,30 +54,9 @@ public struct SearchTab: View {
                     description: Text("Your searches will show up here.")
                 )
             } else {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(filteredSearchQueries) { query in
-                        HStack {
-                            Button {
-                                searchText = query.query
-                                submit()
-                            } label: {
-                                Label(query.query, systemImage: "clock.arrow.circlepath")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-
-                            Button {
-                                modelContext.delete(query)
-                            } label: {
-                                Image(systemName: "xmark")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(.horizontal)
-                        .padding(.vertical, 10)
-                    }
+                RecentSearchQueries(queries: filteredSearchQueries) { query in
+                    searchText = query
+                    submit()
                 }
             }
         }
@@ -90,43 +76,6 @@ public struct SearchTab: View {
         .onDisappear {
             focused = false
         }
-        .safeAreaInset(edge: .top) {
-            HStack(spacing: 4) {
-                TextField("Search movies, TV, and people", text: $searchText)
-                    .textFieldStyle(.plain)
-                    .focused($focused)
-                    .submitLabel(.search)
-                    .onSubmit { submit() }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .padding(.horizontal, 12)
-                    .glassEffect(.clear, in: .rect(cornerRadius: 24))
-                if focused || !tmdbManager.searchResults.isEmpty {
-                    Image(systemName: "xmark")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 50, height: 50)
-                        .glassEffect(.clear, in: Circle())
-                        .onTapGesture {
-                            focused = false
-                        }
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
-            .clipped()
-            .padding(.bottom, 4)
-            .padding(.horizontal)
-            .animation(.smooth, value: focused)
-        }
-    }
-
-    /// Saves the query to history unless an equal one (ignoring case) already exists.
-    private func saveQuery(_ query: String) {
-        let exists = searchQueries.contains {
-            $0.query.caseInsensitiveCompare(query) == .orderedSame
-        }
-        guard !exists else { return }
-        modelContext.insert(MoviesAPIData.SearchQuery(query: query))
     }
 
     private func submit() {
@@ -145,11 +94,104 @@ public struct SearchTab: View {
             do {
                 try await tmdbManager.search(query)
                 didSubmit = true
-                saveQuery(query)
+                if let existing = searchQueries.first(where: {
+                    $0.query.caseInsensitiveCompare(query) == .orderedSame
+                }) {
+                    // Bump it back to the top.
+                    existing.date = .now
+                    return
+                }
+                modelContext.insert(MoviesAPIData.SearchQuery(query: query))
+
             } catch {
                 self.error = error.localizedDescription
                 self.showError = true
             }
         }
+    }
+}
+
+struct RecentSearchQueries: View {
+
+    @Environment(\.modelContext) private var modelContext
+    let queries: [MoviesAPIData.SearchQuery]
+    let onSubmit: (String) -> Void
+
+
+    var body: some View {
+        LazyVStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(queries.enumerated()), id: \.element.id) { index, query in
+                HStack {
+                    Button {
+                        onSubmit(query.query)
+                    } label: {
+                        HStack {
+                            Text(query.query)
+                                .foregroundStyle(.primary)
+                                .font(.body.weight(.semibold))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            if let date = query.date {
+                                dateView(date)
+                            }
+                        }
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        modelContext.delete(query)
+                    } label: {
+                        Image(systemName: "xmark")
+                            .foregroundStyle(.secondary)
+                            .font(.caption.weight(.semibold))
+                            .frame(width: 32, height: 32)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                .frame(minHeight: 44)
+                .padding(.horizontal)
+
+                if index < queries.count - 1 {
+                    Divider()
+                        .padding(.leading)
+                }
+            }
+        }
+    }
+
+    private func dateView(_ date: Date) -> some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+
+            let seconds = max(0, Int(context.date.timeIntervalSince(date)))
+            let minutes = seconds / 60
+            let hours = minutes / 60
+
+            let calendar = Calendar.current
+
+            let days = calendar.dateComponents(
+                [.day],
+                from: calendar.startOfDay(for: date),
+                to: calendar.startOfDay(for: context.date)
+            ).day ?? 0
+
+            Group {
+                if days >= 1 {
+                    Text("\(days)d ago")
+                } else if hours >= 1 {
+                    Text("\(hours)h ago")
+                } else if minutes >= 1 {
+                    Text("\(minutes)m ago")
+                } else {
+                    Text("\(seconds)s ago")
+                }
+            }
+            .contentTransition(.numericText())
+            .animation(.snappy, value: seconds)
+        }
+
     }
 }

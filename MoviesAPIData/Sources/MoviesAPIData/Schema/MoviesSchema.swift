@@ -7,6 +7,9 @@
 
 import SwiftData
 
+public let current_iOS_schema = MoviesSchemaV5.self
+public let current_macOS_schema = MoviesSchemaV5.self
+
 /// MoviesSchemaV2 handles both macOS and iOS
 public enum MoviesSchemaV2: VersionedSchemaDeviceDetail {
     public nonisolated static var versionIdentifier: Schema.Version {
@@ -50,9 +53,38 @@ public enum MoviesSchemaV4: VersionedSchemaDeviceDetail {
 
     public static var models: [any PersistentModel.Type] {
 #if os(iOS)
-        [Favorite.self, History.self, Collection.self, CollectionItem.self, SearchQuery.self]
+        [Favorite.self, History.self, Collection.self, CollectionItem.self, MoviesSchemaV4.SearchQuery.self]
 #elseif os(macOS)
-        [Favorite.self, WidgetFavorites.self, History.self, Collection.self, CollectionItem.self, SearchQuery.self]
+        [Favorite.self, WidgetFavorites.self, History.self, Collection.self, CollectionItem.self, MoviesSchemaV4.SearchQuery.self]
+#endif
+    }
+
+    /// Frozen copy of `SearchQuery` as it shipped in V4 (before `date` was added).
+    /// Do not modify — it must match the on-disk V4 store exactly.
+    @Model
+    public final class SearchQuery {
+        public var query: String
+
+        public init(query: String) {
+            self.query = query
+        }
+    }
+}
+
+/// MoviesSchemaV5 adds an optional `date` to `SearchQuery` on both iOS and macOS
+public enum MoviesSchemaV5: VersionedSchemaDeviceDetail {
+    public nonisolated static var versionIdentifier: Schema.Version {
+        .init(5, 0, 0)
+    }
+
+    public nonisolated static let didChangeOnPhone: Bool = true
+    public nonisolated static let didChangeOnMac: Bool = true
+
+    public static var models: [any PersistentModel.Type] {
+#if os(iOS)
+        [Favorite.self, History.self, Collection.self, CollectionItem.self, MoviesAPIData.SearchQuery.self]
+#elseif os(macOS)
+        [Favorite.self, WidgetFavorites.self, History.self, Collection.self, CollectionItem.self, MoviesAPIData.SearchQuery.self]
 #endif
     }
 }
