@@ -31,4 +31,12 @@ public final class DefaultsManager {
             Defaults[.includeAdult] = includeAdult
         }
     }
+
+    #if os(macOS)
+    var comfyCinemaTheme: ComfyCinemaTheme = Defaults[.comfyCinemaTheme] {
+        didSet {
+            Defaults[.comfyCinemaTheme] = comfyCinemaTheme
+        }
+    }
+    #endif
 }

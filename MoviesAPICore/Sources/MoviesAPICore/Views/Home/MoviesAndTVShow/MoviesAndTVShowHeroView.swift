@@ -186,18 +186,7 @@ struct MoviesAndTVShowHeroView<Media: MediaListItem>: View {
                 activeIndex = newIndex
             }
             .frame(height: 700)
-            .visualEffect { content, proxy in
-                let minY = proxy.frame(in: .scrollView(axis: .vertical)).minY
-                let stretch = max(minY, 0)
-
-                return content
-                    .scaleEffect(
-                        x: 1 + stretch / proxy.size.width,
-                        y: 1 + stretch / proxy.size.height,
-                        anchor: .top
-                    )
-                    .offset(y: -stretch)
-            }
+            .scrollViewStretch()
             .overlay(alignment: .bottom) {
                 ZStack {
                     // blur that ramps in toward the bottom

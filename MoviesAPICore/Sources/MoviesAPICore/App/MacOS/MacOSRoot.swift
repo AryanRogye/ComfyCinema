@@ -44,47 +44,51 @@ struct MacOSRoot: View {
     @AppStorage("home.homeOption")
     private var homeOption: HomeOption = .moviesAndTVShows
 
+    @AppStorage("showingSidebar")
+    private var showingSidebar: Bool = true
+
     var body: some View {
         ZStack {
             if let tmdbManager, let liveTVManager, hasShownCloudSavePrompt {
-                VisualEffectView()
+
+                switch defaultsManager.comfyCinemaTheme {
+                case .transparent:
+                    VisualEffectView()
+                case .dark:
+                    Color.black
+                }
 
                 HStack(spacing: 0) {
-                    MacOSRootSidebar(selectedTab: $selectedTab, path: $path) { tab in
-                        path = NavigationPath()
-                        selectedTab = tab
-                        // Reset Boolean-driven destinations as well as value-based routes.
-                        navigationID = UUID()
-                    }
+                    if showingSidebar {
+                        MacOSRootSidebar(selectedTab: $selectedTab, path: $path) { tab in
+                            path = NavigationPath()
+                            selectedTab = tab
+                            // Reset Boolean-driven destinations as well as value-based routes.
+                            navigationID = UUID()
+                        }
                         .environment(tmdbManager)
                         .environment(blockingService)
                         .environment(playbackSession)
                         .environment(defaultsManager)
+                        .transition(.move(edge: .leading))
 
-                    Divider()
+                        Divider()
+                    }
 
                     NavigationStack(path: $path) {
                         Group {
                             switch selectedTab {
                             case .home:
-                                ComfyHeaderView(tab: .home) {
-                                    Home()
-                                }
+                                Home()
 
                             case .library:
-                                ComfyHeaderView(tab: .library) {
-                                    Library()
-                                }
+                                Library()
 
                             case .history:
-                                ComfyHeaderView(tab: .history) {
-                                    HistoryView()
-                                }
+                                HistoryView()
 
                             case .settings:
-                                ComfyHeaderView(tab: .settings) {
-                                    SettingsView()
-                                }
+                                SettingsView()
                             }
                         }
                         .navigationDestination(for: MacOSRoute.self) { route in
@@ -169,6 +173,17 @@ struct MacOSRoot: View {
                 message: Text("\(error, default: "Unknown Error")")
             )
         }
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    withAnimation(.spring) {
+                        showingSidebar.toggle()
+                    }
+                } label: {
+                    Image(systemName: "sidebar.left")
+                }
+            }
+        }
         .background(.clear)
         .ignoresSafeArea(edges: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -236,54 +251,6 @@ struct MacOSRoot: View {
             selectedTab = .library
             path = NavigationPath()
             navigationID = UUID()
-        }
-    }
-}
-
-struct ComfyHeaderView<Content: View>: View {
-
-    let tab: MacOSTab
-    @ViewBuilder var content: () -> Content
-
-    var body: some View {
-        VStack {
-            ComfyRowView(tab: tab, font: .system(size: 14, weight: .medium, design: .rounded))
-                .padding([.top, .horizontal])
-                .padding(.bottom, 4)
-            Divider()
-            content()
-        }
-    }
-}
-
-struct ComfyRowView: View {
-
-    let tab: MacOSTab
-    var font: Font = .system(size: 14, weight: .regular, design: .rounded)
-
-    var body: some View {
-        HStack {
-            RoundedRectangle(cornerRadius: 7)
-                .fill(tab.color)
-                .frame(width: 25, height: 25)
-                .overlay {
-                    ZStack {
-                        tab.icon
-                            .foregroundStyle(.black)
-                            .fontWeight(.black)
-                            .scaleEffect(1.04)
-
-                        tab.icon
-                            .foregroundStyle(.white)
-                            .fontWeight(.black)
-                            .scaleEffect(tab.primaryScale)
-                    }
-                }
-
-            Text(tab.rawValue)
-                .font(font)
-
-            Spacer()
         }
     }
 }

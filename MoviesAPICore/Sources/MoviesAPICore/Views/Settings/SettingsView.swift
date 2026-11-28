@@ -122,10 +122,17 @@ struct AppearanceSettings: View {
 
     var body: some View {
         Section {
-#if os(iOS)
+            #if os(iOS)
             Toggle("Use Custom Tab Icons", isOn: $defaultsManager.useCustomTabIcons)
                 .toggleStyle(.switch)
-#endif
+            #endif
+            #if os(macOS)
+            Picker("Theme", selection: $defaultsManager.comfyCinemaTheme) {
+                ForEach(ComfyCinemaTheme.allCases, id: \.self) { option in
+                    Text(option.rawValue).tag(option)
+                }
+            }
+            #endif
             Picker("Season Style", selection: $defaultsManager.seasonPicker) {
                 ForEach(SeasonsPicker.allCases, id: \.self) { option in
                     Text(option.rawValue).tag(option)

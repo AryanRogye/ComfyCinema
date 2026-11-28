@@ -149,10 +149,6 @@ struct MoviesAndTVShowsView: View {
             }
         }
         .toolbar {
-
-#if os(macOS)
-            ToolbarSpacer(.flexible)
-#endif
             ToolbarItemGroup(placement: .primaryAction) {
                 Menu {
                     Picker("Filter", selection: $selectedFilter) {

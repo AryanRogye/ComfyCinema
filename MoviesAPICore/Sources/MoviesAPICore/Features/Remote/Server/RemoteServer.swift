@@ -37,9 +37,6 @@ final class RemoteServer: NSObject, NetServiceDelegate {
     @MainActor var onClientConnected: (@MainActor () async throws -> Void)?
     @MainActor var onBackPlayer: (@MainActor () async throws -> Void)?
 
-    /// The web view currently playing, so a new remote play request can shut it down natively.
-    @ObservationIgnored @MainActor weak var activeWebView: WKWebView?
-
     var enableRemoteControl: Bool = Defaults[.enableRemoteControl] {
         didSet {
             Defaults[.enableRemoteControl] = enableRemoteControl
@@ -204,14 +201,13 @@ extension RemoteServer {
 
     @MainActor
     public func attachOnBackServerFunction(
-        onBackPlayer: @escaping () -> Void
+        onBackPlayer: @MainActor @escaping () async throws -> Void
     ) {
         self.onBackPlayer = onBackPlayer
     }
 
     @MainActor
     public func attachWebViewFunctions(_ webView: WKWebView) {
-        activeWebView = webView
         onPlay = {
             let _ = try await webView.callAsyncJavaScript(
                 "return window.comfyFrameAction(action)",
@@ -312,22 +308,6 @@ extension RemoteServer {
         }
         try await action()
         return "Enter fullscreen action requested"
-    }
-
-    /// Pauses the active player, leaves fullscreen/PiP, and waits until WebKit has
-    /// actually finished leaving fullscreen. Exiting via JavaScript only *requests*
-    /// the exit; on macOS the video lives in WebKit's own fullscreen window until
-    /// the animation ends, so tearing down earlier leaves it playing there.
-    @MainActor
-    private func stopActivePlayback() async {
-        guard let webView = activeWebView else { return }
-        await webView.pauseAllMediaPlayback()
-        await webView.closeAllMediaPresentations()
-
-        let deadline = ContinuousClock.now + .seconds(3)
-        while webView.fullscreenState != .notInFullscreen, ContinuousClock.now < deadline {
-            try? await Task.sleep(for: .milliseconds(50))
-        }
     }
 
     @MainActor
@@ -491,7 +471,6 @@ extension RemoteServer {
             let request: PlayRequest = try await request.decode(as: PlayRequest.self, context: context)
 
             /// Stop the current video and wait for fullscreen to fully close before navigating away
-            await self.stopActivePlayback()
             await performBackOnPlayer()
 
             onRemotePlay?(request)

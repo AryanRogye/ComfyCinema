@@ -31,6 +31,7 @@ struct PeopleDetailView: View {
                     }
             }
         }
+        .frame(maxWidth: .infinity)
         .navigationDestination(item: $searchResult) { searchResult in
             WatchDetailView(result: searchResult)
         }

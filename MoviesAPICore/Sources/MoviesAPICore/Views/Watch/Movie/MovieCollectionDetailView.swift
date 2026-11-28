@@ -85,6 +85,7 @@ struct MovieCollectionDetailView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 240)
                 .clipped()
+                .scrollViewStretch()
             } else {
                 Rectangle()
                     .fill(.quaternary)

@@ -25,10 +25,19 @@ extension Defaults.Keys {
     /// Bonjour name shown on iOS. Empty = automatic ("<Mac name>", plus " (Debug)" in debug builds).
     static let remoteControlName = Key<String>("remoteControlName", default: "")
     static let remoteControlPort = Key<Int>("remoteControlPort", default: 8082)
-    #endif
+
+    static let comfyCinemaTheme = Key<ComfyCinemaTheme>("comfyCinemaTheme", default: .transparent)
+#endif
 }
 
 enum SeasonsPicker: String, CaseIterable, Defaults.Serializable {
     case picker = "Picker"
     case showAll = "Show All"
 }
+
+#if os(macOS)
+enum ComfyCinemaTheme: String, CaseIterable, Defaults.Serializable {
+    case transparent = "Transparent"
+    case dark = "Dark"
+}
+#endif

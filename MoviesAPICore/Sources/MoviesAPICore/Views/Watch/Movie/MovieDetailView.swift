@@ -135,16 +135,17 @@ public struct MovieDetailView: View {
 
                     })
                     .id(reloadID)
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity
-                    )
+                    /// Inside a ScrollView `maxHeight: .infinity` collapses to zero, so pin to the available height.
+                    .frame(maxWidth: .infinity)
+                    .frame(height: proxy.size.height)
 #endif
                 } else {
                     MovieImageView(
                         result: result,
                         imagePath: imagePath
                     )
+                    .scrollViewStretch()
+
                     MovieInfoDetailView(
                         result: result,
                         movieInfo: movieInfo
@@ -206,6 +207,7 @@ public struct MovieDetailView: View {
                     }
                 }
             }
+            .scrollIndicators(.hidden)
         }
 #if os(macOS)
         .resizeWindow(width: 850, height: 860) { window in
@@ -296,17 +298,6 @@ public struct MovieDetailView: View {
                     return self.displayServer
                 }
             )
-            remoteServer.attachOnBackServerFunction {
-                screenshotter.stop()
-                remoteServer.clearClosures()
-                webviewModel.stopPlayback()
-
-                movieUrl = nil
-                hasLoadedMovie = false
-
-                cloudKitSyncService.syncSaveToCloud()
-                dismiss()
-            }
         }
         .onChange(of: webviewModel.webView, initial: true) { _, webView in
             guard let webView else {
@@ -314,6 +305,17 @@ public struct MovieDetailView: View {
                 return
             }
             remoteServer.attachWebViewFunctions(webView)
+            remoteServer.attachOnBackServerFunction { [weak webView] in
+                await webView?.pauseAllMediaPlayback()
+                await webView?.closeAllMediaPresentations()
+
+                let deadline = ContinuousClock.now + .seconds(3)
+                while let webView, webView.fullscreenState != .notInFullscreen, ContinuousClock.now < deadline {
+                    try? await Task.sleep(for: .milliseconds(50))
+                }
+                cloudKitSyncService.syncSaveToCloud()
+                dismiss()
+            }
         }
 #endif
         .onDisappear {

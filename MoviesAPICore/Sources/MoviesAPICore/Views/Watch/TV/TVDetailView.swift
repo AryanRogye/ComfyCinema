@@ -151,6 +151,7 @@ public struct TVDetailView: View {
                         result: result,
                         tvShow: tvShow
                     )
+                    .scrollViewStretch()
                 }
 
                 if !hideSeasonsAndEpisodes {
@@ -212,6 +213,7 @@ public struct TVDetailView: View {
                     }
                 }
             }
+            .scrollIndicators(.hidden)
         }
         .scrollDisabled(hideSeasonsAndEpisodes)
         .navigationBarBackButtonHidden()
@@ -359,21 +361,6 @@ public struct TVDetailView: View {
                     return self.displayServer
                 }
             )
-            remoteServer.attachOnBackServerFunction {
-                timeInfoTask?.cancel()
-                timeInfoTask = nil
-
-                screenshotter.stop()
-                saveCurrentPlaybackPosition()
-
-                remoteServer.clearClosures()
-                webviewModel.stopPlayback()
-
-                tvUrl = nil
-
-                cloudKitSyncService.syncSaveToCloud()
-                dismiss()
-            }
         }
         .onChange(of: webviewModel.webView, initial: true) { _, webView in
             guard let webView else {
@@ -381,6 +368,18 @@ public struct TVDetailView: View {
                 return
             }
             remoteServer.attachWebViewFunctions(webView)
+            remoteServer.attachOnBackServerFunction { [weak webView] in
+                await webView?.pauseAllMediaPlayback()
+                await webView?.closeAllMediaPresentations()
+
+                let deadline = ContinuousClock.now + .seconds(3)
+                while let webView, webView.fullscreenState != .notInFullscreen, ContinuousClock.now < deadline {
+                    try? await Task.sleep(for: .milliseconds(50))
+                }
+                cloudKitSyncService.syncSaveToCloud()
+                screenshotter.stop()
+                dismiss()
+            }
         }
 #endif
         /// Attach history if we came including the tvUrl being nil and the currentHistory not being set
